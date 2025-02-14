@@ -24,10 +24,6 @@ uses(Tests\TestCase::class)->in('Feature');
 |
 */
 
-expect()->extend('toBeOne', function () {
-    return $this->toBe(1);
-});
-
 /*
 |--------------------------------------------------------------------------
 | Functions
@@ -39,7 +35,12 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something(): void
+function test_path(?string $path = null): string
 {
-    // ..
+    return base_path('tests' . ($path ? DIRECTORY_SEPARATOR . $path : ''));
+}
+
+function sandbox_path(?string $path = null): string
+{
+    return test_path('sandbox' . ($path ? DIRECTORY_SEPARATOR . $path : ''));
 }
