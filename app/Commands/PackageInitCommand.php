@@ -182,7 +182,7 @@
              $this->createReplacer('vendor', $this->getVendorName()),
              $this->createReplacer('package', $this->getPackageName()),
              $this->createReplacer('author', $this->getAuthor()),
-             $this->createReplacer('description', Str::lower($this->getPackageDescription())),
+             $this->createReplacer('description', $this->getPackageDescription()),
              $this->createReplacer('namespace', $this->getNamespace(), [
                  'reverse' => fn(string $value) => Str::of($value)->replace('\\', '/'),
                  'escape' => fn(string $value) => Str::of($value)->replace('\\', '\\\\')
@@ -205,7 +205,7 @@
      protected function createReplacer(string $key, string $value, array $modifiers = []): \Closure
      {
          return function (string $content, \Closure $next) use ($key, $value, $modifiers) {
-             info("Replacing $key [$value]...");
+             info(sprintf("Replacing %s [%s]...", Str::of($key)->slug(' ')->toString(), $value));
              $replacer = new Replacer($key, $value);
 
              foreach ($modifiers as $modifier => $callback) {
