@@ -131,7 +131,7 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
         );
         $this->newLine();
         info('List of excluded directories:');
-        table(rows: collect($this->getExcludedDirectories())->map(fn (string $directory) => [$this->getPackagePath($directory)]));
+        table(rows: collect($this->getExcludedDirectories())->map(fn (string $directory) => [$this->getPackagePath($directory)])->toArray());
     }
 
     /**
