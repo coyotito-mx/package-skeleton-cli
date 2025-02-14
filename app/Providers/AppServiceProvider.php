@@ -19,6 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind('composer', function () {
+            return new \App\Composer;
+        });
     }
 }
