@@ -34,11 +34,11 @@
         }
     },
     "scripts": {
-        "test": "vendor/bin/pest",
-        "style": "vendor/bin/pint --preset=laravel",
-        "style:test": "vendor/bin/pint --preset=laravel --test",
-        "lint": "vendor/bin/phpstan analyse",
-        "lint:watch": "vendor/bin/phpstan analyse --watch"
+        "test": "@php skeleton test",
+        "style": "@php vendor/bin/pint --preset=laravel",
+        "style:test": "@php vendor/bin/pint --preset=laravel --test",
+        "lint": "@php vendor/bin/phpstan analyse",
+        "lint:watch": "@php vendor/bin/phpstan analyse --watch"
     },
     "config": {
         "preferred-install": "dist",
