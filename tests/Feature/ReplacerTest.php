@@ -23,29 +23,35 @@ it('can replace multiple placeholders', function () {
 it('can replace a placeholder with a modifier', function () {
     $replacer = new App\Replacer('name', 'John');
 
-    $replacer->modifierUsing('uppercase', function ($replacement) {
-        return strtoupper($replacement);
-    });
-
-    expect($replacer->replace('Hello, {{name|uppercase}}!'))->toBe('Hello, JOHN!');
+    expect($replacer->replace('Hello, {{name|upper}}!'))->toBe('Hello, JOHN!');
 });
 
-it('can\'t replace a placeholder with an unknown modifier', function () {
+it('can replace a placeholder with a custom modifier', function () {
     $replacer = new App\Replacer('name', 'John');
 
-    expect($replacer->replace('Hello, {{name|unknown}}!'))->toBe('Hello, {{name|unknown}}!');
+    $replacer->modifierUsing('oddupper', function ($value) {
+        return collect(mb_str_split($value))->map(function ($char, $index) {
+            return $index % 2 === 0 ? strtoupper($char) : strtolower($char);
+        })->join('');
+    });
+
+    expect($replacer->replace('Hello, {{name|oddupper}}!'))->toBe('Hello, JoHn!');
 });
 
-it('can\'t replace a placeholder with multiple modifiers', function () {
+it('can\'t replace none existing placeholder', function () {
     $replacer = new App\Replacer('name', 'John');
 
-    $replacer->modifierUsing('uppercase', function ($replacement) {
-        return strtoupper($replacement);
-    });
+    expect($replacer->replace('Hello, {{unknown}}!'))->toBe('Hello, {{unknown}}!');
+});
 
-    $replacer->modifierUsing('lowercase', function ($replacement) {
-        return strtolower($replacement);
-    });
+test('throw an exception when modifier does not exists', function () {
+    $replacer = new App\Replacer('name', 'John');
 
-    expect($replacer->replace('Hello, {{name|uppercase|lowercase}}!'))->toBe('Hello, {{name|uppercase|lowercase}}!');
+    $replacer->replace('Hello, {{name|unknown}}!');
+})->throws(InvalidArgumentException::class);
+
+it('can use multiple modifiers', function () {
+    $replacer = new App\Replacer('name', 'john doe');
+
+    expect($replacer->replace('Hello, {{name|reverse,slug,ucfirst}}!'))->toBe('Hello, Eod-nhoj!');
 });

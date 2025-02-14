@@ -6,13 +6,13 @@ namespace App\Contracts;
 
 interface Replacer
 {
-    public function __construct(string|array $placeholder, string $replacement);
+    public function __construct(string $placeholder, string $replacement);
 
     public function getPlaceholder(): string|array;
 
     public function getReplacement(): string;
 
-    public function modifierUsing(string $modifier, \Closure $callback): static;
+    public function modifierUsing(string|array $modifier, \Closure $callback): static;
 
     public function getModifier(string $modifier): \Closure;
 
