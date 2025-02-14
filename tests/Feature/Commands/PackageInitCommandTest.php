@@ -52,7 +52,7 @@ it('can init the package', function () {
         ->expectsOutputToContain('Replacing author [Acme]...')
         ->expectsOutputToContain('Replacing description [Lorem ipsum dolor sit amet consectetur adipisicing elit.]...')
         ->expectsOutputToContain('Replacing namespace [Acme\Package]...')
-        ->expectsOutputToContain('Replacing package version [v0.0.1]...')
+        ->expectsOutputToContain('Replacing version [v0.0.1]...')
         ->expectsOutputToContain('Replacing minimum stability [dev]...')
         ->expectsOutputToContain('Replacing type [library]...')
         ->expectsOutputToContain('Replacing license [MIT]...')
@@ -145,7 +145,7 @@ it('can restart configure', function () {
         ->expectsOutputToContain('Replacing author [Asciito]...')
         ->expectsOutputToContain('Replacing description [Lorem ipsum dolor it set adisicing elit.]...')
         ->expectsOutputToContain('Replacing namespace [Asciito\Package]...')
-        ->expectsOutputToContain('Replacing package version [v0.0.1]...')
+        ->expectsOutputToContain('Replacing version [v0.0.1]...')
         ->expectsOutputToContain('Replacing minimum stability [dev]...')
         ->expectsOutputToContain('Replacing type [library]...')
         ->expectsOutputToContain('Replacing license [MIT]...')
@@ -255,7 +255,7 @@ it('can init the package with custom values', function () {
         ->expectsOutputToContain('Replacing author [John Doe]...')
         ->expectsOutputToContain('Replacing description [Lorem ipsum dolor sit amet consectetur adipisicing elit.]...')
         ->expectsOutputToContain('Replacing namespace [Acme\Package]...')
-        ->expectsOutputToContain('Replacing package version [v1.0.0]...')
+        ->expectsOutputToContain('Replacing version [v1.0.0]...')
         ->expectsOutputToContain('Replacing minimum stability [stable]...')
         ->expectsOutputToContain('Replacing type [project]...')
         ->expectsOutputToContain('Replacing license [Apache-2.0]...')
@@ -359,7 +359,7 @@ it('can init the package with custom values and restart configure', function () 
         ->expectsOutputToContain('Replacing author [John Doe]...')
         ->expectsOutputToContain('Replacing description [Lorem ipsum dolor sit amet consectetur adipisicing elit.]...')
         ->expectsOutputToContain('Replacing namespace [Acme\Package]...')
-        ->expectsOutputToContain('Replacing package version [v1.0.0]...')
+        ->expectsOutputToContain('Replacing version [v1.0.0]...')
         ->expectsOutputToContain('Replacing minimum stability [stable]...')
         ->expectsOutputToContain('Replacing type [project]...')
         ->expectsOutputToContain('Replacing license [Apache-2.0]...')
@@ -410,4 +410,85 @@ it('can init the package with custom values and restart configure', function () 
         );
 
     File::deleteDirectory(sandbox_path('config'));
+});
+
+it('exclude directory and avoid replacements', function () {
+    mkdir(sandbox_path('src'));
+
+    File::put(
+        sandbox_path('src/SomeClass.php'),
+        <<<'PHP'
+        <?php
+
+        declare(strict_types=1);
+
+        namespace {{namespace}};
+
+        /**
+        * This is the SomeClass class for testing
+        *
+        * @package {{namespace}}
+        * @author {{author}}
+        * @version {{version}}
+        * @license {{license}}
+        */
+        class SomeClass
+        {
+            public function echoPhrase(string $phrase): string
+            {
+                return $phrase;
+            }
+
+            public function echoHello(): string
+            {
+                return 'Hi, I\'m the author {{author|title}}!';
+            }
+        }
+        PHP
+    );
+
+    $this->artisan('package:init', [
+        '--dir' => 'src',
+    ])
+        ->expectsQuestion('What is the vendor name?', 'Acme')
+        ->expectsQuestion('What is the package name?', 'Package')
+        ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
+        ->expectsConfirmation('Do you want to use this configuration?', 'yes')
+        ->expectsOutputToContain('Package initialized successfully.')
+        ->assertSuccessful();
+
+    expect(File::get(sandbox_path('src/SomeClass.php')))
+        ->toBeString()
+        ->toBe(
+            <<<'PHP'
+            <?php
+
+            declare(strict_types=1);
+
+            namespace {{namespace}};
+
+            /**
+            * This is the SomeClass class for testing
+            *
+            * @package {{namespace}}
+            * @author {{author}}
+            * @version {{version}}
+            * @license {{license}}
+            */
+            class SomeClass
+            {
+                public function echoPhrase(string $phrase): string
+                {
+                    return $phrase;
+                }
+
+                public function echoHello(): string
+                {
+                    return 'Hi, I\'m the author {{author|title}}!';
+                }
+            }
+            PHP
+        );
+
+    File::deleteDirectory(sandbox_path('src'));
 });
