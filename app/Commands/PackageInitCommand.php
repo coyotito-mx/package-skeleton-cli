@@ -8,15 +8,16 @@ use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
-use LaravelZero\Framework\Commands\Command;
 use Illuminate\Support\Str;
+use LaravelZero\Framework\Commands\Command;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
-use function Laravel\Prompts\confirm;
-use function Laravel\Prompts\text;
+
 use function Laravel\Prompts\clear;
+use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\table;
+use function Laravel\Prompts\text;
 
 /**
  * Class PackageInitCommand
@@ -54,8 +55,6 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
 
     /**
      * List of directories to be excluded.
-     *
-     * @var array
      */
     protected array $excludedDirectories = [
         '.git',
@@ -69,8 +68,6 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
 
     /**
      * Execute the console command.
-     *
-     * @return void
      */
     public function handle(): void
     {
@@ -102,8 +99,6 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
 
     /**
      * Print the current configuration to the console.
-     *
-     * @return void
      */
     protected function printConfiguration(): void
     {
@@ -120,7 +115,7 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
                 'Package Version',
                 'Minimum Stability',
                 'Type',
-                'License'
+                'License',
             ],
             [[
                 $this->getVendorName(),
@@ -131,7 +126,7 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
                 $this->getPackageVersion(),
                 $this->getMinimumStability(),
                 $this->getPackageType(),
-                $this->getLicense()
+                $this->getLicense(),
             ]]
         );
         $this->newLine();
@@ -139,14 +134,12 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
         table(
             [],
             collect($this->getExcludedDirectories())
-                ->map(fn(string $directory) => [$this->getPackagePath($directory)])
+                ->map(fn (string $directory) => [$this->getPackagePath($directory)])
         );
     }
 
     /**
      * Initialize the package by processing all files and applying replacements.
-     *
-     * @return void
      */
     public function initPackage(): void
     {
@@ -154,7 +147,7 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
             (new \Illuminate\Pipeline\Pipeline)
                 ->send($file->getContents())
                 ->through($this->getReplacers())
-                ->then(fn(string $content) => File::put($file->getRealPath(), $content));
+                ->then(fn (string $content) => File::put($file->getRealPath(), $content));
         });
 
         info('Package initialized successfully.');
@@ -162,8 +155,6 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
 
     /**
      * Get the collection of files to be processed.
-     *
-     * @return Collection
      */
     public function getFiles(): Collection
     {
@@ -177,8 +168,6 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
 
     /**
      * Get the array of replacers to be applied to the files.
-     *
-     * @return array
      */
     protected function getReplacers(): array
     {
@@ -188,28 +177,23 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
             $this->createReplacer('author', $this->getAuthor()),
             $this->createReplacer('description', $this->getPackageDescription()),
             $this->createReplacer('namespace', $this->getNamespace(), [
-                'reverse' => fn(string $value) => Str::of($value)->replace('\\', '/'),
-                'escape' => fn(string $value) => Str::of($value)->replace('\\', '\\\\')
+                'reverse' => fn (string $value) => Str::of($value)->replace('\\', '/'),
+                'escape' => fn (string $value) => Str::of($value)->replace('\\', '\\\\'),
             ]),
             $this->createReplacer('version', $this->getPackageVersion()),
             $this->createReplacer('minimum-stability', $this->getMinimumStability()),
             $this->createReplacer('type', $this->getPackageType()),
-            $this->createReplacer('license', $this->getLicense())
+            $this->createReplacer('license', $this->getLicense()),
         ];
     }
 
     /**
      * Create a replacer closure for a given key and value.
-     *
-     * @param string $key
-     * @param string $value
-     * @param array $modifiers
-     * @return \Closure
      */
     protected function createReplacer(string $key, string $value, array $modifiers = []): \Closure
     {
         return function (string $content, \Closure $next) use ($key, $value, $modifiers) {
-            info(sprintf("Replacing %s [%s]...", Str::of($key)->slug(' ')->toString(), $value));
+            info(sprintf('Replacing %s [%s]...', Str::of($key)->slug(' ')->toString(), $value));
             $replacer = new Replacer($key, $value);
 
             foreach ($modifiers as $modifier => $callback) {
@@ -222,8 +206,6 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
 
     /**
      * Get the vendor name from the command arguments.
-     *
-     * @return string
      */
     protected function getVendorName(): string
     {
@@ -232,8 +214,6 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
 
     /**
      * Get the package name from the command arguments.
-     *
-     * @return string
      */
     protected function getPackageName(): string
     {
@@ -242,8 +222,6 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
 
     /**
      * Get the package description from the command arguments.
-     *
-     * @return string
      */
     protected function getPackageDescription(): string
     {
@@ -252,8 +230,6 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
 
     /**
      * Get the author name from the command options or generate it automatically.
-     *
-     * @return string
      */
     protected function getAuthor(): string
     {
@@ -262,8 +238,6 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
 
     /**
      * Get the license type from the command options or default to MIT.
-     *
-     * @return string
      */
     protected function getLicense(): string
     {
@@ -272,8 +246,6 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
 
     /**
      * Get the namespace from the command options or generate it automatically.
-     *
-     * @return string
      */
     protected function getNamespace(): string
     {
@@ -282,8 +254,6 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
 
     /**
      * Get the package version from the command options or default to v0.0.1.
-     *
-     * @return string
      */
     protected function getPackageVersion(): string
     {
@@ -292,8 +262,6 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
 
     /**
      * Get the minimum stability from the command options or default to dev.
-     *
-     * @return string
      */
     protected function getMinimumStability(): string
     {
@@ -302,8 +270,6 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
 
     /**
      * Get the package type from the command options or default to library.
-     *
-     * @return string
      */
     protected function getPackageType(): string
     {
@@ -312,8 +278,6 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
 
     /**
      * Get the list of excluded directories.
-     *
-     * @return array
      */
     protected function getExcludedDirectories(): array
     {
@@ -324,7 +288,7 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
     {
         $this->info('Installing dependencies...');
 
-        if (!confirm('Do you want to install the dependencies?')) {
+        if (! confirm('Do you want to install the dependencies?')) {
             $this->info('Dependencies were not installed.');
 
             return;
@@ -337,7 +301,7 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
     {
         $this->info('Installing testing tools...');
 
-        if (!confirm('Do you want to install the testing tools?')) {
+        if (! confirm('Do you want to install the testing tools?')) {
             $this->info('Testing tools were not installed.');
 
             return;
@@ -357,37 +321,30 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
 
     /**
      * Get the package path, optionally appending a subpath.
-     *
-     * @param string|null $path
-     * @return string
      */
     protected function getPackagePath(?string $path = null): string
     {
-        return trim(($this->option('path') ?? getcwd()) . ($path ? DIRECTORY_SEPARATOR . $path : ''));
+        return trim(($this->option('path') ?? getcwd()).($path ? DIRECTORY_SEPARATOR.$path : ''));
     }
 
     /**
      * Define the prompts for missing arguments.
-     *
-     * @return array
      */
     protected function promptForMissingArgumentsUsing(): array
     {
         return [
-            'vendor' => fn() => text('What is the vendor name?'),
-            'package' => fn() => text('What is the package name?'),
-            'description' => fn() => text('What is the package description?'),
+            'vendor' => fn () => text('What is the vendor name?'),
+            'package' => fn () => text('What is the package name?'),
+            'description' => fn () => text('What is the package description?'),
         ];
     }
 
     /**
      * Clear the current input arguments.
-     *
-     * @return void
      */
     protected function clear(): void
     {
         clear();
-        collect($this->arguments())->each(fn($_, string $argument) => $this->input->setArgument($argument, null));
+        collect($this->arguments())->each(fn ($_, string $argument) => $this->input->setArgument($argument, null));
     }
 }

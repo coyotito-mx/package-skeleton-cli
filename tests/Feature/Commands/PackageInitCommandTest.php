@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\File;
+
 use function Pest\Laravel\artisan;
 
 beforeEach(function () {
@@ -244,7 +245,7 @@ it('can init the package with custom values', function () {
         '--package-version' => 'v1.0.0',
         '--minimum-stability' => 'stable',
         '--type' => 'project',
-        '--license' => 'Apache-2.0'
+        '--license' => 'Apache-2.0',
     ])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
@@ -351,7 +352,7 @@ it('can init the package with custom values and restart configure', function () 
         '--package-version' => 'v1.0.0',
         '--minimum-stability' => 'stable',
         '--type' => 'project',
-        '--license' => 'Apache-2.0'
+        '--license' => 'Apache-2.0',
     ])
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
         ->expectsOutputToContain('Replacing vendor [acme]...')

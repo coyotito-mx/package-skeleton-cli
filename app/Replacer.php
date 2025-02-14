@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App;
 
 use Closure;
-use InvalidArgumentException;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 class Replacer implements Contracts\Replacer
 {
@@ -17,8 +17,7 @@ class Replacer implements Contracts\Replacer
         protected string $replacement,
         protected string $openTag = '{{',
         protected string $closeTag = '}}',
-    )
-    {
+    ) {
         //
     }
 
@@ -65,26 +64,27 @@ class Replacer implements Contracts\Replacer
 
     public function getDefaultModifiers(): array
     {
-       return [
-           'upper' => fn(string $replacement) => Str::upper($replacement),
-           'lower' => fn(string $replacement) => Str::lower($replacement),
-           'ucfirst' => fn(string $replacement) => Str::ucfirst($replacement),
-           'title' => fn(string $replacement) => Str::title($replacement),
-           'studly' => fn(string $replacement) => Str::studly($replacement),
-           'camel' => fn(string $replacement) => Str::camel($replacement),
-           'slug' => fn(string $replacement) => Str::slug($replacement),
-           'snake' => fn(string $replacement) => Str::snake($replacement),
-           'kebab' => fn(string $replacement) => Str::kebab($replacement),
-           'plural' => fn(string $replacement) => Str::plural($replacement),
-           'reverse' => fn(string $replacement) => Str::reverse($replacement),
-       ];
+        return [
+            'upper' => fn (string $replacement) => Str::upper($replacement),
+            'lower' => fn (string $replacement) => Str::lower($replacement),
+            'ucfirst' => fn (string $replacement) => Str::ucfirst($replacement),
+            'title' => fn (string $replacement) => Str::title($replacement),
+            'studly' => fn (string $replacement) => Str::studly($replacement),
+            'camel' => fn (string $replacement) => Str::camel($replacement),
+            'slug' => fn (string $replacement) => Str::slug($replacement),
+            'snake' => fn (string $replacement) => Str::snake($replacement),
+            'kebab' => fn (string $replacement) => Str::kebab($replacement),
+            'plural' => fn (string $replacement) => Str::plural($replacement),
+            'reverse' => fn (string $replacement) => Str::reverse($replacement),
+        ];
     }
 
     public function replace(string $text): string
     {
         $placeholder = $this->wrapPlaceholder($this->getPlaceholder());
 
-        $matches = []; preg_match_all($placeholder, $text, $matches, PREG_SET_ORDER);
+        $matches = [];
+        preg_match_all($placeholder, $text, $matches, PREG_SET_ORDER);
 
         foreach ($matches as $match) {
             $replacement = $this->getReplacement();

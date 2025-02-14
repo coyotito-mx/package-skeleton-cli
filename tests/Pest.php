@@ -37,10 +37,10 @@ uses(Tests\TestCase::class)->in('Feature');
 
 function test_path(?string $path = null): string
 {
-    return base_path('tests' . ($path ? DIRECTORY_SEPARATOR . $path : ''));
+    return base_path('tests'.($path ? DIRECTORY_SEPARATOR.$path : ''));
 }
 
 function sandbox_path(?string $path = null): string
 {
-    return test_path('sandbox' . ($path ? DIRECTORY_SEPARATOR . $path : ''));
+    return test_path('sandbox'.($path ? DIRECTORY_SEPARATOR.$path : ''));
 }
