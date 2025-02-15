@@ -72,7 +72,6 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
             return;
         }
 
-
         spin(fn () => $this->replacePlaceholdersInFiles($this->getFiles()), 'Processing files...');
 
         $this->installDependencies();

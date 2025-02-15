@@ -6,7 +6,6 @@ namespace App\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
-
 /**
  * Facade for Composer operations that includes license validation functionality.
  *

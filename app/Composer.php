@@ -13,16 +13,13 @@ class Composer extends \Illuminate\Support\Composer
 {
     use Traits\WithLicense;
 
-
     /**
      * Install the dependencies from the current Composer lock file.
      *
-     * @param  bool  $dev if dev dependencies should be installed
-     * @param  bool  $noProgress if output should hide progress
-     * @param  bool  $optimize if autoloader should be optimized
-     * @param  \Closure|\Symfony\Component\Console\Output\OutputInterface|null  $output
+     * @param  bool  $dev  if dev dependencies should be installed
+     * @param  bool  $noProgress  if output should hide progress
+     * @param  bool  $optimize  if autoloader should be optimized
      * @param  string|null  $composerBinary
-     * @return bool
      */
     public function installDependencies(bool $dev = true, bool $noProgress = false, bool $optimize = false, \Closure|OutputInterface|null $output = null, $composerBinary = null): bool
     {
@@ -32,16 +29,16 @@ class Composer extends \Illuminate\Support\Composer
                 '--ansi',
                 '--no-interaction',
             ])
-            ->when(!$dev, fn($command) => $command->push('--no-dev'))
-            ->when($noProgress, fn($command) => $command->push('--no-progress'))
-            ->when($optimize, fn($command) => $command->push('--optimize-autoloader'))
+            ->when(! $dev, fn ($command) => $command->push('--no-dev'))
+            ->when($noProgress, fn ($command) => $command->push('--no-progress'))
+            ->when($optimize, fn ($command) => $command->push('--optimize-autoloader'))
             ->all();
 
-        return 0 === $this->getProcess($command, ['COMPOSER_MEMORY_LIMIT' => '-1'])
+        return $this->getProcess($command, ['COMPOSER_MEMORY_LIMIT' => '-1'])
             ->run(
                 $output instanceof OutputInterface
-                    ? fn($type, $line) => $output->write('    '.$line)
+                    ? fn ($type, $line) => $output->write('    '.$line)
                     : $output
-            );
+            ) === 0;
     }
 }

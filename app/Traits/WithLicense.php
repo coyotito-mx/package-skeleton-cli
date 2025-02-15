@@ -16,7 +16,7 @@ trait WithLicense
     private function getLicenses(): SpdxLicenses
     {
         if (empty($this->licenses)) {
-            $this->licenses = new SpdxLicenses();
+            $this->licenses = new SpdxLicenses;
         }
 
         return $this->licenses;
@@ -66,7 +66,7 @@ trait WithLicense
      */
     private function getLicenseDefinitionFromHtml(string $html): string
     {
-        $dom = new \DOMDocument();
+        $dom = new \DOMDocument;
         $dom->loadHTML($html);
 
         $xpath = new \DOMXPath($dom);
