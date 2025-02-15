@@ -187,7 +187,13 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
 
     protected function getLicense(): string
     {
-        return $this->option('license') ?? 'MIT';
+        $license = $this->option('license') ?? 'MIT';
+
+        if (! \App\Facades\Composer::validateLicense($license)) {
+            throw new Exceptions\LicenseNotFound($license);
+        }
+
+        return $license;
     }
 
     protected function getNamespace(): string
@@ -231,7 +237,7 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
             return;
         }
 
-        \App\Facades\Composer::install();
+        \App\Facades\Composer::installDependencies();
     }
 
     protected function promptForMissingArgumentsUsing(): array
