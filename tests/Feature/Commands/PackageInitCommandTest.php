@@ -1,29 +1,37 @@
 <?php
 
+use App\Facades\Composer;
 use Illuminate\Support\Facades\File;
 
 use function Pest\Laravel\artisan;
 
 beforeEach(function () {
-    $this->oldDir = getcwd();
+    $this->oldPath = getcwd();
 
-    chdir(test_path('sandbox'));
+    if (! File::exists(sandbox_path())) {
+        mkdir(sandbox_path());
+    }
+
+    chdir(sandbox_path());
 });
 
 afterEach(function () {
-    chdir($this->oldDir);
+    chdir($this->oldPath);
 
-    unset($this->oldDir);
+    File::cleanDirectory(sandbox_path());
 });
 
 it('change command context', function () {
     expect(getcwd())
         ->toBe(sandbox_path())
-        ->and($this->oldDir)
+        ->and($this->oldPath)
         ->toBe(base_path());
 });
 
 it('can init the package', function () {
+    $composer = Composer::partialMock();
+    $composer->expects('install')->andReturn();
+
     File::put(
         sandbox_path('composer.json'),
         <<<'EOF'
@@ -36,9 +44,16 @@ it('can init the package', function () {
             "license": "{{license}}",
             "authors": [
                 {
-                    "name": "{{author}}",
+                    "name": "{{author}}"
                 }
-            ]
+            ],
+            "require": {
+                "php": "^7.3",
+                "{{vendor}}/support": "dev-main",
+                "{{vendor}}/console": "dev-main",
+                "{{vendor}}/sso-connector": "dev-main",
+                "spatie/laravel-permission": "^5.0"
+            }
         }
         EOF
     );
@@ -48,16 +63,7 @@ it('can init the package', function () {
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
-        ->expectsOutputToContain('Replacing vendor [acme]...')
-        ->expectsOutputToContain('Replacing package [package]...')
-        ->expectsOutputToContain('Replacing author [Acme]...')
-        ->expectsOutputToContain('Replacing description [Lorem ipsum dolor sit amet consectetur adipisicing elit.]...')
-        ->expectsOutputToContain('Replacing namespace [Acme\Package]...')
-        ->expectsOutputToContain('Replacing version [v0.0.1]...')
-        ->expectsOutputToContain('Replacing minimum stability [dev]...')
-        ->expectsOutputToContain('Replacing type [library]...')
-        ->expectsOutputToContain('Replacing license [MIT]...')
-        ->expectsOutputToContain('Package initialized successfully.')
+        ->expectsQuestion('Do you want to install the dependencies?', 'yes')
         ->assertSuccessful();
 
     expect(File::get(sandbox_path('composer.json')))
@@ -73,9 +79,16 @@ it('can init the package', function () {
                 "license": "MIT",
                 "authors": [
                     {
-                        "name": "Acme",
+                        "name": "Acme"
                     }
-                ]
+                ],
+                "require": {
+                    "php": "^7.3",
+                    "acme/support": "dev-main",
+                    "acme/console": "dev-main",
+                    "acme/sso-connector": "dev-main",
+                    "spatie/laravel-permission": "^5.0"
+                }
             }
             EOF
         );
@@ -115,11 +128,11 @@ it('can restart configure', function () {
 
         ## Changelog
 
-        Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
+        Please see CHANGELOG for more information on what has changed recently.
 
         ## Contributing
 
-        Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+        Please see CONTRIBUTING for details.
 
         ## Security
 
@@ -128,7 +141,7 @@ it('can restart configure', function () {
         ## Credits
 
         - {{author}} - Initial work
-        - [All Contributors](../../contributors)
+        - All Contributors
         README
     );
 
@@ -141,16 +154,7 @@ it('can restart configure', function () {
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor it set adisicing elit.')
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
-        ->expectsOutputToContain('Replacing vendor [asciito]...')
-        ->expectsOutputToContain('Replacing package [package]...')
-        ->expectsOutputToContain('Replacing author [Asciito]...')
-        ->expectsOutputToContain('Replacing description [Lorem ipsum dolor it set adisicing elit.]...')
-        ->expectsOutputToContain('Replacing namespace [Asciito\Package]...')
-        ->expectsOutputToContain('Replacing version [v0.0.1]...')
-        ->expectsOutputToContain('Replacing minimum stability [dev]...')
-        ->expectsOutputToContain('Replacing type [library]...')
-        ->expectsOutputToContain('Replacing license [MIT]...')
-        ->expectsOutputToContain('Package initialized successfully.')
+        ->expectsConfirmation('Do you want to install the dependencies?')
         ->assertSuccessful();
 
     expect(File::get(sandbox_path('README.MD')))
@@ -185,11 +189,11 @@ it('can restart configure', function () {
 
             ## Changelog
 
-            Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
+            Please see CHANGELOG for more information on what has changed recently.
 
             ## Contributing
 
-            Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+            Please see CONTRIBUTING for details.
 
             ## Security
 
@@ -198,7 +202,7 @@ it('can restart configure', function () {
             ## Credits
 
             - Asciito - Initial work
-            - [All Contributors](../../contributors)
+            - All Contributors
             README
         );
 
@@ -251,16 +255,7 @@ it('can init the package with custom values', function () {
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
-        ->expectsOutputToContain('Replacing vendor [acme]...')
-        ->expectsOutputToContain('Replacing package [package]...')
-        ->expectsOutputToContain('Replacing author [John Doe]...')
-        ->expectsOutputToContain('Replacing description [Lorem ipsum dolor sit amet consectetur adipisicing elit.]...')
-        ->expectsOutputToContain('Replacing namespace [Acme\Package]...')
-        ->expectsOutputToContain('Replacing version [v1.0.0]...')
-        ->expectsOutputToContain('Replacing minimum stability [stable]...')
-        ->expectsOutputToContain('Replacing type [project]...')
-        ->expectsOutputToContain('Replacing license [Apache-2.0]...')
-        ->expectsOutputToContain('Package initialized successfully.')
+        ->expectsConfirmation('Do you want to install the dependencies?')
         ->assertSuccessful();
 
     expect(File::get(sandbox_path('src/SomeClass.php')))
@@ -321,19 +316,16 @@ it('can init the package with custom values and restart configure', function () 
                 'admin' => 'Administrator',
                 'user' => 'User',
             ],
-
             'permissions' => [
                 'create' => 'Create',
                 'read' => 'Read',
                 'update' => 'Update',
                 'delete' => 'Delete',
             ],
-
             'models' => [
                 'role' => {{namespace}}\Role::class,
                 'permission' => {{namespace}}\Permission::class,
             ],
-
             'tables' => [
                 'roles' => 'roles',
                 'permissions' => 'permissions',
@@ -344,7 +336,7 @@ it('can init the package with custom values and restart configure', function () 
         EOF
     );
 
-    $this->artisan('package:init', [
+    artisan('package:init', [
         'vendor' => 'Acme',
         'package' => 'Package',
         'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
@@ -355,16 +347,7 @@ it('can init the package with custom values and restart configure', function () 
         '--license' => 'Apache-2.0',
     ])
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
-        ->expectsOutputToContain('Replacing vendor [acme]...')
-        ->expectsOutputToContain('Replacing package [package]...')
-        ->expectsOutputToContain('Replacing author [John Doe]...')
-        ->expectsOutputToContain('Replacing description [Lorem ipsum dolor sit amet consectetur adipisicing elit.]...')
-        ->expectsOutputToContain('Replacing namespace [Acme\Package]...')
-        ->expectsOutputToContain('Replacing version [v1.0.0]...')
-        ->expectsOutputToContain('Replacing minimum stability [stable]...')
-        ->expectsOutputToContain('Replacing type [project]...')
-        ->expectsOutputToContain('Replacing license [Apache-2.0]...')
-        ->expectsOutputToContain('Package initialized successfully.')
+        ->expectsConfirmation('Do you want to install the dependencies?')
         ->assertSuccessful();
 
     expect(File::get(sandbox_path('config/app.php')))
@@ -387,19 +370,16 @@ it('can init the package with custom values and restart configure', function () 
                     'admin' => 'Administrator',
                     'user' => 'User',
                 ],
-
                 'permissions' => [
                     'create' => 'Create',
                     'read' => 'Read',
                     'update' => 'Update',
                     'delete' => 'Delete',
                 ],
-
                 'models' => [
                     'role' => Acme\Package\Role::class,
                     'permission' => Acme\Package\Permission::class,
                 ],
-
                 'tables' => [
                     'roles' => 'roles',
                     'permissions' => 'permissions',
@@ -448,14 +428,14 @@ it('exclude directory and avoid replacements', function () {
         PHP
     );
 
-    $this->artisan('package:init', [
+    artisan('package:init', [
         '--dir' => 'src',
     ])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
-        ->expectsOutputToContain('Package initialized successfully.')
+        ->expectsConfirmation('Do you want to install the dependencies?')
         ->assertSuccessful();
 
     expect(File::get(sandbox_path('src/SomeClass.php')))

@@ -8,6 +8,8 @@ abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
 
+    public ?string $oldPath = null;
+
     protected function setUp(): void
     {
         parent::setUp();
