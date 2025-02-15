@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Process;
 
 class Composer
 {
+    use Traits\WithLicense;
+
     public function install(): void
     {
         $this->runProcess('install');
