@@ -72,6 +72,7 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
             return;
         }
 
+
         spin(fn () => $this->replacePlaceholdersInFiles($this->getFiles()), 'Processing files...');
 
         $this->installDependencies();
@@ -235,7 +236,7 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
             return;
         }
 
-        \App\Facades\Composer::install();
+        \App\Facades\Composer::installDependencies();
     }
 
     protected function promptForMissingArgumentsUsing(): array

@@ -4,50 +4,44 @@ declare(strict_types=1);
 
 namespace App;
 
-use Illuminate\Process\Exceptions\ProcessFailedException;
-use Illuminate\Support\Facades\Process;
+use Symfony\Component\Console\Output\OutputInterface;
 
-class Composer
+/**
+ * @mixin \Illuminate\Support\Composer
+ */
+class Composer extends \Illuminate\Support\Composer
 {
     use Traits\WithLicense;
 
-    public function install(): void
+
+    /**
+     * Install the dependencies from the current Composer lock file.
+     *
+     * @param  bool  $dev if dev dependencies should be installed
+     * @param  bool  $noProgress if output should hide progress
+     * @param  bool  $optimize if autoloader should be optimized
+     * @param  \Closure|\Symfony\Component\Console\Output\OutputInterface|null  $output
+     * @param  string|null  $composerBinary
+     * @return bool
+     */
+    public function installDependencies(bool $dev = true, bool $noProgress = false, bool $optimize = false, \Closure|OutputInterface|null $output = null, $composerBinary = null): bool
     {
-        $this->runProcess('install');
-    }
+        $command = collect($this->findComposer($composerBinary))
+            ->merge([
+                'install',
+                '--ansi',
+                '--no-interaction',
+            ])
+            ->when(!$dev, fn($command) => $command->push('--no-dev'))
+            ->when($noProgress, fn($command) => $command->push('--no-progress'))
+            ->when($optimize, fn($command) => $command->push('--optimize-autoloader'))
+            ->all();
 
-    public function require(string $package, bool $dev = false): void
-    {
-        $this->runProcess(['require', $package, $dev ? '--dev' : '']);
-    }
-
-    public function remove(string $package, bool $dev = false): void
-    {
-        $this->runProcess(['remove', $package, $dev ? '--dev' : '']);
-    }
-
-    public function update(string $package, bool $dev = false): void
-    {
-        $this->runProcess(['update', $package, $dev ? '--dev' : '']);
-    }
-
-    public function dumpAutoload(bool $optimize = false): void
-    {
-        $this->runProcess(['dump-autoload', $optimize ? '--optimize' : '']);
-    }
-
-    public function runProcess(string|array $command): void
-    {
-        $composer = 'composer';
-
-        try {
-            $command = Process::command([$composer, ...\Arr::wrap($command)]);
-
-            $command->tty();
-
-            $command->run();
-        } catch (ProcessFailedException $e) {
-            throw new \RuntimeException($e->getMessage());
-        }
+        return 0 === $this->getProcess($command, ['COMPOSER_MEMORY_LIMIT' => '-1'])
+            ->run(
+                $output instanceof OutputInterface
+                    ? fn($type, $line) => $output->write('    '.$line)
+                    : $output
+            );
     }
 }
