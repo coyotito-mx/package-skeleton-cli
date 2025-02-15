@@ -61,16 +61,19 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
                 }
 
                 $this->clear();
+
                 $this->promptForMissingArguments($this->input, $this->output);
 
                 throw new \Exception('You did not confirm the package initialization.');
             });
         } catch (\Throwable $th) {
             $this->error($th->getMessage());
+
             return;
         }
 
         spin(fn () => $this->replacePlaceholdersInFiles($this->getFiles()), 'Processing files...');
+
         $this->installDependencies();
     }
 
@@ -124,6 +127,7 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
         $this->newLine();
 
         info('List of excluded directories:');
+
         table(
             rows: collect($this->getExcludedDirectories())
                 ->map(fn (string $directory) => [$this->getPackagePath($directory)])->toArray()
@@ -139,7 +143,7 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
             $this->createReplacer('description', $this->getPackageDescription()),
             $this->createReplacer('namespace', $this->getNamespace(), [
                 'reverse' => fn (string $value) => Str::of($value)->replace('\\', '/'),
-                'escape'  => fn (string $value) => Str::of($value)->replace('\\', '\\\\'),
+                'escape' => fn (string $value) => Str::of($value)->replace('\\', '\\\\'),
             ]),
             $this->createReplacer('version', $this->getPackageVersion()),
             $this->createReplacer('minimum-stability', $this->getMinimumStability()),
@@ -212,7 +216,7 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
 
     protected function getPackagePath(?string $path = null): string
     {
-        return trim(($this->option('path') ?? getcwd()).($path ? DIRECTORY_SEPARATOR . $path : ''));
+        return trim(($this->option('path') ?? getcwd()).($path ? DIRECTORY_SEPARATOR.$path : ''));
     }
 
     protected function installDependencies(): void
@@ -221,6 +225,7 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
 
         if (! confirm('Do you want to install the dependencies?')) {
             $this->info('Dependencies were not installed.');
+
             return;
         }
 
@@ -230,8 +235,8 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
     protected function promptForMissingArgumentsUsing(): array
     {
         return [
-            'vendor'      => fn () => text('What is the vendor name?'),
-            'package'     => fn () => text('What is the package name?'),
+            'vendor' => fn () => text('What is the vendor name?'),
+            'package' => fn () => text('What is the package name?'),
             'description' => fn () => text('What is the package description?'),
         ];
     }
