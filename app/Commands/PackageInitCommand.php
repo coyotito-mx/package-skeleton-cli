@@ -50,7 +50,7 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
         'tests',
     ];
 
-    public function handle(): void
+    public function handle(): int
     {
         try {
             retry(3, function () {
@@ -69,12 +69,14 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
         } catch (\Throwable $th) {
             $this->error($th->getMessage());
 
-            return;
+            return self::FAILURE;
         }
 
         spin(fn () => $this->replacePlaceholdersInFiles($this->getFiles()), 'Processing files...');
 
         $this->installDependencies();
+
+        return self::SUCCESS;
     }
 
     public function replacePlaceholdersInFile(SplFileInfo $file): SplFileInfo
