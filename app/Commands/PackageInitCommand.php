@@ -31,7 +31,6 @@ class PackageInitCommand extends Command implements HasPackageConfigurationComma
 
     // Command signature and description
     protected $signature = 'package:init
-                         {description : The package description}
                          {--author= : The package author}
                          {--license= : The package license (default: MIT)}
                          {--namespace= : The package namespace}
@@ -172,11 +171,6 @@ class PackageInitCommand extends Command implements HasPackageConfigurationComma
 
             return $next($replacer->replace($content));
         };
-    }
-
-    public function getPackageDescription(): string
-    {
-        return Str::ucfirst($this->argument('description'));
     }
 
     public function getPackageAuthorName(): string

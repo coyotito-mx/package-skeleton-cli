@@ -11,6 +11,7 @@ use Symfony\Component\Console\Input\InputOption;
 trait InteractsWithPackageConfiguration
 {
     use InteractsWithNamespace;
+    use InteractsWithDescription;
 
     /**
      * @var array<string, string|\Closure> The missing arguments to prompt for.
