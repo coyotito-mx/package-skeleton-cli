@@ -29,8 +29,7 @@ it('change command context', function () {
 });
 
 it('can init the package', function () {
-    $composer = Composer::partialMock();
-    $composer->expects('install')->andReturn();
+    Composer::partialMock()->expects('installDependencies')->andReturn(true);
 
     File::put(
         sandbox_path('composer.json'),
@@ -74,7 +73,7 @@ it('can init the package', function () {
                 "name": "acme/package",
                 "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
                 "type": "library",
-                "version": "v0.0.1",
+                "version": "0.0.1",
                 "minimum-stability": "dev",
                 "license": "MIT",
                 "authors": [
@@ -246,7 +245,7 @@ it('can init the package with custom values', function () {
 
     artisan('package:init', [
         '--author' => 'John Doe',
-        '--package-version' => 'v1.0.0',
+        '--package-version' => '1.0.0',
         '--minimum-stability' => 'stable',
         '--type' => 'project',
         '--license' => 'Apache-2.0',
@@ -273,7 +272,7 @@ it('can init the package with custom values', function () {
             *
             * @package Acme\Package
             * @author John Doe
-            * @version v1.0.0
+            * @version 1.0.0
             * @license Apache-2.0
             */
             class SomeClass
@@ -341,7 +340,7 @@ it('can init the package with custom values and restart configure', function () 
         'package' => 'Package',
         'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
         '--author' => 'John Doe',
-        '--package-version' => 'v1.0.0',
+        '--package-version' => '1.0.0',
         '--minimum-stability' => 'stable',
         '--type' => 'project',
         '--license' => 'Apache-2.0',

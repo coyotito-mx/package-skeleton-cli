@@ -2,6 +2,8 @@
 
 namespace App\Commands;
 
+use App\Commands\Contracts\HasPackageConfigurationCommand;
+use App\Commands\Traits\InteractsWithPackageConfiguration;
 use App\Replacer;
 use Illuminate\Console\Concerns\PromptsForMissingInput as ConcernsPromptsForMissingInput;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
@@ -18,23 +20,16 @@ use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\spin;
 use function Laravel\Prompts\table;
-use function Laravel\Prompts\text;
 
-class PackageInitCommand extends Command implements PromptsForMissingInput
+class PackageInitCommand extends Command implements HasPackageConfigurationCommand, PromptsForMissingInput
 {
     use ConcernsPromptsForMissingInput;
+    use InteractsWithPackageConfiguration {
+        InteractsWithPackageConfiguration::promptForMissingArgumentsUsing as packagePromptForMissingArgumentsUsing;
+    }
 
     // Command signature and description
     protected $signature = 'package:init
-                         {vendor : The vendor name}
-                         {package : The package name}
-                         {description : The package description}
-                         {--author= : The package author}
-                         {--license= : The package license (default: MIT)}
-                         {--namespace= : The package namespace}
-                         {--package-version= : The package version (default: v0.0.1)}
-                         {--minimum-stability= : The package minimum-stability (default: dev)}
-                         {--type= : The package type (default: library)}
                          {--dir=* : The excluded directories}
                          {--path= : The path where the package will be initialized}';
 
@@ -50,7 +45,7 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
         'tests',
     ];
 
-    public function handle(): void
+    public function handle(): int
     {
         try {
             retry(3, function () {
@@ -69,12 +64,14 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
         } catch (\Throwable $th) {
             $this->error($th->getMessage());
 
-            return;
+            return self::FAILURE;
         }
 
         spin(fn () => $this->replacePlaceholdersInFiles($this->getFiles()), 'Processing files...');
 
         $this->installDependencies();
+
+        return self::SUCCESS;
     }
 
     public function replacePlaceholdersInFile(SplFileInfo $file): SplFileInfo
@@ -112,15 +109,15 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
         table(
             ['Vendor', 'Package', 'Author', 'Description', 'Namespace', 'Package Version', 'Minimum Stability', 'Type', 'License'],
             [[
-                $this->getVendorName(),
+                $this->getPackageVendor(),
                 $this->getPackageName(),
-                $this->getAuthor(),
+                $this->getPackageAuthorName(),
                 $this->getPackageDescription(),
-                $this->getNamespace(),
+                $this->getPackageNamespace(),
                 $this->getPackageVersion(),
-                $this->getMinimumStability(),
+                $this->getPackageMinimumStability(),
                 $this->getPackageType(),
-                $this->getLicense(),
+                $this->getPackageLicense(),
             ]]
         );
 
@@ -137,18 +134,18 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
     protected function getReplacers(): array
     {
         return [
-            $this->createReplacer('vendor', $this->getVendorName()),
+            $this->createReplacer('vendor', $this->getPackageVendor()),
             $this->createReplacer('package', $this->getPackageName()),
-            $this->createReplacer('author', $this->getAuthor()),
+            $this->createReplacer('author', $this->getPackageAuthorName()),
             $this->createReplacer('description', $this->getPackageDescription()),
-            $this->createReplacer('namespace', $this->getNamespace(), [
+            $this->createReplacer('namespace', $this->getPackageNamespace(), [
                 'reverse' => fn (string $value) => Str::of($value)->replace('\\', '/'),
                 'escape' => fn (string $value) => Str::of($value)->replace('\\', '\\\\'),
             ]),
             $this->createReplacer('version', $this->getPackageVersion()),
-            $this->createReplacer('minimum-stability', $this->getMinimumStability()),
+            $this->createReplacer('minimum-stability', $this->getPackageMinimumStability()),
             $this->createReplacer('type', $this->getPackageType()),
-            $this->createReplacer('license', $this->getLicense()),
+            $this->createReplacer('license', $this->getPackageLicense()),
         ];
     }
 
@@ -161,52 +158,6 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
 
             return $next($replacer->replace($content));
         };
-    }
-
-    protected function getVendorName(): string
-    {
-        return Str::lower($this->argument('vendor'));
-    }
-
-    protected function getPackageName(): string
-    {
-        return Str::lower($this->argument('package'));
-    }
-
-    protected function getPackageDescription(): string
-    {
-        return $this->argument('description');
-    }
-
-    protected function getAuthor(): string
-    {
-        return Str::title($this->option('author') ?? $this->getVendorName());
-    }
-
-    protected function getLicense(): string
-    {
-        return $this->option('license') ?? 'MIT';
-    }
-
-    protected function getNamespace(): string
-    {
-        return Str::title($this->option('namespace') ??
-            Str::title("{$this->getVendorName()}\\{$this->getPackageName()}"));
-    }
-
-    protected function getPackageVersion(): string
-    {
-        return Str::lower($this->option('package-version') ?? 'v0.0.1');
-    }
-
-    protected function getMinimumStability(): string
-    {
-        return Str::lower($this->option('minimum-stability') ?? 'dev');
-    }
-
-    protected function getPackageType(): string
-    {
-        return Str::lower($this->option('type') ?? 'library');
     }
 
     protected function getExcludedDirectories(): array
@@ -229,16 +180,12 @@ class PackageInitCommand extends Command implements PromptsForMissingInput
             return;
         }
 
-        \App\Facades\Composer::install();
+        \App\Facades\Composer::installDependencies();
     }
 
     protected function promptForMissingArgumentsUsing(): array
     {
-        return [
-            'vendor' => fn () => text('What is the vendor name?'),
-            'package' => fn () => text('What is the package name?'),
-            'description' => fn () => text('What is the package description?'),
-        ];
+        return $this->packagePromptForMissingArgumentsUsing();
     }
 
     protected function clear(): void
