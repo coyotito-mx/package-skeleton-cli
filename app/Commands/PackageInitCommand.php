@@ -26,7 +26,6 @@ class PackageInitCommand extends Command implements HasPackageConfigurationComma
         InteractsWithPackageConfiguration::promptForMissingArgumentsUsing as packagePromptForMissingArgumentsUsing;
     }
 
-    // Command signature and description
     protected $signature = 'package:init
                          {--dir=* : The excluded directories}
                          {--path= : The path where the package will be initialized}';

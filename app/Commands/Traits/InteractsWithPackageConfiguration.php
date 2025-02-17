@@ -138,8 +138,6 @@ trait InteractsWithPackageConfiguration
     }
 
     /**
-     * Add the package configuration arguments.
-     *
      * @param  InputArgument[]  $arguments
      */
     public function addArguments(array $arguments): self
@@ -150,8 +148,6 @@ trait InteractsWithPackageConfiguration
     }
 
     /**
-     * Add the package configuration options.
-     *
      * @param  InputOption[]  $options
      */
     public function addOptions(array $options): self

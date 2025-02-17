@@ -16,7 +16,7 @@ trait InteractsWIthLicense
     }
 
     /**
-     * @throw LicenseDefinitionNotFound if the license is not found
+     * @throw LicenseDefinitionNotFound
      */
     public function getPackageLicense(): string
     {
