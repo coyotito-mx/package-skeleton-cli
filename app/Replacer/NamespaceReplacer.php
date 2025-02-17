@@ -10,14 +10,14 @@ class NamespaceReplacer
 {
     use Traits\InteractsWithReplacer;
 
-    protected string $placeholder = 'namespace';
+    protected static string $placeholder = 'namespace';
 
-    protected array $reversedSeparators = [
+    protected static array $reversedSeparators = [
         '/' => '\\',
         '\\' => '/',
     ];
 
-    public function getModifiers(): array
+    public static function getModifiers(): array
     {
         return [
             'escape' => function (string $replacement): string {
@@ -33,7 +33,7 @@ class NamespaceReplacer
             'reverse' => function (string $replacement): string {
                 $separator = static::identifySeparator($replacement);
 
-                return $separator ? Str::replace($separator, $this->reversedSeparators[$separator], $replacement) : $replacement;
+                return $separator ? Str::replace($separator, static::$reversedSeparators[$separator], $replacement) : $replacement;
             },
         ];
     }

@@ -8,5 +8,5 @@ class VendorReplacer
 {
     use Traits\InteractsWithReplacer;
 
-    protected string $placeholder = 'vendor';
+    protected static string $placeholder = 'vendor';
 }

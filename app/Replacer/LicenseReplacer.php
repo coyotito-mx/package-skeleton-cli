@@ -8,5 +8,5 @@ class LicenseReplacer
 {
     use Traits\InteractsWithReplacer;
 
-    protected string $placeholder = 'license';
+    protected static string $placeholder = 'license';
 }

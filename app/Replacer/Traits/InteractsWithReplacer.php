@@ -10,17 +10,15 @@ trait InteractsWithReplacer
 {
     public static function make(string $replacement): \App\Replacer\Contracts\Replacer
     {
-        $class = new static;
-
-        return (new Replacer($class->getPlaceholder(), $replacement))->modifierUsing($class->getModifiers());
+        return (new Replacer(static::getPlaceholder(), $replacement))->modifierUsing(static::getModifiers());
     }
 
-    public function getPlaceholder(): string
+    public static function getPlaceholder(): string
     {
-        return $this->placeholder;
+        return static::$placeholder;
     }
 
-    public function getModifiers(): array
+    public static function getModifiers(): array
     {
         return [];
     }

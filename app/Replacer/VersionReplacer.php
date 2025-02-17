@@ -8,5 +8,5 @@ class VersionReplacer
 {
     use Traits\InteractsWithReplacer;
 
-    protected string $placeholder = 'version';
+    protected static string $placeholder = 'version';
 }

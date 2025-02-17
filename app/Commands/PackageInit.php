@@ -2,7 +2,7 @@
 
 namespace App\Commands;
 
-use App\Commands\Contracts\HasPackageConfigurationCommand;
+use App\Commands\Contracts\HasPackageConfiguration;
 use App\Commands\Traits\InteractsWithPackageConfiguration;
 use Illuminate\Console\Concerns\PromptsForMissingInput as ConcernsPromptsForMissingInput;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
@@ -19,7 +19,7 @@ use function Laravel\Prompts\info;
 use function Laravel\Prompts\spin;
 use function Laravel\Prompts\table;
 
-class PackageInitCommand extends Command implements HasPackageConfigurationCommand, PromptsForMissingInput
+class PackageInit extends Command implements HasPackageConfiguration, PromptsForMissingInput
 {
     use ConcernsPromptsForMissingInput;
     use InteractsWithPackageConfiguration {

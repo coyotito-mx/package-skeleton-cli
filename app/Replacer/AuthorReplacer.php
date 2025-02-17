@@ -8,5 +8,5 @@ class AuthorReplacer
 {
     use Traits\InteractsWithReplacer;
 
-    protected string $placeholder = 'author';
+    protected static string $placeholder = 'author';
 }

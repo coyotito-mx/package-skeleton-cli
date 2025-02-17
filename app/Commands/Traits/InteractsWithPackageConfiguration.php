@@ -4,15 +4,6 @@ declare(strict_types=1);
 
 namespace App\Commands\Traits;
 
-use App\Replacer\AuthorReplacer;
-use App\Replacer\DescriptionReplacer;
-use App\Replacer\LicenseReplacer;
-use App\Replacer\MinimumStabilityReplacer;
-use App\Replacer\NamespaceReplacer;
-use App\Replacer\PackageReplacer;
-use App\Replacer\TypeReplacer;
-use App\Replacer\VendorReplacer;
-use App\Replacer\VersionReplacer;
 use Illuminate\Console\Parser;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -31,6 +22,9 @@ trait InteractsWithPackageConfiguration
      * @var array<string, string|\Closure> The missing arguments to prompt for.
      */
     protected array $promptRequiredArguments = [];
+
+    /** @var array class-string */
+    protected array $replacers = [];
 
     protected function configureUsingFluentDefinition(): void
     {
@@ -59,17 +53,25 @@ trait InteractsWithPackageConfiguration
 
     public function getPackageReplacers(): array
     {
-        return [
-            $this->pipeThroughReplacer($this->getPackageVendor(), VendorReplacer::class),
-            $this->pipeThroughReplacer($this->getPackageName(), PackageReplacer::class),
-            $this->pipeThroughReplacer($this->getPackageAuthorName(), AuthorReplacer::class),
-            $this->pipeThroughReplacer($this->getPackageDescription(), DescriptionReplacer::class),
-            $this->pipeThroughReplacer($this->getPackageNamespace(), NamespaceReplacer::class),
-            $this->pipeThroughReplacer($this->getPackageVersion(), VersionReplacer::class),
-            $this->pipeThroughReplacer($this->getPackageMinimumStability(), MinimumStabilityReplacer::class),
-            $this->pipeThroughReplacer($this->getPackageType(), TypeReplacer::class),
-            $this->pipeThroughReplacer($this->getPackageLicense(), LicenseReplacer::class),
-        ];
+        return collect($this->replacers)
+            ->map(function (string|\Closure $replacement, string $replacer) {
+                if ($replacement instanceof \Closure) {
+                    $replacement = $replacement();
+                }
+
+                return $this->pipeThroughReplacer($replacement, $replacer);
+            })
+            ->toArray();
+    }
+
+    /**
+     * @param  array<class-string, string|\Closure>  $replacers
+     */
+    public function addReplacers(array $replacers): void
+    {
+        foreach ($replacers as $replacer => $replacement) {
+            $this->replacers[$replacer] = $replacement;
+        }
     }
 
     /**

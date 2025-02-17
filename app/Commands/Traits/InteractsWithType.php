@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Commands\Traits;
 
+use App\Replacer;
 use Symfony\Component\Console\Input\InputOption;
 
 trait InteractsWithType
@@ -26,6 +27,10 @@ trait InteractsWithType
 
     public function bootPackageInteractsWithType(): void
     {
+        $this->addReplacers([
+            Replacer\TypeReplacer::class => fn (): string => $this->getPackageType(),
+        ]);
+
         $this->addOption('type', mode: InputOption::VALUE_OPTIONAL, description: 'The package type', default: 'library');
     }
 

@@ -8,5 +8,5 @@ class DescriptionReplacer
 {
     use Traits\InteractsWithReplacer;
 
-    protected string $placeholder = 'description';
+    protected static string $placeholder = 'description';
 }

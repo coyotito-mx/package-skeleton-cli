@@ -8,5 +8,5 @@ class TypeReplacer
 {
     use Traits\InteractsWithReplacer;
 
-    protected string $placeholder = 'type';
+    protected static string $placeholder = 'type';
 }
