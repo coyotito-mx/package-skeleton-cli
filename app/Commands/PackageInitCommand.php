@@ -33,7 +33,6 @@ class PackageInitCommand extends Command implements HasPackageConfigurationComma
     protected $signature = 'package:init
                          {--author= : The package author}
                          {--license= : The package license (default: MIT)}
-                         {--namespace= : The package namespace}
                          {--package-version= : The package version (default: v0.0.1)}
                          {--minimum-stability= : The package minimum-stability (default: dev)}
                          {--type= : The package type (default: library)}
