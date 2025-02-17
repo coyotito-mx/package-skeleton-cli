@@ -30,7 +30,6 @@ class PackageInitCommand extends Command implements HasPackageConfigurationComma
 
     // Command signature and description
     protected $signature = 'package:init
-                         {--package-version= : The package version (default: v0.0.1)}
                          {--minimum-stability= : The package minimum-stability (default: dev)}
                          {--type= : The package type (default: library)}
                          {--dir=* : The excluded directories}
@@ -161,11 +160,6 @@ class PackageInitCommand extends Command implements HasPackageConfigurationComma
 
             return $next($replacer->replace($content));
         };
-    }
-
-    public function getPackageVersion(): string
-    {
-        return Str::lower($this->option('package-version') ?? 'v0.0.1');
     }
 
     public function getPackageMinimumStability(): string

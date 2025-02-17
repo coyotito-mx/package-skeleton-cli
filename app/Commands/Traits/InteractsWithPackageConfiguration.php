@@ -14,6 +14,7 @@ trait InteractsWithPackageConfiguration
     use InteractsWithNamespace;
     use InteractsWithDescription;
     use InteractsWIthLicense;
+    use InteractsWithVersion;
 
     /**
      * @var array<string, string|\Closure> The missing arguments to prompt for.
