@@ -105,6 +105,6 @@ class Replacer implements Contracts\Replacer
 
     protected function wrapPlaceholder(string $placeholder): string
     {
-        return Str::of(preg_quote($placeholder))->wrap('/{{(', ')(?:\|([\w,]+))?}}/')->toString();
+        return Str::of(preg_quote($placeholder))->wrap("/{$this->openTag}(", ")(?:\|([\w,]+))?{$this->closeTag}/")->toString();
     }
 }
