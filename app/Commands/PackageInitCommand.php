@@ -3,7 +3,6 @@
 namespace App\Commands;
 
 use App\Commands\Contracts\HasPackageConfigurationCommand;
-use App\Commands\Exceptions\LicenseNotFound;
 use App\Commands\Traits\InteractsWithPackageConfiguration;
 use App\Replacer;
 use Illuminate\Console\Concerns\PromptsForMissingInput as ConcernsPromptsForMissingInput;
@@ -31,7 +30,6 @@ class PackageInitCommand extends Command implements HasPackageConfigurationComma
 
     // Command signature and description
     protected $signature = 'package:init
-                         {--license= : The package license (default: MIT)}
                          {--package-version= : The package version (default: v0.0.1)}
                          {--minimum-stability= : The package minimum-stability (default: dev)}
                          {--type= : The package type (default: library)}
@@ -105,9 +103,6 @@ class PackageInitCommand extends Command implements HasPackageConfigurationComma
         )->toArray();
     }
 
-    /**
-     * @throws LicenseNotFound
-     */
     protected function printConfiguration(): void
     {
         info("Package init on: <fg=white>[{$this->getPackagePath()}]</>");
@@ -139,9 +134,6 @@ class PackageInitCommand extends Command implements HasPackageConfigurationComma
         );
     }
 
-    /**
-     * @throws LicenseNotFound
-     */
     protected function getReplacers(): array
     {
         return [
@@ -169,20 +161,6 @@ class PackageInitCommand extends Command implements HasPackageConfigurationComma
 
             return $next($replacer->replace($content));
         };
-    }
-
-    /**
-     * @throws LicenseNotFound
-     */
-    public function getPackageLicense(): string
-    {
-        $license = $this->option('license') ?? 'MIT';
-
-        if (! \App\Facades\Composer::validateLicense($license)) {
-            throw new Exceptions\LicenseNotFound($license);
-        }
-
-        return $license;
     }
 
     public function getPackageVersion(): string

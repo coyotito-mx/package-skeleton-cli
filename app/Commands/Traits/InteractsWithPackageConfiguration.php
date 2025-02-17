@@ -13,6 +13,7 @@ trait InteractsWithPackageConfiguration
     use InteractsWithAuthor;
     use InteractsWithNamespace;
     use InteractsWithDescription;
+    use InteractsWIthLicense;
 
     /**
      * @var array<string, string|\Closure> The missing arguments to prompt for.
