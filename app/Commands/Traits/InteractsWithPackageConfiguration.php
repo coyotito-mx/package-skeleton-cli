@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Commands\Traits;
 
-use Symfony\Component\Console\Input\InputArgument;
 use Illuminate\Console\Parser;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
 trait InteractsWithPackageConfiguration
 {
+    use InteractsWithAuthor;
     use InteractsWithNamespace;
     use InteractsWithDescription;
 
