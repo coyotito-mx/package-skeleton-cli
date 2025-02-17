@@ -21,4 +21,6 @@ interface HasPackageConfigurationCommand
     public function getPackageMinimumStability(): string;
 
     public function getPackageType(): string;
+
+    public function getPackageReplacers(): array;
 }

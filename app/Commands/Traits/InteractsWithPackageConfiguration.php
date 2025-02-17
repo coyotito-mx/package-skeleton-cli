@@ -4,6 +4,15 @@ declare(strict_types=1);
 
 namespace App\Commands\Traits;
 
+use App\Replacer\AuthorReplacer;
+use App\Replacer\DescriptionReplacer;
+use App\Replacer\LicenseReplacer;
+use App\Replacer\MinimumStabilityReplacer;
+use App\Replacer\NamespaceReplacer;
+use App\Replacer\PackageReplacer;
+use App\Replacer\TypeReplacer;
+use App\Replacer\VendorReplacer;
+use App\Replacer\VersionReplacer;
 use Illuminate\Console\Parser;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -101,6 +110,31 @@ trait InteractsWithPackageConfiguration
         }
 
         return $type;
+    }
+
+    public function getPackageReplacers(): array
+    {
+        return [
+            $this->pipeThroughReplacer($this->getPackageVendor(), VendorReplacer::class),
+            $this->pipeThroughReplacer($this->getPackageName(), PackageReplacer::class),
+            $this->pipeThroughReplacer($this->getPackageAuthorName(), AuthorReplacer::class),
+            $this->pipeThroughReplacer($this->getPackageDescription(), DescriptionReplacer::class),
+            $this->pipeThroughReplacer($this->getPackageNamespace(), NamespaceReplacer::class),
+            $this->pipeThroughReplacer($this->getPackageVersion(), VersionReplacer::class),
+            $this->pipeThroughReplacer($this->getPackageMinimumStability(), MinimumStabilityReplacer::class),
+            $this->pipeThroughReplacer($this->getPackageType(), TypeReplacer::class),
+            $this->pipeThroughReplacer($this->getPackageLicense(), LicenseReplacer::class),
+        ];
+    }
+
+    /**
+     * @param  class-string  $replacer
+     */
+    protected function pipeThroughReplacer(string $replacement, string $replacer): \Closure
+    {
+        return function (string $subject, \Closure $next) use ($replacement, $replacer): string {
+            return $next($replacer::make($replacement)->replace($subject));
+        };
     }
 
     /**
