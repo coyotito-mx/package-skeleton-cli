@@ -21,6 +21,30 @@ trait InteractsWithPackageConfiguration
      */
     protected array $promptRequiredArguments = [];
 
+    protected array $packageTypes = [
+        'library',
+        'project',
+        'metapackage',
+        'composer-plugin',
+        'symfony-bundle',
+        'wordpress-plugin',
+        'wordpress-theme',
+        'drupal-module',
+        'drupal-theme',
+        'drupal-profile',
+        'magento-module',
+        'magento-theme',
+        'typo3-cms-extension',
+    ];
+
+    protected array $minimumStabilityAvailable = [
+        'stable',
+        'rc' => 'RC',
+        'beta',
+        'alpha',
+        'dev',
+    ];
+
     protected function configureUsingFluentDefinition(): void
     {
         if (isset($this->signature)) {
@@ -44,7 +68,39 @@ trait InteractsWithPackageConfiguration
                 ->merge($arguments ?? [])
                 ->toArray()
         )
+            ->addOption('minimum-stability', mode: InputOption::VALUE_OPTIONAL, description: 'The minimum stability allowed for the package', default: 'dev')
+            ->addOption('type', mode: InputOption::VALUE_OPTIONAL, description: 'The package type', default: 'library')
             ->addOptions($options ?? []);
+    }
+
+    public function getPackageMinimumStability(): string
+    {
+        return $this->option('minimum-stability');
+    }
+
+    public function getPackageMinimumStabilityType(): string
+    {
+        $minimumStability = collect($this->minimumStabilityAvailable)
+            ->map(fn (string $value, mixed $key) => [
+                ctype_digit($key) ? $value : $key => $value,
+            ])->firstWhere($this->option('minimum-stability'));
+
+        if (is_null($minimumStability)) {
+            throw new \RuntimeException('Invalid minimum stability.');
+        }
+
+        return $minimumStability;
+    }
+
+    public function getPackageType(): string
+    {
+        $type = $this->option('type');
+
+        if (! in_array($type, ['library', 'project', 'metapackage'])) {
+            throw new \RuntimeException('Invalid package type.');
+        }
+
+        return $type;
     }
 
     /**

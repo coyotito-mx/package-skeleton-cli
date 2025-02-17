@@ -30,8 +30,6 @@ class PackageInitCommand extends Command implements HasPackageConfigurationComma
 
     // Command signature and description
     protected $signature = 'package:init
-                         {--minimum-stability= : The package minimum-stability (default: dev)}
-                         {--type= : The package type (default: library)}
                          {--dir=* : The excluded directories}
                          {--path= : The path where the package will be initialized}';
 
@@ -160,16 +158,6 @@ class PackageInitCommand extends Command implements HasPackageConfigurationComma
 
             return $next($replacer->replace($content));
         };
-    }
-
-    public function getPackageMinimumStability(): string
-    {
-        return Str::lower($this->option('minimum-stability') ?? 'dev');
-    }
-
-    public function getPackageType(): string
-    {
-        return Str::lower($this->option('type') ?? 'library');
     }
 
     protected function getExcludedDirectories(): array
