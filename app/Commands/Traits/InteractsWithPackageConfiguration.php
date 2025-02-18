@@ -13,12 +13,13 @@ use function Laravel\Prompts\text;
 trait InteractsWithPackageConfiguration
 {
     use InteractsWithAuthor;
-    use InteractsWithNamespace;
     use InteractsWithDescription;
     use InteractsWIthLicense;
-    use InteractsWithVersion;
     use InteractsWithMinimumStability;
+    use InteractsWithNamespace;
     use InteractsWithType;
+    use InteractsWithVersion;
+    use WithPackageTraitsBootstrap;
 
     /**
      * @var array<string, array{description: string, missing: string}> The missing arguments to prompt for.
@@ -135,12 +136,5 @@ trait InteractsWithPackageConfiguration
                 return [$name => $missing];
             })
             ->toArray();
-    }
-
-    protected function bootPackageTraits(): void
-    {
-        collect(class_uses_recursive($this))
-            ->filter(fn (string $trait) => method_exists($this, 'bootPackage'.class_basename($trait)))
-            ->each(fn (string $trait) => $this->{'bootPackage'.class_basename($trait)}());
     }
 }
