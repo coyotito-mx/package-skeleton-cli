@@ -40,7 +40,11 @@
         "style": "@php vendor/bin/pint --config=./pint.json",
         "style:test": "@php vendor/bin/pint --preset=laravel --test",
         "lint": "@php vendor/bin/phpstan analyse",
-        "lint:watch": "@php vendor/bin/phpstan analyse --watch"
+        "lint:pro": "@php vendor/bin/phpstan analyse --pro",
+        "lint:with-style": [
+            "@lint",
+            "@style:test"
+        ]
     },
     "config": {
         "preferred-install": "dist",
