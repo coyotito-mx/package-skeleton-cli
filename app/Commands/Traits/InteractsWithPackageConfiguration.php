@@ -7,6 +7,7 @@ namespace App\Commands\Traits;
 use Illuminate\Console\Parser;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
+use function Laravel\Prompts\text;
 
 trait InteractsWithPackageConfiguration
 {
@@ -123,7 +124,13 @@ trait InteractsWithPackageConfiguration
     {
         return collect($this->getPromptRequiredArguments())
             ->mapWithKeys(function (array $definition, $name) {
-                return [$name => $definition['missing']];
+                $missing = $definition['missing'];
+
+                if (! $missing instanceof \Closure) {
+                    $missing = fn () => text($missing);
+                }
+
+                return [$name => $missing];
             })
             ->toArray();
     }
