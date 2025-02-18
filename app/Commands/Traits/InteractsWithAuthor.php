@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Commands\Traits;
 
+use App\Replacer;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -11,6 +12,10 @@ trait InteractsWithAuthor
 {
     public function bootPackageInteractsWithAuthor(): void
     {
+        $this->addReplacers([
+            Replacer\AuthorReplacer::class => fn (): string => $this->getPackageAuthorName(),
+        ]);
+
         $this->addOption('author', mode: InputOption::VALUE_OPTIONAL, description: 'The author of the package');
     }
 

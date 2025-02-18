@@ -2,15 +2,13 @@
 
 namespace App\Commands;
 
-use App\Commands\Contracts\HasPackageConfigurationCommand;
+use App\Commands\Contracts\HasPackageConfiguration;
 use App\Commands\Traits\InteractsWithPackageConfiguration;
-use App\Replacer;
 use Illuminate\Console\Concerns\PromptsForMissingInput as ConcernsPromptsForMissingInput;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
 use LaravelZero\Framework\Commands\Command;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
@@ -21,14 +19,13 @@ use function Laravel\Prompts\info;
 use function Laravel\Prompts\spin;
 use function Laravel\Prompts\table;
 
-class PackageInitCommand extends Command implements HasPackageConfigurationCommand, PromptsForMissingInput
+class PackageInit extends Command implements HasPackageConfiguration, PromptsForMissingInput
 {
     use ConcernsPromptsForMissingInput;
     use InteractsWithPackageConfiguration {
         InteractsWithPackageConfiguration::promptForMissingArgumentsUsing as packagePromptForMissingArgumentsUsing;
     }
 
-    // Command signature and description
     protected $signature = 'package:init
                          {--dir=* : The excluded directories}
                          {--path= : The path where the package will be initialized}';
@@ -78,7 +75,7 @@ class PackageInitCommand extends Command implements HasPackageConfigurationComma
     {
         $content = (new Pipeline)
             ->send($file->getContents())
-            ->through($this->getReplacers())
+            ->through($this->getPackageReplacers())
             ->thenReturn();
 
         File::put($file->getRealPath(), $content);
@@ -129,35 +126,6 @@ class PackageInitCommand extends Command implements HasPackageConfigurationComma
             rows: collect($this->getExcludedDirectories())
                 ->map(fn (string $directory) => [$this->getPackagePath($directory)])->toArray()
         );
-    }
-
-    protected function getReplacers(): array
-    {
-        return [
-            $this->createReplacer('vendor', $this->getPackageVendor()),
-            $this->createReplacer('package', $this->getPackageName()),
-            $this->createReplacer('author', $this->getPackageAuthorName()),
-            $this->createReplacer('description', $this->getPackageDescription()),
-            $this->createReplacer('namespace', $this->getPackageNamespace(), [
-                'reverse' => fn (string $value) => Str::of($value)->replace('\\', '/'),
-                'escape' => fn (string $value) => Str::of($value)->replace('\\', '\\\\'),
-            ]),
-            $this->createReplacer('version', $this->getPackageVersion()),
-            $this->createReplacer('minimum-stability', $this->getPackageMinimumStability()),
-            $this->createReplacer('type', $this->getPackageType()),
-            $this->createReplacer('license', $this->getPackageLicense()),
-        ];
-    }
-
-    protected function createReplacer(string $placeholder, string $replacement, array $modifiers = []): \Closure
-    {
-        return function (string $content, \Closure $next) use ($placeholder, $replacement, $modifiers) {
-            $replacer = new Replacer($placeholder, $replacement);
-
-            collect($modifiers)->each(fn (\Closure $cb, string $modifier) => $replacer->modifierUsing($modifier, $cb));
-
-            return $next($replacer->replace($content));
-        };
     }
 
     protected function getExcludedDirectories(): array
