@@ -10,6 +10,7 @@ use Symfony\Component\Console\Input\InputOption;
 
 trait InteractsWithNamespace
 {
+    #[Attributes\Order(Attributes\Order::FIRST)]
     public function bootPackageInteractsWithNamespace(): void
     {
         $this->addReplacers([

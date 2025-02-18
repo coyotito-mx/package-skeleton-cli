@@ -1,7 +1,6 @@
 {
     "preset": "laravel",
     "rules": {
-        "ordered_traits": false,
         "cast_spaces": true,
         "no_unneeded_braces": true
     }

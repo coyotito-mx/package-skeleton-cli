@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 
 trait InteractsWithDescription
 {
+    #[Attributes\Order(10)]
     public function bootPackageInteractsWithDescription(): void
     {
         $this->addReplacers([
