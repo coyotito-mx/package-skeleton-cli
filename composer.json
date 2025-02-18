@@ -41,7 +41,10 @@
         "style:test": "@php vendor/bin/pint --preset=laravel --test",
         "lint": "@php vendor/bin/phpstan analyse",
         "lint:pro": "@php vendor/bin/phpstan analyse --pro",
-        "lint:with-style": "@composer run lint && @composer run style:test"
+        "lint:with-style": [
+            "@lint",
+            "@style:test"
+        ]
     },
     "config": {
         "preferred-install": "dist",
