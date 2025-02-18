@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Commands\Traits;
 
+use App\Replacer;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -11,6 +12,12 @@ trait InteractsWithNamespace
 {
     public function bootPackageInteractsWithNamespace(): void
     {
+        $this->addReplacers([
+            Replacer\VendorReplacer::class => fn (): string => $this->getPackageVendor(),
+            Replacer\PackageReplacer::class => fn (): string => $this->getPackageName(),
+            Replacer\NamespaceReplacer::class => fn (): string => $this->getPackageNamespace(),
+        ]);
+
         $this
             ->addPromptRequiredArgument('vendor', 'Vendor name', 'What is the vendor name?')
             ->addPromptRequiredArgument('package', 'Package name', 'What is the package name?')

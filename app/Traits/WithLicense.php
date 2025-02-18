@@ -60,8 +60,6 @@ trait WithLicense
     }
 
     /**
-     * Extracts the license definition from the HTML.
-     *
      * @throws RuntimeException in case the license definition could not be found in the HTML.
      */
     private function getLicenseDefinitionFromHtml(string $html): string

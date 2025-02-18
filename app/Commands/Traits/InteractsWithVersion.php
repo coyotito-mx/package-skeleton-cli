@@ -2,6 +2,7 @@
 
 namespace App\Commands\Traits;
 
+use App\Replacer;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -16,6 +17,10 @@ trait InteractsWithVersion
 
     public function bootPackageInteractsWithVersion(): void
     {
+        $this->addReplacers([
+            Replacer\VersionReplacer::class => fn (): string => $this->getPackageVersion(),
+        ]);
+
         $this->addOption('package-version', mode: InputOption::VALUE_OPTIONAL, description: 'The package version', default: '0.0.1');
     }
 

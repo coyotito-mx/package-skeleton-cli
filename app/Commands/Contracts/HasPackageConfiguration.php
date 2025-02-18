@@ -2,7 +2,7 @@
 
 namespace App\Commands\Contracts;
 
-interface HasPackageConfigurationCommand
+interface HasPackageConfiguration
 {
     public function getPackageVendor(): string;
 
@@ -21,4 +21,8 @@ interface HasPackageConfigurationCommand
     public function getPackageMinimumStability(): string;
 
     public function getPackageType(): string;
+
+    public function getPackageReplacers(): array;
+
+    public function addReplacers(array $replacers): void;
 }

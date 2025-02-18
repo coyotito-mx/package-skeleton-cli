@@ -4,12 +4,17 @@ declare(strict_types=1);
 
 namespace App\Commands\Traits;
 
+use App\Replacer;
 use Illuminate\Support\Str;
 
 trait InteractsWithDescription
 {
     public function bootPackageInteractsWithDescription(): void
     {
+        $this->addReplacers([
+            Replacer\DescriptionReplacer::class => fn (): string => $this->getPackageDescription(),
+        ]);
+
         $this->addPromptRequiredArgument('description', 'The description of the package', 'What is the package description?');
     }
 

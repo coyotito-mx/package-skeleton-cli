@@ -7,6 +7,7 @@ namespace App\Commands\Traits;
 use Illuminate\Console\Parser;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
+use function Laravel\Prompts\text;
 
 trait InteractsWithPackageConfiguration
 {
@@ -15,35 +16,16 @@ trait InteractsWithPackageConfiguration
     use InteractsWithDescription;
     use InteractsWIthLicense;
     use InteractsWithVersion;
+    use InteractsWithMinimumStability;
+    use InteractsWithType;
 
     /**
      * @var array<string, string|\Closure> The missing arguments to prompt for.
      */
     protected array $promptRequiredArguments = [];
 
-    protected array $packageTypes = [
-        'library',
-        'project',
-        'metapackage',
-        'composer-plugin',
-        'symfony-bundle',
-        'wordpress-plugin',
-        'wordpress-theme',
-        'drupal-module',
-        'drupal-theme',
-        'drupal-profile',
-        'magento-module',
-        'magento-theme',
-        'typo3-cms-extension',
-    ];
-
-    protected array $minimumStabilityAvailable = [
-        'stable',
-        'rc' => 'RC',
-        'beta',
-        'alpha',
-        'dev',
-    ];
+    /** @var array class-string */
+    protected array $replacers = [];
 
     protected function configureUsingFluentDefinition(): void
     {
@@ -67,45 +49,43 @@ trait InteractsWithPackageConfiguration
                 ->map(fn (array $definition, string $name) => new InputArgument($name, InputArgument::REQUIRED, $definition['description']))
                 ->merge($arguments ?? [])
                 ->toArray()
-        )
-            ->addOption('minimum-stability', mode: InputOption::VALUE_OPTIONAL, description: 'The minimum stability allowed for the package', default: 'dev')
-            ->addOption('type', mode: InputOption::VALUE_OPTIONAL, description: 'The package type', default: 'library')
-            ->addOptions($options ?? []);
+        )->addOptions($options ?? []);
     }
 
-    public function getPackageMinimumStability(): string
+    public function getPackageReplacers(): array
     {
-        return $this->option('minimum-stability');
-    }
+        return collect($this->replacers)
+            ->map(function (string|\Closure $replacement, string $replacer) {
+                if ($replacement instanceof \Closure) {
+                    $replacement = $replacement();
+                }
 
-    public function getPackageMinimumStabilityType(): string
-    {
-        $minimumStability = collect($this->minimumStabilityAvailable)
-            ->map(fn (string $value, mixed $key) => [
-                ctype_digit($key) ? $value : $key => $value,
-            ])->firstWhere($this->option('minimum-stability'));
-
-        if (is_null($minimumStability)) {
-            throw new \RuntimeException('Invalid minimum stability.');
-        }
-
-        return $minimumStability;
-    }
-
-    public function getPackageType(): string
-    {
-        $type = $this->option('type');
-
-        if (! in_array($type, ['library', 'project', 'metapackage'])) {
-            throw new \RuntimeException('Invalid package type.');
-        }
-
-        return $type;
+                return $this->pipeThroughReplacer($replacement, $replacer);
+            })
+            ->toArray();
     }
 
     /**
-     * Add the package configuration arguments.
-     *
+     * @param  array<class-string, string|\Closure>  $replacers
+     */
+    public function addReplacers(array $replacers): void
+    {
+        foreach ($replacers as $replacer => $replacement) {
+            $this->replacers[$replacer] = $replacement;
+        }
+    }
+
+    /**
+     * @param  class-string  $replacer
+     */
+    protected function pipeThroughReplacer(string $replacement, string $replacer): \Closure
+    {
+        return function (string $subject, \Closure $next) use ($replacement, $replacer): string {
+            return $next($replacer::make($replacement)->replace($subject));
+        };
+    }
+
+    /**
      * @param  InputArgument[]  $arguments
      */
     public function addArguments(array $arguments): self
@@ -116,8 +96,6 @@ trait InteractsWithPackageConfiguration
     }
 
     /**
-     * Add the package configuration options.
-     *
      * @param  InputOption[]  $options
      */
     public function addOptions(array $options): self
@@ -146,7 +124,13 @@ trait InteractsWithPackageConfiguration
     {
         return collect($this->getPromptRequiredArguments())
             ->mapWithKeys(function (array $definition, $name) {
-                return [$name => $definition['missing']];
+                $missing = $definition['missing'];
+
+                if (! $missing instanceof \Closure) {
+                    $missing = fn () => text($missing);
+                }
+
+                return [$name => $missing];
             })
             ->toArray();
     }

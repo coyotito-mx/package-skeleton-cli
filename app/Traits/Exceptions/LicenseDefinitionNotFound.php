@@ -6,9 +6,6 @@ namespace App\Traits\Exceptions;
 
 use RuntimeException;
 
-/**
- * Throw when a license definition is not found for a given identifier.
- */
 class LicenseDefinitionNotFound extends RuntimeException
 {
     public function __construct(string $identifier)
