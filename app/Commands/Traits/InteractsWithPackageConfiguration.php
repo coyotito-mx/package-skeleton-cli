@@ -20,7 +20,7 @@ trait InteractsWithPackageConfiguration
     use InteractsWithType;
 
     /**
-     * @var array<string, string|\Closure> The missing arguments to prompt for.
+     * @var array<string, array{description: string, missing: string}> The missing arguments to prompt for.
      */
     protected array $promptRequiredArguments = [];
 
@@ -29,6 +29,7 @@ trait InteractsWithPackageConfiguration
 
     protected function configureUsingFluentDefinition(): void
     {
+        // @phpstan-ignore isset.property
         if (isset($this->signature)) {
             [$name, $arguments, $options] = Parser::parse($this->signature);
 
