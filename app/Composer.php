@@ -20,9 +20,13 @@ class Composer extends \Illuminate\Support\Composer
      * @param  bool  $noProgress  if output should hide progress
      * @param  bool  $optimize  if autoloader should be optimized
      * @param  string|null  $composerBinary
+     *
+     * @throw \RuntimeException if the composer file is not found
      */
     public function installDependencies(bool $dev = true, bool $noProgress = false, bool $optimize = false, \Closure|OutputInterface|null $output = null, $composerBinary = null): bool
     {
+        $this->findComposerFile();
+
         $command = collect($this->findComposer($composerBinary))
             ->merge([
                 'install',
