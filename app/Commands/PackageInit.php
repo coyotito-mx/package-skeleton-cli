@@ -148,7 +148,7 @@ class PackageInit extends Command implements HasPackageConfiguration, PromptsFor
             return;
         }
 
-        \App\Facades\Composer::installDependencies();
+        \App\Facades\Composer::setWorkingPath($this->getPackagePath())->installDependencies();
     }
 
     protected function promptForMissingArgumentsUsing(): array
