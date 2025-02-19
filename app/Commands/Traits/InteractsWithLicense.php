@@ -9,7 +9,7 @@ use App\Replacer;
 use App\Traits\Exceptions\LicenseDefinitionNotFound;
 use Symfony\Component\Console\Input\InputOption;
 
-trait InteractsWIthLicense
+trait InteractsWithLicense
 {
     public function bootPackageInteractsWIthLicense(): void
     {
