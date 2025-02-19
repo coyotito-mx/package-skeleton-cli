@@ -14,7 +14,7 @@ trait InteractsWithPackageConfiguration
 {
     use InteractsWithAuthor;
     use InteractsWithDescription;
-    use InteractsWIthLicense;
+    use InteractsWithLicense;
     use InteractsWithMinimumStability;
     use InteractsWithNamespace;
     use InteractsWithType;
