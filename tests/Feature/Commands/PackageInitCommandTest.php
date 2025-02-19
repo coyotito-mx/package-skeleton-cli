@@ -95,6 +95,19 @@ it('can init the package', function () {
     File::delete(sandbox_path('composer.json'));
 });
 
+it('failed to install dependencies', function () {
+    Composer::partialMock()
+        ->expects('findComposerFile')
+        ->andThrow(\RuntimeException::class);
+
+    artisan('package:init')
+        ->expectsQuestion('What is the vendor name?', 'Acme')
+        ->expectsQuestion('What is the package name?', 'Package')
+        ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
+        ->expectsConfirmation('Do you want to use this configuration?', 'yes')
+        ->expectsQuestion('Do you want to install the dependencies?', 'yes');
+})->throws(\RuntimeException::class);
+
 it('can restart configure', function () {
     File::put(
         sandbox_path('README.MD'),
