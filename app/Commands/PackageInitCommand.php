@@ -149,8 +149,8 @@ class PackageInitCommand extends Command implements HasPackageConfiguration, Pro
     protected function getExcludedFiles(): array
     {
         return collect($this->option('file'))
-            ->filter(fn (string $file) => (bool) realpath($this->getPackagePath($file)))
             ->map(fn (string $file) => realpath($this->getPackagePath($file)))
+            ->filter()
             ->toArray();
     }
 
