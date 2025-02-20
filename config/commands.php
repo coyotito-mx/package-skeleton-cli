@@ -40,7 +40,7 @@ return [
     */
 
     'add' => [
-        //
+        \App\Commands\PackageInitCommand::class,
     ],
 
     /*
