@@ -6,7 +6,6 @@ use App\Commands\Contracts\HasPackageConfiguration;
 use App\Commands\Traits\InteractsWithPackageConfiguration;
 use Illuminate\Console\Concerns\PromptsForMissingInput as ConcernsPromptsForMissingInput;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
-use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
