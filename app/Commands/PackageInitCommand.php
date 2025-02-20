@@ -19,7 +19,7 @@ use function Laravel\Prompts\info;
 use function Laravel\Prompts\spin;
 use function Laravel\Prompts\table;
 
-class PackageInit extends Command implements HasPackageConfiguration, PromptsForMissingInput
+class PackageInitCommand extends Command implements HasPackageConfiguration, PromptsForMissingInput
 {
     use ConcernsPromptsForMissingInput;
     use InteractsWithPackageConfiguration {
