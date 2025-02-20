@@ -6,11 +6,9 @@ use Illuminate\Support\Facades\File;
 use function Pest\Laravel\artisan;
 
 beforeEach(function () {
-    $this->oldPath = getcwd();
+    mkdir(sandbox_path());
 
-    if (! File::exists(sandbox_path())) {
-        mkdir(sandbox_path());
-    }
+    $this->oldPath = getcwd();
 
     chdir(sandbox_path());
 });
@@ -18,7 +16,7 @@ beforeEach(function () {
 afterEach(function () {
     chdir($this->oldPath);
 
-    File::cleanDirectory(sandbox_path());
+    rmdir_recursive(sandbox_path());
 });
 
 it('change command context', function () {
@@ -577,4 +575,32 @@ it('exclude files from being processed', function () {
         }
         PHP)
         ->and(File::get(sandbox_path('package.json')))->toBe($node);
+});
+
+it('replace placeholder in file names', function () {
+    mkdir(sandbox_path('src'));
+
+    File::put(sandbox_path('src/{{author|studly}}{{license|upper}}Class.php'), '');
+    File::put(sandbox_path('src/{{author|studly}}{{type|studly}}Helper.php'), '');
+    File::put(sandbox_path('src/{{license|title}}{{type|studly}}Service.php'), '');
+    File::put(sandbox_path('src/{{type|studly}}{{author|studly}}Controller.php'), '');
+    File::put(sandbox_path('src/{{license|studly}}{{author|studly}}Model.php'), '');
+
+    artisan('package:init', [
+        '--author' => 'John Doe',
+        '--license' => 'MIT',
+        '--type' => 'library',
+    ])
+        ->expectsQuestion('What is the vendor name?', 'Acme')
+        ->expectsQuestion('What is the package name?', 'Package')
+        ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
+        ->expectsConfirmation('Do you want to use this configuration?', 'yes')
+        ->expectsConfirmation('Do you want to install the dependencies?')
+        ->assertSuccessful();
+
+    expect(File::exists(sandbox_path('src/JohnDoeMITClass.php')))->toBeTrue()
+        ->and(File::exists(sandbox_path('src/JohnDoeLibraryHelper.php')))->toBeTrue()
+        ->and(File::exists(sandbox_path('src/MITLibraryService.php')))->toBeTrue()
+        ->and(File::exists(sandbox_path('src/LibraryJohnDoeController.php')))->toBeTrue()
+        ->and(File::exists(sandbox_path('src/MITJohnDoeModel.php')))->toBeTrue();
 });
