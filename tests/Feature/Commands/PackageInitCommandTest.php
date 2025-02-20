@@ -570,6 +570,7 @@ it('exclude files from being processed', function () {
         class AcmeClass
         {
             public function __construct()
+            {
                 echo 'Hello, John Doe!';
             }
         }
@@ -577,21 +578,10 @@ it('exclude files from being processed', function () {
         ->and(File::get(sandbox_path('package.json')))->toBe($node);
 });
 
-it('replaces placeholders in file names', function () {
-            {
+it('replaces placeholders in file name', function (string $file, string $expected) {
     mkdir(sandbox_path('src'));
 
-    $files = [
-        '{{author|studly}}{{license|upper}}Class.php',
-        '{{author|studly}}{{type|studly}}Helper.php',
-        '{{license|title}}{{type|studly}}Service.php',
-        '{{type|studly}}{{author|studly}}Controller.php',
-        '{{license|studly}}{{author|studly}}Model.php',
-    ];
-
-    foreach ($files as $file) {
-        File::put(sandbox_path("src/{$file}"), '');
-    }
+    File::put(sandbox_path("src/$file"), '');
 
     artisan('package:init', [
         '--author' => 'John Doe',
@@ -605,15 +595,18 @@ it('replaces placeholders in file names', function () {
         ->expectsConfirmation('Do you want to install the dependencies?')
         ->assertSuccessful();
 
-    $expectedFiles = [
-        'JohnDoeMITClass.php',
-        'JohnDoeLibraryHelper.php',
-        'MITLibraryService.php',
-        'LibraryJohnDoeController.php',
-        'MITJohnDoeModel.php',
-    ];
-
-    foreach ($expectedFiles as $expectedFile) {
-        expect(File::exists(sandbox_path("src/{$expectedFile}")))->toBeTrue();
-    }
-});
+    expect(File::exists(sandbox_path("src/$expected")))->toBeTrue();
+})->with([
+    'with author' => [
+        '{{author|studly}}{{license|upper}}Class.php', 'JohnDoeMITClass.php',
+    ],
+    'without author' => [
+        '{{license|upper}}Class.php', 'MITClass.php',
+    ],
+    'with author and package' => [
+        '{{author|studly}}{{package|studly}}Class.php', 'JohnDoePackageClass.php',
+    ],
+    'without author and package' => [
+        '{{package|studly}}Class.php', 'PackageClass.php',
+    ],
+]);
