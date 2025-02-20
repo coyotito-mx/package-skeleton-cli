@@ -6,11 +6,10 @@ use Illuminate\Support\Facades\File;
 use function Pest\Laravel\artisan;
 
 beforeEach(function () {
-    $this->oldPath = getcwd();
+    rmdir_recursive(sandbox_path());
+    mkdir(sandbox_path());
 
-    if (! File::exists(sandbox_path())) {
-        mkdir(sandbox_path());
-    }
+    $this->oldPath = getcwd();
 
     chdir(sandbox_path());
 });
@@ -18,7 +17,7 @@ beforeEach(function () {
 afterEach(function () {
     chdir($this->oldPath);
 
-    File::cleanDirectory(sandbox_path());
+    rmdir_recursive(sandbox_path());
 });
 
 it('change command context', function () {
@@ -578,3 +577,36 @@ it('exclude files from being processed', function () {
         PHP)
         ->and(File::get(sandbox_path('package.json')))->toBe($node);
 });
+
+it('replaces placeholders in file name', function (string $file, string $expected) {
+    mkdir(sandbox_path('src'));
+
+    File::put(sandbox_path("src/$file"), '');
+
+    artisan('package:init', [
+        '--author' => 'John Doe',
+        '--license' => 'MIT',
+        '--type' => 'library',
+    ])
+        ->expectsQuestion('What is the vendor name?', 'Acme')
+        ->expectsQuestion('What is the package name?', 'Package')
+        ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
+        ->expectsConfirmation('Do you want to use this configuration?', 'yes')
+        ->expectsConfirmation('Do you want to install the dependencies?')
+        ->assertSuccessful();
+
+    expect(File::exists(sandbox_path("src/$expected")))->toBeTrue();
+})->with([
+    'with author' => [
+        '{{author|studly}}{{license|upper}}Class.php', 'JohnDoeMITClass.php',
+    ],
+    'without author' => [
+        '{{license|upper}}Class.php', 'MITClass.php',
+    ],
+    'with author and package' => [
+        '{{author|studly}}{{package|studly}}Class.php', 'JohnDoePackageClass.php',
+    ],
+    'without author and package' => [
+        '{{package|studly}}Class.php', 'PackageClass.php',
+    ],
+]);
