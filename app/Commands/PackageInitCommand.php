@@ -85,7 +85,15 @@ class PackageInitCommand extends Command implements HasPackageConfiguration, Pro
             ->through($this->getPackageReplacers())
             ->thenReturn();
 
-        File::put($file->getRealPath(), $content);
+        $filename = (new Pipeline)
+            ->send($file->getFilename())
+            ->through($this->getPackageReplacers())
+            ->thenReturn();
+
+        tap(
+            File::getFacadeRoot(),
+            fn ($filesystem) => $filesystem->put($file->getRealPath(), $content)
+        )->move($file->getRealPath(), $file->getPath().DIRECTORY_SEPARATOR.$filename);
 
         return $file;
     }
