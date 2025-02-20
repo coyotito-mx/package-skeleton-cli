@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\File;
 use function Pest\Laravel\artisan;
 
 beforeEach(function () {
+    rmdir_recursive(sandbox_path());
     mkdir(sandbox_path());
 
     $this->oldPath = getcwd();
@@ -569,7 +570,6 @@ it('exclude files from being processed', function () {
         class AcmeClass
         {
             public function __construct()
-            {
                 echo 'Hello, John Doe!';
             }
         }
@@ -577,14 +577,21 @@ it('exclude files from being processed', function () {
         ->and(File::get(sandbox_path('package.json')))->toBe($node);
 });
 
-it('replace placeholder in file names', function () {
+it('replaces placeholders in file names', function () {
+            {
     mkdir(sandbox_path('src'));
 
-    File::put(sandbox_path('src/{{author|studly}}{{license|upper}}Class.php'), '');
-    File::put(sandbox_path('src/{{author|studly}}{{type|studly}}Helper.php'), '');
-    File::put(sandbox_path('src/{{license|title}}{{type|studly}}Service.php'), '');
-    File::put(sandbox_path('src/{{type|studly}}{{author|studly}}Controller.php'), '');
-    File::put(sandbox_path('src/{{license|studly}}{{author|studly}}Model.php'), '');
+    $files = [
+        '{{author|studly}}{{license|upper}}Class.php',
+        '{{author|studly}}{{type|studly}}Helper.php',
+        '{{license|title}}{{type|studly}}Service.php',
+        '{{type|studly}}{{author|studly}}Controller.php',
+        '{{license|studly}}{{author|studly}}Model.php',
+    ];
+
+    foreach ($files as $file) {
+        File::put(sandbox_path("src/{$file}"), '');
+    }
 
     artisan('package:init', [
         '--author' => 'John Doe',
@@ -598,9 +605,15 @@ it('replace placeholder in file names', function () {
         ->expectsConfirmation('Do you want to install the dependencies?')
         ->assertSuccessful();
 
-    expect(File::exists(sandbox_path('src/JohnDoeMITClass.php')))->toBeTrue()
-        ->and(File::exists(sandbox_path('src/JohnDoeLibraryHelper.php')))->toBeTrue()
-        ->and(File::exists(sandbox_path('src/MITLibraryService.php')))->toBeTrue()
-        ->and(File::exists(sandbox_path('src/LibraryJohnDoeController.php')))->toBeTrue()
-        ->and(File::exists(sandbox_path('src/MITJohnDoeModel.php')))->toBeTrue();
+    $expectedFiles = [
+        'JohnDoeMITClass.php',
+        'JohnDoeLibraryHelper.php',
+        'MITLibraryService.php',
+        'LibraryJohnDoeController.php',
+        'MITJohnDoeModel.php',
+    ];
+
+    foreach ($expectedFiles as $expectedFile) {
+        expect(File::exists(sandbox_path("src/{$expectedFile}")))->toBeTrue();
+    }
 });

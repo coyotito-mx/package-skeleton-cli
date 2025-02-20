@@ -6,6 +6,7 @@ use App\Commands\Contracts\HasPackageConfiguration;
 use App\Commands\Traits\InteractsWithPackageConfiguration;
 use Illuminate\Console\Concerns\PromptsForMissingInput as ConcernsPromptsForMissingInput;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
@@ -90,9 +91,10 @@ class PackageInitCommand extends Command implements HasPackageConfiguration, Pro
             ->through($this->getPackageReplacers())
             ->thenReturn();
 
-        tap(File::getFacadeRoot())
-            ->put($file->getRealPath(), $content)
-            ->move($file->getRealPath(), $file->getPath().DIRECTORY_SEPARATOR.$filename);
+        tap(
+            File::getFacadeRoot(),
+            fn ($filesystem) => $filesystem->put($file->getRealPath(), $content)
+        )->move($file->getRealPath(), $file->getPath().DIRECTORY_SEPARATOR.$filename);
 
         return $file;
     }
