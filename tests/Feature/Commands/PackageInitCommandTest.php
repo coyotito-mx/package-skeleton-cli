@@ -485,3 +485,96 @@ it('exclude directory and avoid replacements', function () {
 
     File::deleteDirectory(sandbox_path('src'));
 });
+
+it('exclude files from being processed', function () {
+    $ignore = <<<'EOF'
+    ./{{vendor}}/{{package}}
+    ./{{namespace|reverse,lower}}/vendor/bin/
+    ./{{author|lower,slug}}.txt
+    EOF;
+
+    $editor = <<<'EOF'
+    # Maintained by {{author|title}}
+
+    root = true
+
+    # {{namespace|ucfirst}} EditorConfig File
+    [*]
+    indent_style = space
+    indent_size = 4
+    charset = utf-8
+    trim_trailing_whitespace = true
+    insert_final_newline = true
+    EOF;
+
+    $acmeClass = <<<'PHP'
+    <?php
+
+    declare(strict_types=1);
+
+    namespace {{namespace}};
+
+    class AcmeClass
+    {
+        public function __construct()
+        {
+            echo 'Hello, {{author}}!';
+        }
+    }
+    PHP;
+
+    $node = <<<'JSON'
+    {
+        "name": "{{namespace}}",
+        "version": "1.0.0",
+        "description": "{{description}}",
+        "main": "index.js",
+        "scripts": {
+            "test": "echo \"Error: no test specified\" && exit 1"
+        },
+        "keywords": [],
+        "author": "{{author}}",
+        "license": "MIT"
+    }
+    JSON;
+
+    File::put(sandbox_path('.gitignore'), $ignore);
+    File::put(sandbox_path('.editorconfig'), $editor);
+    File::put('AcmeClass.php', $acmeClass);
+    File::put('package.json', $node);
+
+    artisan('package:init', [
+        'vendor' => 'Acme',
+        'package' => 'Package',
+        'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
+        '--author' => 'John Doe',
+        '--file' => ['package.json'],
+    ])
+        ->expectsConfirmation('Do you want to use this configuration?', 'yes')
+        ->expectsConfirmation('Do you want to install the dependencies?')
+        ->assertSuccessful();
+
+    expect(File::get(sandbox_path('.gitignore')))->toBe($ignore)
+        ->not->toBe(<<<'EOF'
+        ./acme/package
+        ./acme/package/vendor/bin/
+        ./john-doe.txt
+        EOF)
+        ->and(File::get(sandbox_path('.editorconfig')))->toBe($editor)
+        ->and(File::get(sandbox_path('AcmeClass.php')))->toBe(<<<'PHP'
+        <?php
+
+        declare(strict_types=1);
+
+        namespace Acme\Package;
+
+        class AcmeClass
+        {
+            public function __construct()
+            {
+                echo 'Hello, John Doe!';
+            }
+        }
+        PHP)
+        ->and(File::get(sandbox_path('package.json')))->toBe($node);
+});

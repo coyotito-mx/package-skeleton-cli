@@ -105,6 +105,7 @@ skeleton package:init [options] [--] <vendor> <package> <description>
 - `--minimum-stability=`: The package minimum-stability. Available values: dev, alpha, beta, RC, stable.
 - `--type=`: The package type. Available values: project, library, metapackage, composer-plugin.
 - `--dir=*`: The excluded directories.
+- `--file=*`: The excluded files.
 - `--path=`: The path where the package will be initialized.
 - `--template=`: The path to a custom template for package initialization.
 

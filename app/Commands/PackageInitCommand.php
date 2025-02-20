@@ -28,6 +28,7 @@ class PackageInitCommand extends Command implements HasPackageConfiguration, Pro
 
     protected $signature = 'package:init
                          {--dir=* : The excluded directories}
+                         {--file=* : The excluded files}
                          {--path= : The path where the package will be initialized}';
 
     protected $description = 'Init package';
@@ -40,6 +41,12 @@ class PackageInitCommand extends Command implements HasPackageConfiguration, Pro
         'vendor',
         'node_modules',
         'tests',
+    ];
+
+    protected array $excludedFiles = [
+        '.gitignore',
+        '.gitattributes',
+        '.editorconfig',
     ];
 
     public function handle(): int
@@ -93,7 +100,13 @@ class PackageInitCommand extends Command implements HasPackageConfiguration, Pro
     public function getFiles(): array
     {
         return collect(
-            tap(new Finder)->files()->in($this->getPackagePath())->exclude($this->getExcludedDirectories())
+            tap(new Finder)
+                ->files()
+                ->in($this->getPackagePath())
+                ->filter(function (\SplFileInfo $file) {
+                    return ! in_array($file->getRealPath(), $this->getExcludedFiles());
+                })
+                ->exclude($this->getExcludedDirectories())
         )->toArray();
     }
 
@@ -131,6 +144,14 @@ class PackageInitCommand extends Command implements HasPackageConfiguration, Pro
     protected function getExcludedDirectories(): array
     {
         return [...Arr::wrap($this->option('dir')), ...$this->excludedDirectories];
+    }
+
+    protected function getExcludedFiles(): array
+    {
+        return collect($this->option('file'))
+            ->map(fn (string $file) => realpath($this->getPackagePath($file)))
+            ->filter()
+            ->toArray();
     }
 
     protected function getPackagePath(?string $path = null): string
