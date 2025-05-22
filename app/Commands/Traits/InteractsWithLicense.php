@@ -6,7 +6,6 @@ namespace App\Commands\Traits;
 
 use App\Facades\Composer;
 use App\Replacer;
-use App\Traits\Exceptions\LicenseDefinitionNotFound;
 use Symfony\Component\Console\Input\InputOption;
 
 trait InteractsWithLicense
@@ -28,7 +27,7 @@ trait InteractsWithLicense
         $license = $this->option('license');
 
         if (! Composer::validateLicense($license)) {
-            throw new LicenseDefinitionNotFound($license);
+            throw new Exceptions\LicenseDefinitionNotFound($license);
         }
 
         return $license;
