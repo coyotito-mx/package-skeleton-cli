@@ -56,7 +56,7 @@ it('can init the package', function () {
         EOF
     );
 
-    artisan('package:init')
+    artisan('init')
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -99,7 +99,7 @@ it('failed to install dependencies', function () {
         ->expects('findComposerFile')
         ->andThrow(\RuntimeException::class);
 
-    artisan('package:init')
+    artisan('init')
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -156,7 +156,7 @@ it('can restart configure', function () {
         README
     );
 
-    artisan('package:init')
+    artisan('init')
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -255,7 +255,7 @@ it('can init the package with custom values', function () {
         PHP
     );
 
-    artisan('package:init', [
+    artisan('init', [
         '--author' => 'John Doe',
         '--package-version' => '1.0.0',
         '--minimum-stability' => 'stable',
@@ -347,7 +347,7 @@ it('can init the package with custom values and restart configure', function () 
         EOF
     );
 
-    artisan('package:init', [
+    artisan('init', [
         'vendor' => 'Acme',
         'package' => 'Package',
         'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
@@ -439,7 +439,7 @@ it('exclude directory and avoid replacements', function () {
         PHP
     );
 
-    artisan('package:init', [
+    artisan('init', [
         '--dir' => 'src',
     ])
         ->expectsQuestion('What is the vendor name?', 'Acme')
@@ -542,7 +542,7 @@ it('exclude files from being processed', function () {
     File::put('AcmeClass.php', $acmeClass);
     File::put('package.json', $node);
 
-    artisan('package:init', [
+    artisan('init', [
         'vendor' => 'Acme',
         'package' => 'Package',
         'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
@@ -583,7 +583,7 @@ it('replaces placeholders in file name', function (string $file, string $expecte
 
     File::put(sandbox_path("src/$file"), '');
 
-    artisan('package:init', [
+    artisan('init', [
         '--author' => 'John Doe',
         '--license' => 'MIT',
         '--type' => 'library',
