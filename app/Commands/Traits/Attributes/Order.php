@@ -7,43 +7,15 @@ namespace App\Commands\Traits\Attributes;
 #[\Attribute(\Attribute::TARGET_METHOD)]
 class Order
 {
-    public const string FIRST = 'first';
-
-    public const string LAST = 'last';
-
-    public function __construct(
-        protected int|string $order,
-        protected ?string $key = null,
-        protected ?string $before = null,
-        protected ?string $after = null
-    ) {
-        if (is_int($this->order) && $this->order < 1) {
-            $this->order = -1;
+    public function __construct(protected int|Enums\Order $order = Enums\Order::DEFAULT)
+    {
+        if (is_int($this->order) && $this->order < 0) {
+            $this->order = Enums\Order::DEFAULT;
         }
     }
 
-    public function getOrder(): int|string
+    public function getOrder(): int|Enums\Order
     {
         return $this->order;
-    }
-
-    public function shouldBeFirst(): bool
-    {
-        return $this->order === self::FIRST;
-    }
-
-    public function shouldBeLast(): bool
-    {
-        return $this->order === self::LAST;
-    }
-
-    public function shouldBeBefore(): string
-    {
-        return $this->before;
-    }
-
-    public function shouldBeAfter(): string
-    {
-        return $this->after;
     }
 }

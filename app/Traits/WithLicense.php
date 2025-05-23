@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Traits;
 
-use App\Traits\Exceptions\LicenseDefinitionNotFound;
+use App\Exceptions;
 use Composer\Spdx\SpdxLicenses;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
@@ -38,7 +38,7 @@ trait WithLicense
         try {
             $definition = $this->requestLicenseDefinition($license[2]);
         } catch (\Throwable) {
-            throw new LicenseDefinitionNotFound($identifier);
+            throw new Exceptions\LicenseDefinitionNotFound($identifier);
         }
 
         return $definition;

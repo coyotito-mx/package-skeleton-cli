@@ -93,7 +93,7 @@ Modifiers by `Replacer`:
 To initialize the package skeleton, you must run the following command:
 
 ```bash
-skeleton package:init [options] [--] <vendor> <package> <description>
+skeleton init [options] [--] <vendor> <package> <description>
 ```
 
 ### Options
@@ -114,13 +114,13 @@ skeleton package:init [options] [--] <vendor> <package> <description>
 You can also run the command without any arguments. This will prompt you to enter the arguments needed to initialize the package skeleton.
 
 ```bash
-skeleton package:init
+skeleton init
 ```
 
 ### Example
 
 ```bash
-skeleton package:init asciito acme "This is a sample package" --author="John Doe" --license=MIT --namespace="Asciito\\Acme" --package-version=v1.0.0 --minimum-stability=stable --type=library --path=./packages
+skeleton init asciito acme "This is a sample package" --author="John Doe" --license=MIT --namespace="Asciito\\Acme" --package-version=v1.0.0 --minimum-stability=stable --type=library --path=./packages
 ```
 
 This command will initialize a new package with the provided details and options.
