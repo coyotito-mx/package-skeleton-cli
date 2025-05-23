@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Commands\Traits;
 
+use App\Exceptions;
 use App\Facades\Composer;
 use App\Replacer;
-use App\Traits\Exceptions\LicenseDefinitionNotFound;
 use Symfony\Component\Console\Input\InputOption;
 
 trait InteractsWithLicense
@@ -21,14 +21,14 @@ trait InteractsWithLicense
     }
 
     /**
-     * @throw LicenseDefinitionNotFound
+     * @throw Exception\LicenseDefinitionNotFound
      */
     public function getPackageLicense(): string
     {
         $license = $this->option('license');
 
         if (! Composer::validateLicense($license)) {
-            throw new LicenseDefinitionNotFound($license);
+            throw new Exceptions\LicenseDefinitionNotFound($license);
         }
 
         return $license;

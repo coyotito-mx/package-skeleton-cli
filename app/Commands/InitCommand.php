@@ -19,14 +19,14 @@ use function Laravel\Prompts\info;
 use function Laravel\Prompts\spin;
 use function Laravel\Prompts\table;
 
-class PackageInitCommand extends Command implements HasPackageConfiguration, PromptsForMissingInput
+class InitCommand extends Command implements HasPackageConfiguration, PromptsForMissingInput
 {
     use ConcernsPromptsForMissingInput;
     use InteractsWithPackageConfiguration {
         InteractsWithPackageConfiguration::promptForMissingArgumentsUsing as packagePromptForMissingArgumentsUsing;
     }
 
-    protected $signature = 'package:init
+    protected $signature = 'init
                          {--dir=* : The excluded directories}
                          {--file=* : The excluded files}
                          {--path= : The path where the package will be initialized}';

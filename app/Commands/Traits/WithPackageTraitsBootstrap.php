@@ -10,40 +10,48 @@ trait WithPackageTraitsBootstrap
 {
     protected function bootPackageTraits(): void
     {
-        $default = $beginning = $middle = $end = [];
+        // Prepare arrays to hold traits by their boot order
+        $beginning = [];
+        $middle = [];
+        $default = [];
+        $end = [];
 
-        $classes = collect(class_uses_recursive($this));
+        foreach (class_uses_recursive($this) as $trait) {
+            $method = 'bootPackage'.class_basename($trait);
 
-        $classes->each(function (string $trait) use (&$default, &$beginning, &$middle, &$end): void {
             try {
-                $reflected = new \ReflectionMethod($trait, 'bootPackage'.class_basename($trait));
+                $reflected = new \ReflectionMethod($trait, $method);
             } catch (\ReflectionException) {
-                return;
+                continue;
             }
 
-            $attributes = $reflected->getAttributes(Attributes\Order::class);
+            $attribute = $reflected->getAttributes(Attributes\Order::class)[0] ?? null;
 
-            if (empty($attributes)) {
+            if (! $attribute) {
                 $default[] = $trait;
 
-                return;
+                continue;
             }
 
-            $attribute = $attributes[0]->newInstance();
+            $order = $attribute->newInstance()->getOrder();
 
-            $order = $attribute->getOrder();
-
-            if ($order === -1) {
-                $default[] = $trait;
-            } elseif ($order === Attributes\Order::FIRST) {
-                $beginning[] = $trait;
-            } elseif ($order === Attributes\Order::LAST) {
-                $end[] = $trait;
-            } else {
-                $middle[$order][] = $trait;
+            switch ($order) {
+                case Attributes\Enums\Order::DEFAULT:
+                    $default[] = $trait;
+                    break;
+                case Attributes\Enums\Order::FIRST:
+                    $beginning[] = $trait;
+                    break;
+                case Attributes\Enums\Order::LAST:
+                    $end[] = $trait;
+                    break;
+                default:
+                    $middle[$order][] = $trait;
+                    break;
             }
-        });
+        }
 
+        // Boot traits in the order: beginning, middle, default, end
         collect([
             ...$beginning,
             ...Arr::flatten($middle),
