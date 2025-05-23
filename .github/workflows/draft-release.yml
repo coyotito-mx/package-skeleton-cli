@@ -2,21 +2,19 @@ name: Release
 
 on:
   push:
-    tags:
-      - "v*.*.*"
+    branches:
+      - main
+
+permissions:
+  contents: read
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Build Changelog
-        uses: mikepenz/release-changelog-builder-action@v5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -36,14 +34,41 @@ jobs:
           zip skeleton.zip skeleton &&
           tar -czf skeleton.tar.gz skeleton
 
-      - name: Create Release
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: skeleton
+          path: builds/*
+
+  build-draft-release:
+    runs-on: ubuntu-latest
+    needs: build
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Artifacts
+        id: download_artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: skeleton
+
+      - name: Create Draft Release
+        id: github_draft_release
+        uses: release-drafter/release-drafter@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+
+      - name: Upload Artifacts
+        id: upload_artifact
         uses: softprops/action-gh-release@v2
         with:
-          body: ${{ steps.github_release.outputs.changelog }}
+          name: ${{ steps.github_draft_release.outputs.name }}
+          body: ${{ steps.github_draft_release.outputs.body }}
           files: |
             builds/skeleton
             builds/skeleton.zip
             builds/skeleton.tar.gz
-          prerelease: true
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
