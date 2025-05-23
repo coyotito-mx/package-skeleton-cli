@@ -17,7 +17,7 @@ trait WithPackageTraitsBootstrap
         $end = [];
 
         foreach (class_uses_recursive($this) as $trait) {
-            $method = 'bootPackage' . class_basename($trait);
+            $method = 'bootPackage'.class_basename($trait);
 
             try {
                 $reflected = new \ReflectionMethod($trait, $method);
@@ -29,6 +29,7 @@ trait WithPackageTraitsBootstrap
 
             if (! $attribute) {
                 $default[] = $trait;
+
                 continue;
             }
 
