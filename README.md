@@ -2,7 +2,7 @@
 # Package Skeleton CLI
 
 ![example workflow](https://github.com/coyotito-mx/package-skeleton-cli/actions/workflows/tests.yml/badge.svg)
-![Release version](https://img.shields.io/github/v/release/laravel/laravel?label=Release%20Version&color=2cbe4e&labelColor=444d56)
+![Release version](https://img.shields.io/github/v/release/coyotito-mx/package-skeleton-cli?label=Release%20Version&color=2cbe4e&labelColor=444d56)
 
 The **Package Skeleton CLI** is a command-line interface that allows you to initialize a PHP package skeleton by replacing all the placeholders in the files with the values you provide.
 
