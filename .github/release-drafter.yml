@@ -1,14 +1,5 @@
 name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
-categories:
-  - title: '🚀 Features'
-    label: ^feat:'
-  - title: '🐛 Bug Fixes'
-    label: '^bug:'
-  - title: '🧰 Maintenance'
-    label: '^chore:'
-  - title: '📝 Docs'
-    label: '^docs'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 change-title-escapes: '\<*_&'
 version-resolver:
