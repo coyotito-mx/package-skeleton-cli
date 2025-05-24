@@ -6,15 +6,24 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Create Draft Release
+        id: github_draft_release
+        uses: release-drafter/release-drafter@v6
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -26,7 +35,7 @@ jobs:
         run: composer install --no-dev --no-interaction --no-progress --optimize-autoloader
 
       - name: Build CLI
-        run: php skeleton app:build --no-interaction --build-version="${{ github.ref_name }}" skeleton
+        run: php skeleton app:build --no-interaction --build-version="v${{ steps.github_draft_release.outputs.resolved_version }}" skeleton
 
       - name: Archive CLI
         run: |
@@ -34,35 +43,8 @@ jobs:
           zip skeleton.zip skeleton &&
           tar -czf skeleton.tar.gz skeleton
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: skeleton
-          path: builds/*
-
-  build-draft-release:
-    runs-on: ubuntu-latest
-    needs: build
-
-    permissions:
-      contents: write
-
-    steps:
-      - name: Download Artifacts
-        id: download_artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: skeleton
-          path: builds/
-
-      - name: Create Draft Release
-        id: github_draft_release
-        uses: release-drafter/release-drafter@v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-
-      - name: Upload Artifacts
+      - name: Upload assets
         uses: shogo82148/actions-upload-release-asset@v1
         with:
           upload_url: ${{ steps.github_draft_release.outputs.upload_url }}
-          asset_path: builds/skeleton*
+          asset_path: builds/*
