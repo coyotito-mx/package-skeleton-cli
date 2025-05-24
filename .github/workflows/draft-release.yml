@@ -6,7 +6,7 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -50,9 +50,10 @@ jobs:
     steps:
       - name: Download Artifacts
         id: download_artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: skeleton
+          path: builds/
 
       - name: Create Draft Release
         id: github_draft_release
@@ -61,14 +62,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
       - name: Upload Artifacts
-        id: upload_artifact
-        uses: softprops/action-gh-release@v2
+        uses: shogo82148/actions-upload-release-asset@v1
         with:
-          name: ${{ steps.github_draft_release.outputs.name }}
-          body: ${{ steps.github_draft_release.outputs.body }}
-          files: |
-            builds/skeleton
-            builds/skeleton.zip
-            builds/skeleton.tar.gz
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          upload_url: ${{ steps.github_draft_release.outputs.upload_url }}
+          asset_path: builds/skeleton*
