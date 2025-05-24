@@ -16,4 +16,6 @@ version-resolver:
 template: |
   ## What's changed
 
+  The release includes the following changes:
+
   $CHANGES
