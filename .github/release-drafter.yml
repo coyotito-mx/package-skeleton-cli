@@ -47,7 +47,7 @@ autolabeler:
   - label: 'style'
     branch:
       - '/^style\/.+$/'
-  - label: 'test'
+  - label: 'tests'
     branch:
       - '/^(test|tests)\/.+$/'
 exclude-labels:
