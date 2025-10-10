@@ -24,6 +24,7 @@ jobs:
         uses: release-drafter/release-drafter@v6
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          disable-autolabeler: true
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
