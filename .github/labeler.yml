@@ -1,0 +1,20 @@
+build:
+  - head-branch: ['^build',]
+ci:
+  - head-branch: ['^ci']
+documentation:
+  - head-branch: ['doc', '^docs', '^documentation']
+feature:
+  - head-branch: ['^feature', '^feat']
+bugfix:
+  - head-branch: ['^fix', '^bugfix' , '^hotfix']
+performance:
+  - head-branch: ['^perf']
+refactor:
+  - head-branch: ['^refactor']
+style:
+  - head-branch: ['^style']
+tests:
+  - head-branch: ['^test', '^tests']
+release:
+  - base-branch: 'main'
