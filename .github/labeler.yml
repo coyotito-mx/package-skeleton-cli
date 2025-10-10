@@ -13,6 +13,9 @@ feature:
 bugfix:
   - head-branch: ['^fix\/.+', '^bugfix\/.+']
   - base-branch: 'dev'
+hotfix:
+  - head-branch: ['^hotfix\/.+']
+  - base-branch: 'main'
 performance:
   - head-branch: ['^perf\/.+']
   - base-branch: 'dev'
@@ -26,5 +29,5 @@ tests:
   - head-branch: ['^test\/.+', '^tests\/.+']
   - base-branch: 'dev'
 release:
-  - head-branch: ['^release\/.+', '^hotfix\/.+']
+  - head-branch: ['^release\/.+']
   - base-branch: 'main'

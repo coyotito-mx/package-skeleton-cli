@@ -12,7 +12,7 @@ categories:
   - title: '🐞 Bugfix'
     label: 'bugfix'
   - title: '🔥 Hotfix'
-    label: 'bugfix'
+    label: 'hotfix'
   - title: '📊 Performance improvements'
     label: 'performance'
   - title: '⚒️ Refactor'
