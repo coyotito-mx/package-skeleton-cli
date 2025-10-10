@@ -6,11 +6,11 @@ categories:
   - title: '📂 Documentation'
     label: 'documentation'
   - title: '🚀 Features'
-    labels:
-      - 'feature'
-      - 'enhancement'
+    labels: 'feature'
   - title: '🐞 Bugfix'
     label: 'bugfix'
+  - title: '🔥 Hotfix'
+    label: 'hotfix'
   - title: '📊 Performance improvements'
     label: 'performance'
   - title: '⚒️ Refactor'
@@ -19,38 +19,8 @@ categories:
     label: 'style'
   - title: '✅ Tests'
     label: 'tests'
-autolabeler:
-  - label: 'build'
-    branch:
-      - '/^build\/.+$/'
-  - label: 'ci'
-    branch:
-      - '/^ci\/.+$/'
-  - label: 'documentation'
-    branch:
-      - '/^docs?\/.+$/'
-  - label: 'enhancement'
-    branch:
-      - '/^feat\/.+$/'
-  - label: 'feature'
-    branch:
-      - '/^feat\/.+$/'
-  - label: 'bugfix'
-    branch:
-      - '/^(fix|bugfix|hotfix)\/.+$/'
-  - label: 'performance'
-    branch:
-      - '/^(perf|performance)\/.+$/'
-  - label: 'refactor'
-    branch:
-      - '/^refactor\/.+$/'
-  - label: 'style'
-    branch:
-      - '/^style\/.+$/'
-  - label: 'tests'
-    branch:
-      - '/^(test|tests)\/.+$/'
 exclude-labels:
+  - 'release'
   - 'changelog'
 change-template: '- $TITLE by @$AUTHOR in #$NUMBER'
 change-title-escapes: '\<*_&' # You can add # and @ to disable mentions, and add ` to disable code blocks.
