@@ -1,20 +1,30 @@
 build:
-  - head-branch: ['^build',]
+  - head-branch: ['^build\/.+']
+  - base-branch: 'dev'
 ci:
-  - head-branch: ['^ci']
+  - head-branch: ['^ci\/.+']
+  - base-branch: 'dev'
 documentation:
-  - head-branch: ['doc', '^docs', '^documentation']
+  - head-branch: ['^doc\/.+', '^docs\/.+', '^documentation\/.+']
+  - base-branch: 'dev'
 feature:
-  - head-branch: ['^feature', '^feat']
+  - head-branch: ['^feature\/.+', '^feat\/.+']
+  - base-branch: 'dev'
 bugfix:
-  - head-branch: ['^fix', '^bugfix' , '^hotfix']
+  - head-branch: ['^fix\/.+', '^bugfix\/.+']
+  - base-branch: 'dev'
 performance:
-  - head-branch: ['^perf']
+  - head-branch: ['^perf\/.+']
+  - base-branch: 'dev'
 refactor:
-  - head-branch: ['^refactor']
+  - head-branch: ['^refactor\/.+']
+  - base-branch: 'dev'
 style:
-  - head-branch: ['^style']
+  - head-branch: ['^style\/.+']
+  - base-branch: 'dev'
 tests:
-  - head-branch: ['^test', '^tests']
+  - head-branch: ['^test\/.+', '^tests\/.+']
+  - base-branch: 'dev'
 release:
+  - head-branch: ['^release\/.+', '^hotfix\/.+']
   - base-branch: 'main'
