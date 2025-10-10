@@ -11,6 +11,8 @@ categories:
       - 'enhancement'
   - title: '🐞 Bugfix'
     label: 'bugfix'
+  - title: '🔥 Hotfix'
+    label: 'bugfix'
   - title: '📊 Performance improvements'
     label: 'performance'
   - title: '⚒️ Refactor'
