@@ -53,10 +53,10 @@ jobs:
 
       - name: Build CLI
         run: |
-          php skeleton app:build
-          \ --no-interaction
-          \ --build-version="v${{ needs.draft-release.outputs.resolved_version }}"
-          \ skeleton
+          php skeleton app:build \
+          --no-interaction \
+          --build-version="v${{ needs.draft-release.outputs.resolved_version }}" \
+          skeleton
 
       - name: Archive CLI
         run: |
