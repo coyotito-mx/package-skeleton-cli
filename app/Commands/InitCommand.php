@@ -3,6 +3,7 @@
 namespace App\Commands;
 
 use App\Commands\Contracts\HasPackageConfiguration;
+use App\Commands\Exceptions\CliNotBuiltException;
 use App\Commands\Traits\InteractsWithPackageConfiguration;
 use Illuminate\Console\Concerns\PromptsForMissingInput as ConcernsPromptsForMissingInput;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
@@ -10,6 +11,8 @@ use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use LaravelZero\Framework\Commands\Command;
+use Phar;
+use PharException;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -29,7 +32,8 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
     protected $signature = 'init
                          {--dir=* : The excluded directories}
                          {--file=* : The excluded files}
-                         {--path= : The path where the package will be initialized}';
+                         {--path= : The path where the package will be initialized}
+                         {--no-self-delete : Do not delete this command after initialization}';
 
     protected $description = 'Init package';
 
@@ -74,6 +78,8 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
         spin(fn () => $this->replacePlaceholdersInFiles($this->getFiles()), 'Processing files...');
 
         $this->installDependencies();
+
+        $this->selfDelete(shouldDelete: ! $this->hasOption('no-self-delete'));
 
         return self::SUCCESS;
     }
@@ -180,6 +186,32 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
         \App\Facades\Composer::setWorkingPath($this->getPackagePath())->installDependencies();
     }
 
+    /**
+     * Self-delete the CLI if it is running as a Phar and the user wants to.
+     *
+     * @throws CliNotBuiltException if the CLI is not running as a Phar
+     * @throws PharException if there is an error deleting the Phar
+     */
+    protected function selfDelete(bool $shouldDelete = true): void
+    {
+
+        $pharPath = Phar::running(false);
+
+        if (! $shouldDelete) {
+            return;
+        }
+
+        if ($pharPath === '') {
+            throw new CliNotBuiltException('You cannot self-delete the CLI because it is not built already');
+        }
+
+        $this->info('Self-deleting the CLI...');
+
+        Phar::unlinkArchive($pharPath);
+
+        $this->info('Bye bye 👋');
+    }
+
     protected function promptForMissingArgumentsUsing(): array
     {
         return $this->packagePromptForMissingArgumentsUsing();
@@ -189,7 +221,9 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
     {
         clear();
 
-        collect($this->arguments())
-            ->each(fn ($_, string $argument) => $this->input->setArgument($argument, null));
+        $requiredArguments = array_keys($this->getPromptRequiredArguments());
+
+        collect($requiredArguments)
+            ->each(fn (string $argument) => $this->input->setArgument($argument, null));
     }
 }

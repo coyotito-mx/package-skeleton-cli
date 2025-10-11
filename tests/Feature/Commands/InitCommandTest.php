@@ -56,7 +56,7 @@ it('can init the package', function () {
         EOF
     );
 
-    artisan('init')
+    artisan('init', ['--no-self-delete'])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -99,7 +99,7 @@ it('failed to install dependencies', function () {
         ->expects('findComposerFile')
         ->andThrow(\RuntimeException::class);
 
-    artisan('init')
+    artisan('init', ['--no-self-delete'])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -156,7 +156,7 @@ it('can restart configure', function () {
         README
     );
 
-    artisan('init')
+    artisan('init', ['--no-self-delete'])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -166,6 +166,8 @@ it('can restart configure', function () {
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor it set adisicing elit.')
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
         ->expectsConfirmation('Do you want to install the dependencies?')
+        ->doesntExpectOutput('Self-deleting the CLI...')
+        ->doesntExpectOutput('Bye bye 👋')
         ->assertSuccessful();
 
     expect(File::get(sandbox_path('README.MD')))
@@ -261,6 +263,7 @@ it('can init the package with custom values', function () {
         '--minimum-stability' => 'stable',
         '--type' => 'project',
         '--license' => 'Apache-2.0',
+        '--no-self-delete',
     ])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
@@ -356,6 +359,7 @@ it('can init the package with custom values and restart configure', function () 
         '--minimum-stability' => 'stable',
         '--type' => 'project',
         '--license' => 'Apache-2.0',
+        '--no-self-delete',
     ])
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
         ->expectsConfirmation('Do you want to install the dependencies?')
@@ -441,6 +445,7 @@ it('exclude directory and avoid replacements', function () {
 
     artisan('init', [
         '--dir' => 'src',
+        '--no-self-delete',
     ])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
@@ -548,6 +553,7 @@ it('exclude files from being processed', function () {
         'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
         '--author' => 'John Doe',
         '--file' => ['package.json'],
+        '--no-self-delete',
     ])
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
         ->expectsConfirmation('Do you want to install the dependencies?')
