@@ -198,11 +198,13 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
     {
         $this->info('Attempting to self-delete the CLI');
 
-        $pharPath = Phar::running(false);
-
         if ($this->option('no-self-delete')) {
             $this->warn('Self-deleting skipped');
+
+            return;
         }
+
+        $pharPath = Phar::running(false);
 
         if (! $pharPath) {
             throw new CliNotBuiltException('You cannot self-delete the CLI because it is not built already');
