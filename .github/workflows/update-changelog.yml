@@ -29,7 +29,7 @@ jobs:
           FORMATTED_DATE=$(date -u -d @$TIMESTAMP_OF_RELEASE_COMMIT +%Y-%m-%d)
 
           # Make date available to other steps
-          echo "date=$(echo $FORMATTED_DATE)" >> $GITHUB_OUTPUT;
+          echo "date=$FORMATTED_DATE" >> $GITHUB_OUTPUT;
 
       - name: Update Changelog
         uses: stefanzweifel/changelog-updater-action@v1
