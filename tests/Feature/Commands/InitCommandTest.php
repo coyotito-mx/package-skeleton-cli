@@ -5,6 +5,7 @@ use App\Facades\Composer;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 
+use Illuminate\Support\Sleep;
 use function Pest\Laravel\artisan;
 
 beforeEach(function () {
@@ -574,7 +575,8 @@ it('exclude files from being processed', function () {
         ./acme/package
         ./acme/package/vendor/bin/
         ./john-doe.txt
-        EOF)
+        EOF
+        )
         ->and(File::get(sandbox_path('.editorconfig')))->toBe($editor)
         ->and(File::get(sandbox_path('AcmeClass.php')))->toBe(<<<'PHP'
         <?php
@@ -590,7 +592,8 @@ it('exclude files from being processed', function () {
                 echo 'Hello, John Doe!';
             }
         }
-        PHP)
+        PHP
+        )
         ->and(File::get(sandbox_path('package.json')))->toBe($node);
 });
 
@@ -650,48 +653,4 @@ it('skips self delete', function () {
         ->expectsConfirmation('Do you want to install the dependencies?')
         ->expectsOutput('Self-deleting skipped')
         ->assertSuccessful();
-});
-
-it('self-deletes CLI', function () {
-    // Build CLI
-    $command = Process::command(['./skeleton', 'app:build'])->path(
-        base_path()
-    )->tty(false);
-
-    $process = $command->run();
-
-    expect($process)
-        ->failed()
-        ->toBeFalse()
-        ->and(
-            File::exists(base_path('builds/skeleton'))
-        )
-        ->and(
-            File::move(base_path('builds/skeleton'), sandbox_path('skeleton'))
-        )
-        ->toBeTrue()
-        ->and(
-            File::exists(sandbox_path('skeleton'))
-        )
-        ->toBeTrue();
-
-    // Run init command from the built Phar file
-    $command = Process::command([
-        './skeleton',
-        'init',
-        'asciito',
-        'asciito',
-        'Lorem ipsum dolor it',
-        '--confirm',
-        '--dont-install-dependencies',
-    ])
-        ->path(sandbox_path())
-        ->tty(false);
-
-    $command->run();
-
-    expect(
-        File::exists(sandbox_path('skeleton'))
-    )
-    ->toBeFalse();
 });

@@ -12,11 +12,11 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use LaravelZero\Framework\Commands\Command;
 use Phar;
-use PharException;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
-
+use Symfony\Component\Process\Process;
 use Throwable;
+
 use function Laravel\Prompts\clear;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\info;
@@ -196,23 +196,39 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
      */
     protected function selfDelete(): void
     {
+        $this->info('Attempting to self-delete the CLI');
+
         $pharPath = Phar::running(false);
 
         if ($this->option('no-self-delete')) {
             $this->warn('Self-deleting skipped');
-
-            return;
         }
 
-        if ($pharPath === '') {
+        if (! $pharPath) {
             throw new CliNotBuiltException('You cannot self-delete the CLI because it is not built already');
         }
 
-        $this->info('Self-deleting the CLI...');
+        $id = pcntl_fork();
 
-        File::delete($pharPath);
+        if ($id == -1) {
+            $this->error('Could not fork the process for self-deleting');
+        }
 
-        $this->info('Bye bye 👋');
+        if ($id) {
+            $this->info('Deleting the CLI...');
+        } else {
+            $process = Process::fromShellCommandline(collect([
+                PHP_BINARY,
+                '-r',
+                '"usleep(500_000); @unlink('.var_export($pharPath, true).');"',
+            ])->join(' '));
+
+            $this->info('Bye bye 👋');
+
+            $process->mustRun();
+        }
+
+        exit(0);
     }
 
     protected function promptForMissingArgumentsUsing(): array
