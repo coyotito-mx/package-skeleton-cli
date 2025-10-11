@@ -30,7 +30,7 @@ jobs:
       resolved_version: ${{ steps.release_drafter.outputs.resolved_version }}
 
   build-cli-and-upload:
-    if: ${{ github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main' }}
+    if: ${{ github.event.pull_request.merged == true }}
     needs: draft-release
 
     permissions:
