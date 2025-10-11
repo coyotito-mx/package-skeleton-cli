@@ -9,7 +9,6 @@ use Illuminate\Support\Sleep;
 use function Pest\Laravel\artisan;
 
 beforeEach(function () {
-    rmdir_recursive(base_path('builds'));
     rmdir_recursive(sandbox_path());
     mkdir(sandbox_path());
 
@@ -22,7 +21,6 @@ afterEach(function () {
     chdir($this->oldPath);
 
     rmdir_recursive(sandbox_path());
-    rmdir_recursive(base_path('builds'));
 });
 
 it('change command context', function () {
