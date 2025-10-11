@@ -16,6 +16,7 @@ use PharException;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
+use Throwable;
 use function Laravel\Prompts\clear;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\info;
@@ -33,6 +34,8 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
                          {--dir=* : The excluded directories}
                          {--file=* : The excluded files}
                          {--path= : The path where the package will be initialized}
+                         {--confirm : Skip the confirmation prompt}
+                         {--dont-install-dependencies : Do not install the dependencies after initialization}
                          {--no-self-delete : Do not delete this command after initialization}';
 
     protected $description = 'Init package';
@@ -56,10 +59,10 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
     public function handle(): int
     {
         try {
-            retry(3, function () {
-                $this->printConfiguration();
+            retry(3, callback: function () {
+                ! $this->option('confirm') && $this->printConfiguration();
 
-                if (confirm('Do you want to use this configuration?')) {
+                if ($this->option('confirm') || confirm('Do you want to use this configuration?')) {
                     return true;
                 }
 
@@ -77,9 +80,9 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
 
         spin(fn () => $this->replacePlaceholdersInFiles($this->getFiles()), 'Processing files...');
 
-        $this->installDependencies();
+        ! $this->option('dont-install-dependencies') && $this->installDependencies();
 
-        $this->selfDelete(shouldDelete: ! $this->hasOption('no-self-delete'));
+        $this->selfDelete();
 
         return self::SUCCESS;
     }
@@ -190,14 +193,14 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
      * Self-delete the CLI if it is running as a Phar and the user wants to.
      *
      * @throws CliNotBuiltException if the CLI is not running as a Phar
-     * @throws PharException if there is an error deleting the Phar
      */
-    protected function selfDelete(bool $shouldDelete = true): void
+    protected function selfDelete(): void
     {
-
         $pharPath = Phar::running(false);
 
-        if (! $shouldDelete) {
+        if ($this->option('no-self-delete')) {
+            $this->warn('Self-deleting skipped');
+
             return;
         }
 
@@ -207,7 +210,7 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
 
         $this->info('Self-deleting the CLI...');
 
-        Phar::unlinkArchive($pharPath);
+        File::delete($pharPath);
 
         $this->info('Bye bye 👋');
     }

@@ -1,11 +1,14 @@
 <?php
 
+use App\Commands\Exceptions\CliNotBuiltException;
 use App\Facades\Composer;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Process;
 
 use function Pest\Laravel\artisan;
 
 beforeEach(function () {
+    rmdir_recursive(base_path('builds'));
     rmdir_recursive(sandbox_path());
     mkdir(sandbox_path());
 
@@ -18,6 +21,7 @@ afterEach(function () {
     chdir($this->oldPath);
 
     rmdir_recursive(sandbox_path());
+    rmdir_recursive(base_path('builds'));
 });
 
 it('change command context', function () {
@@ -56,12 +60,13 @@ it('can init the package', function () {
         EOF
     );
 
-    artisan('init', ['--no-self-delete'])
+    artisan('init', ['--no-self-delete' => true])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
         ->expectsQuestion('Do you want to install the dependencies?', 'yes')
+        ->expectsOutput('Self-deleting skipped')
         ->assertSuccessful();
 
     expect(File::get(sandbox_path('composer.json')))
@@ -99,7 +104,7 @@ it('failed to install dependencies', function () {
         ->expects('findComposerFile')
         ->andThrow(\RuntimeException::class);
 
-    artisan('init', ['--no-self-delete'])
+    artisan('init', ['--no-self-delete' => true])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -156,7 +161,7 @@ it('can restart configure', function () {
         README
     );
 
-    artisan('init', ['--no-self-delete'])
+    artisan('init', ['--no-self-delete' => true])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -166,6 +171,7 @@ it('can restart configure', function () {
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor it set adisicing elit.')
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
         ->expectsConfirmation('Do you want to install the dependencies?')
+        ->expectsOutput('Self-deleting skipped')
         ->doesntExpectOutput('Self-deleting the CLI...')
         ->doesntExpectOutput('Bye bye 👋')
         ->assertSuccessful();
@@ -263,13 +269,14 @@ it('can init the package with custom values', function () {
         '--minimum-stability' => 'stable',
         '--type' => 'project',
         '--license' => 'Apache-2.0',
-        '--no-self-delete',
+        '--no-self-delete' => true,
     ])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
         ->expectsConfirmation('Do you want to install the dependencies?')
+        ->expectsOutput('Self-deleting skipped')
         ->assertSuccessful();
 
     expect(File::get(sandbox_path('src/SomeClass.php')))
@@ -359,10 +366,11 @@ it('can init the package with custom values and restart configure', function () 
         '--minimum-stability' => 'stable',
         '--type' => 'project',
         '--license' => 'Apache-2.0',
-        '--no-self-delete',
+        '--no-self-delete' => true,
     ])
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
         ->expectsConfirmation('Do you want to install the dependencies?')
+        ->expectsOutput('Self-deleting skipped')
         ->assertSuccessful();
 
     expect(File::get(sandbox_path('config/app.php')))
@@ -445,13 +453,14 @@ it('exclude directory and avoid replacements', function () {
 
     artisan('init', [
         '--dir' => 'src',
-        '--no-self-delete',
+        '--no-self-delete' => true,
     ])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
         ->expectsConfirmation('Do you want to install the dependencies?')
+        ->expectsOutput('Self-deleting skipped')
         ->assertSuccessful();
 
     expect(File::get(sandbox_path('src/SomeClass.php')))
@@ -553,10 +562,11 @@ it('exclude files from being processed', function () {
         'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
         '--author' => 'John Doe',
         '--file' => ['package.json'],
-        '--no-self-delete',
+        '--no-self-delete' => true,
     ])
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
         ->expectsConfirmation('Do you want to install the dependencies?')
+        ->expectsOutput('Self-deleting skipped')
         ->assertSuccessful();
 
     expect(File::get(sandbox_path('.gitignore')))->toBe($ignore)
@@ -593,12 +603,14 @@ it('replaces placeholders in file name', function (string $file, string $expecte
         '--author' => 'John Doe',
         '--license' => 'MIT',
         '--type' => 'library',
+        '--no-self-delete' => true,
     ])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
         ->expectsConfirmation('Do you want to install the dependencies?')
+        ->expectsOutput('Self-deleting skipped')
         ->assertSuccessful();
 
     expect(File::exists(sandbox_path("src/$expected")))->toBeTrue();
@@ -616,3 +628,70 @@ it('replaces placeholders in file name', function (string $file, string $expecte
         '{{package|studly}}Class.php', 'PackageClass.php',
     ],
 ]);
+
+it('can\'t self delete because it\'s not a Phar file', function () {
+    expect(function () {
+        artisan('init', ['--no-self-delete' => false])
+            ->expectsQuestion('What is the vendor name?', 'Acme')
+            ->expectsQuestion('What is the package name?', 'Package')
+            ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
+            ->expectsConfirmation('Do you want to use this configuration?', 'yes')
+            ->expectsConfirmation('Do you want to install the dependencies?')
+            ->assertSuccessful();
+    })->toThrow(CliNotBuiltException::class);
+});
+
+it('skips self delete', function () {
+    artisan('init', ['--no-self-delete' => true])
+        ->expectsQuestion('What is the vendor name?', 'Acme')
+        ->expectsQuestion('What is the package name?', 'Package')
+        ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
+        ->expectsConfirmation('Do you want to use this configuration?', 'yes')
+        ->expectsConfirmation('Do you want to install the dependencies?')
+        ->expectsOutput('Self-deleting skipped')
+        ->assertSuccessful();
+});
+
+it('self-deletes CLI', function () {
+    // Build CLI
+    $command = Process::command(['./skeleton', 'app:build'])->path(
+        base_path()
+    )->tty(false);
+
+    $process = $command->run();
+
+    expect($process)
+        ->failed()
+        ->toBeFalse()
+        ->and(
+            File::exists(base_path('builds/skeleton'))
+        )
+        ->and(
+            File::move(base_path('builds/skeleton'), sandbox_path('skeleton'))
+        )
+        ->toBeTrue()
+        ->and(
+            File::exists(sandbox_path('skeleton'))
+        )
+        ->toBeTrue();
+
+    // Run init command from the built Phar file
+    $command = Process::command([
+        './skeleton',
+        'init',
+        'asciito',
+        'asciito',
+        'Lorem ipsum dolor it',
+        '--confirm',
+        '--dont-install-dependencies',
+    ])
+        ->path(sandbox_path())
+        ->tty(false);
+
+    $command->run();
+
+    expect(
+        File::exists(sandbox_path('skeleton'))
+    )
+    ->toBeFalse();
+});
