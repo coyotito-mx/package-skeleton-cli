@@ -14,7 +14,7 @@ jobs:
     steps:
       # Based on https://github.com/laravel/.github/blob/main/.github/workflows/update-changelog.yml
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # Fetch all history for all tags and branches
           fetch-depth: 0
