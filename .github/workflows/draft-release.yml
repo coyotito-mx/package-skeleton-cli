@@ -27,7 +27,7 @@ jobs:
 
     outputs:
       upload_url: ${{ steps.draft_releaser.outputs.upload_url }}
-      resolved_version: ${{ steps.release_drafter.outputs.resolved_version }}kk
+      resolved_version: ${{ steps.release_drafter.outputs.resolved_version }}
 
   build-cli-and-upload:
     if: ${{ github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main' }}
