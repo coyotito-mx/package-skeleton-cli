@@ -26,7 +26,7 @@ jobs:
           disable-autolabeler: true
 
     outputs:
-      upload_url: ${{ steps.draft_releaser.outputs.upload_url }}
+      upload_url: ${{ steps.release_drafter.outputs.upload_url }}
       resolved_version: ${{ steps.release_drafter.outputs.resolved_version }}
 
   build-cli-and-upload:
