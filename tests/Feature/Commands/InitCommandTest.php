@@ -573,8 +573,7 @@ it('exclude files from being processed', function () {
         ./acme/package
         ./acme/package/vendor/bin/
         ./john-doe.txt
-        EOF
-        )
+        EOF)
         ->and(File::get(sandbox_path('.editorconfig')))->toBe($editor)
         ->and(File::get(sandbox_path('AcmeClass.php')))->toBe(<<<'PHP'
         <?php
@@ -590,8 +589,7 @@ it('exclude files from being processed', function () {
                 echo 'Hello, John Doe!';
             }
         }
-        PHP
-        )
+        PHP)
         ->and(File::get(sandbox_path('package.json')))->toBe($node);
 });
 
