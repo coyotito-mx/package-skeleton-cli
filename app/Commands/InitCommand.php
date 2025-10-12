@@ -217,7 +217,7 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
             exit(self::FAILURE);
         }
 
-        if ($id) {
+        if ($id !== 0) {
             $this->info('Self-deleting the CLI...');
         } else {
             $process = Process::fromShellCommandline(collect([
