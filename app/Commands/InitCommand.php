@@ -10,11 +10,11 @@ use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Process;
 use LaravelZero\Framework\Commands\Command;
 use Phar;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
-use Illuminate\Support\Facades\Process;
 
 use function Laravel\Prompts\clear;
 use function Laravel\Prompts\confirm;
