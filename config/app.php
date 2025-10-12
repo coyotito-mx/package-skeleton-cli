@@ -40,7 +40,7 @@ return [
     |
     */
 
-    'env' => env('ENV', 'development'),
+    'env' => env('ENVIRONMENT', 'development'),
 
     /*
     |--------------------------------------------------------------------------
