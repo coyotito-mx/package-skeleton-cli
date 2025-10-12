@@ -3,13 +3,16 @@
 namespace App\Commands;
 
 use App\Commands\Contracts\HasPackageConfiguration;
+use App\Commands\Exceptions\CliNotBuiltException;
 use App\Commands\Traits\InteractsWithPackageConfiguration;
 use Illuminate\Console\Concerns\PromptsForMissingInput as ConcernsPromptsForMissingInput;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Process;
 use LaravelZero\Framework\Commands\Command;
+use Phar;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -29,7 +32,10 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
     protected $signature = 'init
                          {--dir=* : The excluded directories}
                          {--file=* : The excluded files}
-                         {--path= : The path where the package will be initialized}';
+                         {--path= : The path where the package will be initialized}
+                         {--confirm : Skip the confirmation prompt}
+                         {--dont-install-dependencies : Do not install the dependencies after initialization}
+                         {--no-self-delete : Do not delete this command after initialization}';
 
     protected $description = 'Init package';
 
@@ -52,10 +58,10 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
     public function handle(): int
     {
         try {
-            retry(3, function () {
-                $this->printConfiguration();
+            retry(3, callback: function () {
+                ! $this->option('confirm') && $this->printConfiguration();
 
-                if (confirm('Do you want to use this configuration?')) {
+                if ($this->option('confirm') || confirm('Do you want to use this configuration?')) {
                     return true;
                 }
 
@@ -73,7 +79,9 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
 
         spin(fn () => $this->replacePlaceholdersInFiles($this->getFiles()), 'Processing files...');
 
-        $this->installDependencies();
+        ! $this->option('dont-install-dependencies') && $this->installDependencies();
+
+        $this->selfDelete();
 
         return self::SUCCESS;
     }
@@ -180,6 +188,56 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
         \App\Facades\Composer::setWorkingPath($this->getPackagePath())->installDependencies();
     }
 
+    /**
+     * Self-delete the CLI if it is running as a Phar and the user wants to.
+     *
+     * @throws CliNotBuiltException if the CLI is not running as a Phar
+     */
+    protected function selfDelete(): void
+    {
+        if ($this->option('no-self-delete')) {
+            $this->warn('Self-deleting skipped');
+
+            return;
+        }
+
+        $this->info('Attempting to self-delete the CLI');
+
+        $pharPath = Phar::running(false);
+
+        if (! $pharPath) {
+            throw new CliNotBuiltException('The CLI has not been build. Self-deletion is not possible.');
+        }
+
+        $id = pcntl_fork();
+
+        if ($id === -1) {
+            $this->error('We could not self-delete the CLI');
+
+            exit(self::FAILURE);
+        }
+
+        if ($id !== 0) {
+            $this->info('Self-deleting the CLI...');
+        } else {
+            // This will give the parent process time to exit before
+            // we delete the Phar in the context of the child process
+            $breathingTime = 500_000;
+
+            $process = Process::command([
+                PHP_BINARY,
+                '-r',
+                'usleep('.$breathingTime.'); @unlink('.var_export($pharPath, true).');',
+            ]);
+
+            $this->info('Bye bye 👋');
+
+            $process->run();
+        }
+
+        exit(self::SUCCESS);
+    }
+
     protected function promptForMissingArgumentsUsing(): array
     {
         return $this->packagePromptForMissingArgumentsUsing();
@@ -189,7 +247,9 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
     {
         clear();
 
-        collect($this->arguments())
-            ->each(fn ($_, string $argument) => $this->input->setArgument($argument, null));
+        $requiredArguments = array_keys($this->getPromptRequiredArguments());
+
+        collect($requiredArguments)
+            ->each(fn (string $argument) => $this->input->setArgument($argument, null));
     }
 }

@@ -27,4 +27,6 @@ jobs:
       run: composer install --prefer-dist --no-progress
 
     - name: Run tests
+      env:
+        ENVIRONMENT: testing
       run: composer run test
