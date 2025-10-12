@@ -15,7 +15,6 @@ use Phar;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Process\Process;
-use Throwable;
 
 use function Laravel\Prompts\clear;
 use function Laravel\Prompts\confirm;
@@ -214,6 +213,8 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
 
         if ($id == -1) {
             $this->error('Could not fork the process for self-deleting');
+
+            exit(self::FAILURE);
         }
 
         if ($id) {
@@ -230,7 +231,7 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
             $process->mustRun();
         }
 
-        exit(0);
+        exit(self::SUCCESS);
     }
 
     protected function promptForMissingArgumentsUsing(): array

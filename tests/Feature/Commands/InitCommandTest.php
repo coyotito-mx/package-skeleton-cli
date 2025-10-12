@@ -3,6 +3,7 @@
 use App\Commands\Exceptions\CliNotBuiltException;
 use App\Facades\Composer;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Sleep;
 
 use function Pest\Laravel\artisan;
 
@@ -19,6 +20,7 @@ afterEach(function () {
     chdir($this->oldPath);
 
     rmdir_recursive(sandbox_path());
+    rmdir_recursive(base_path('builds'));
 });
 
 it('change command context', function () {
@@ -650,3 +652,43 @@ it('skips self delete', function () {
         ->expectsOutput('Self-deleting skipped')
         ->assertSuccessful();
 });
+
+describe('Build CLI and test self-delete functionality', function () {
+    it('can self delete when built', function () {
+        $command = \Illuminate\Support\Facades\Process::command([
+            PHP_BINARY,
+            'skeleton',
+            'app:build',
+        ])
+            ->path(base_path());
+
+        expect($command->run())
+            ->failed()
+            ->toBeFalse()
+            ->successful()
+            ->toBeTrue();
+
+        $command = \Illuminate\Support\Facades\Process::command([
+            './builds/skeleton',
+            'init',
+            'asciito',
+            'package',
+            'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
+            '--confirm',
+            '--dont-install-dependencies',
+        ])
+            ->path(base_path());
+
+        $process = $command->run();
+
+        Sleep::for(1)->seconds();
+
+        expect($process)
+            ->errorOutput()
+            ->toBeEmpty()
+            ->successful()
+            ->toBeTrue()
+            ->and(File::exists(base_path('builds/skeleton')))
+            ->toBeFalse('The CLI file still exists');
+    });
+})->skip(fn () => config('app.env') !== 'development');
