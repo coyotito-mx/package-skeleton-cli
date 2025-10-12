@@ -206,13 +206,13 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
         $pharPath = Phar::running(false);
 
         if (! $pharPath) {
-            throw new CliNotBuiltException('You cannot self-delete the CLI because it is not built already');
+            throw new CliNotBuiltException('The CLI has not been build. Self-deletion is not possible.');
         }
 
         $id = pcntl_fork();
 
         if ($id === -1) {
-            $this->error('Could not fork the process for self-deleting');
+            $this->error('We could not self-delete the CLI');
 
             exit(self::FAILURE);
         }
