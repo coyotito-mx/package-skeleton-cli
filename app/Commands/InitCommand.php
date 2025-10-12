@@ -211,7 +211,7 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
 
         $id = pcntl_fork();
 
-        if ($id == -1) {
+        if ($id === -1) {
             $this->error('Could not fork the process for self-deleting');
 
             exit(self::FAILURE);
