@@ -5,8 +5,6 @@ use App\Facades\Composer;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Sleep;
 
-use function Pest\Laravel\artisan;
-
 beforeEach(function () {
     rmdir_recursive(sandbox_path());
     mkdir(sandbox_path());
@@ -59,7 +57,7 @@ it('can init the package', function () {
         EOF
     );
 
-    artisan('init', ['--no-self-delete' => true])
+    $this->artisan('init', ['--no-self-delete' => true])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -103,7 +101,7 @@ it('failed to install dependencies', function () {
         ->expects('findComposerFile')
         ->andThrow(\RuntimeException::class);
 
-    artisan('init', ['--no-self-delete' => true])
+    $this->artisan('init', ['--no-self-delete' => true])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -160,7 +158,7 @@ it('can restart configure', function () {
         README
     );
 
-    artisan('init', ['--no-self-delete' => true])
+    $this->artisan('init', ['--no-self-delete' => true])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -262,7 +260,7 @@ it('can init the package with custom values', function () {
         PHP
     );
 
-    artisan('init', [
+    $this->artisan('init', [
         '--author' => 'John Doe',
         '--package-version' => '1.0.0',
         '--minimum-stability' => 'stable',
@@ -356,7 +354,7 @@ it('can init the package with custom values and restart configure', function () 
         EOF
     );
 
-    artisan('init', [
+    $this->artisan('init', [
         'vendor' => 'Acme',
         'package' => 'Package',
         'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
@@ -450,7 +448,7 @@ it('exclude directory and avoid replacements', function () {
         PHP
     );
 
-    artisan('init', [
+    $this->artisan('init', [
         '--dir' => 'src',
         '--no-self-delete' => true,
     ])
@@ -555,7 +553,7 @@ it('exclude files from being processed', function () {
     File::put('AcmeClass.php', $acmeClass);
     File::put('package.json', $node);
 
-    artisan('init', [
+    $this->artisan('init', [
         'vendor' => 'Acme',
         'package' => 'Package',
         'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
@@ -598,7 +596,7 @@ it('replaces placeholders in file name', function (string $file, string $expecte
 
     File::put(sandbox_path("src/$file"), '');
 
-    artisan('init', [
+    $this->artisan('init', [
         '--author' => 'John Doe',
         '--license' => 'MIT',
         '--type' => 'library',
@@ -630,7 +628,7 @@ it('replaces placeholders in file name', function (string $file, string $expecte
 
 it('can\'t self delete because it\'s not a Phar file', function () {
     expect(function () {
-        artisan('init', ['--no-self-delete' => false])
+        $this->artisan('init', ['--no-self-delete' => false])
             ->expectsQuestion('What is the vendor name?', 'Acme')
             ->expectsQuestion('What is the package name?', 'Package')
             ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -641,7 +639,7 @@ it('can\'t self delete because it\'s not a Phar file', function () {
 });
 
 it('skips self delete', function () {
-    artisan('init', ['--no-self-delete' => true])
+    $this->artisan('init', ['--no-self-delete' => true])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
