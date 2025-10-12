@@ -195,13 +195,13 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
      */
     protected function selfDelete(): void
     {
-        $this->info('Attempting to self-delete the CLI');
-
         if ($this->option('no-self-delete')) {
             $this->warn('Self-deleting skipped');
 
             return;
         }
+
+        $this->info('Attempting to self-delete the CLI');
 
         $pharPath = Phar::running(false);
 
