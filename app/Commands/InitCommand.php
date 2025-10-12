@@ -203,9 +203,9 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
 
         $this->info('Attempting to self-delete the CLI');
 
-        $pharPath = Phar::running(false);
+        $binary = Phar::running(false);
 
-        if (! $pharPath) {
+        if (! $binary) {
             throw new CliNotBuiltException('The CLI has not been build. Self-deletion is not possible.');
         }
 
@@ -220,19 +220,17 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
         if ($id !== 0) {
             $this->info('Self-deleting the CLI...');
         } else {
-            // This will give the parent process time to exit before
-            // we delete the Phar in the context of the child process
-            $breathingTime = 500_000;
+            $process = Process::command(['unlink', $binary]);
 
-            $process = Process::command([
-                PHP_BINARY,
-                '-r',
-                'usleep('.$breathingTime.'); @unlink('.var_export($pharPath, true).');',
-            ]);
+            $process = $process->run();
+
+            if ($process->failed()) {
+                $this->error('We could not self-delete the CLI');
+
+                exit(self::FAILURE);
+            }
 
             $this->info('Bye bye 👋');
-
-            $process->run();
         }
 
         exit(self::SUCCESS);
