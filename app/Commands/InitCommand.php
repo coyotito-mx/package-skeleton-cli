@@ -220,10 +220,14 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
         if ($id !== 0) {
             $this->info('Self-deleting the CLI...');
         } else {
+            // This will give the parent process time to exit before
+            // we delete the Phar in the context of the child process
+            $breathingTime = 500_000;
+
             $process = Process::fromShellCommandline(collect([
                 PHP_BINARY,
                 '-r',
-                '"usleep(500_000); @unlink('.var_export($pharPath, true).');"',
+                '"usleep('.$breathingTime.'); @unlink('.var_export($pharPath, true).');"',
             ])->join(' '));
 
             $this->info('Bye bye 👋');
