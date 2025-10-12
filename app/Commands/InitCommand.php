@@ -14,7 +14,7 @@ use LaravelZero\Framework\Commands\Command;
 use Phar;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
-use Symfony\Component\Process\Process;
+use Illuminate\Support\Facades\Process;
 
 use function Laravel\Prompts\clear;
 use function Laravel\Prompts\confirm;
@@ -224,15 +224,15 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
             // we delete the Phar in the context of the child process
             $breathingTime = 500_000;
 
-            $process = Process::fromShellCommandline(collect([
+            $process = Process::command([
                 PHP_BINARY,
                 '-r',
-                '"usleep('.$breathingTime.'); @unlink('.var_export($pharPath, true).');"',
-            ])->join(' '));
+                'usleep('.$breathingTime.'); @unlink('.var_export($pharPath, true).');',
+            ]);
 
             $this->info('Bye bye 👋');
 
-            $process->mustRun();
+            $process->run();
         }
 
         exit(self::SUCCESS);
