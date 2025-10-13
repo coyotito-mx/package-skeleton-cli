@@ -9,7 +9,31 @@ permissions:
   contents: read
 
 jobs:
+  draft-release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Create Draft Release
+        id: draft_release
+        uses: release-drafter/release-drafter@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          disable-autolabeler: true
+
+    outputs:
+      upload_url: ${{ steps.draft_release.outputs.upload_url }}
+      resolved_version: ${{ steps.draft_release.outputs.resolved_version }}
+
   build:
+    strategy:
+      matrix:
+        platform: [ 'mac', 'linux' ]
+
+    needs: draft-release
     runs-on: ubuntu-latest
 
     permissions:
@@ -19,33 +43,72 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Create Draft Release
-        id: github_draft_release
-        uses: release-drafter/release-drafter@v6
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          disable-autolabeler: true
-
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.4'
           tools: composer
 
       - name: Install Dependencies
-        run: composer install --no-dev --no-interaction --no-progress --optimize-autoloader
-
-      - name: Build CLI
-        run: php skeleton app:build --no-interaction --build-version="v${{ steps.github_draft_release.outputs.resolved_version }}" skeleton
-
-      - name: Archive CLI
+        shell: bash
         run: |
-          cd builds &&
-          zip skeleton.zip skeleton &&
-          tar -czf skeleton.tar.gz skeleton
+          composer install \
+            --no-dev \
+            --no-progress \
+            --no-interaction \
+            --optimize-autoloader
 
-      - name: Upload assets
+      - name: Build Phar
+        shell: bash
+        run: |
+          php skeleton app:build \
+            --no-interaction \
+            --build-version="v${{ needs.draft_release.outputs.resolved_version }}" skeleton.phar
+
+      - name: Install PHPacker
+        shell: bash
+        run: |
+          Composer global require \
+            --no-update \
+            --no-progress \
+            --no-interaction \
+            phpacker/phpacker
+
+      - name: Cache PHP Binaries
+        id: cache-php-binaries
+        uses: actions/cache@v4
+        with:
+          path: '~/.phpacker/binaries'
+          key: php-binaries-${{ hashFiles('**/_version') }}
+
+      - name: Build Binaries
+        shell: bash
+        run: |
+          phpacker build ${{ matrix.platform }} --src=./builds/skeleton.phar
+
+      - name: Archive Artifacts
+        shell: bash
+        run: |
+          # Change to builds directory
+          cd builds
+
+          # Remove extension from phar file
+          mv skeleton.phar skeleton
+
+          # Move files to root of builds directory
+          find build -type f -exec mv {} . \;
+
+          # Delete build directory and config file to avoid uploading unnecessary files
+            rm -rf build phpacker.json
+
+          # Create zip and tar.gz archives from everything in builds directory
+          find . \
+            -type f -not -name '*.*' \
+            -exec zip -j "$(basename {})".zip {} \; \
+            -exec tar -czf "$(basename {})".tar.gz {} \;
+
+      - name: Upload Release Assets
         uses: shogo82148/actions-upload-release-asset@v1
         with:
-          upload_url: ${{ steps.github_draft_release.outputs.upload_url }}
+          upload_url: ${{ needs.draft-release.outputs.upload_url }}
           asset_path: builds/*
