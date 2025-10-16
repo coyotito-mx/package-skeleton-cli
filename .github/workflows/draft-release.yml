@@ -99,7 +99,7 @@ jobs:
           find build -type f -exec mv {} . \;
 
           # Delete build directory and config file to avoid uploading unnecessary files
-            rm -rf build phpacker.json
+          rm -rf build phpacker.json
 
           # Create zip and tar.gz archives from everything in builds directory
           find . \
