@@ -83,8 +83,7 @@ jobs:
 
       - name: Build Binaries
         shell: bash
-        run: |
-          phpacker build ${{ matrix.platform }} --src=./builds/skeleton.phar
+        run: phpacker build ${{ matrix.platform }} --src=./builds/skeleton.phar
 
       - name: Archive Artifacts
         shell: bash
