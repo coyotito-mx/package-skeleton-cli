@@ -1,0 +1,4 @@
+{
+    "repository": "coyotito-mx/php-bin",
+    "architectures": [ "arm", "x64" ]
+}

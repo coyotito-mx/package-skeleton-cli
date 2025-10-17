@@ -2,7 +2,8 @@
 /.idea
 /.vscode
 /.vagrant
-/builds
+/builds/*
+!/builds/phpacker.json
 .phpunit.result.cache
 /tests/sandbox
 .DS_Store
