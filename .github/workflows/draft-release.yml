@@ -52,6 +52,13 @@ jobs:
             --no-interaction \
             --build-version="v${{ needs.draft_release.outputs.resolved_version }}" skeleton
 
+      - name: Save Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: skeleton
+          path: builds/skeleton
+          retention-days: 1
+
       - name: Archive CLI
         shell: bash
         run: |
@@ -78,12 +85,6 @@ jobs:
         with:
           upload_url: ${{ needs.draft-release.outputs.upload_url }}
           asset_path: builds/*
-
-      - name: Save Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: skeleton
-          path: builds/skeleton
 
     outputs:
       upload_url: ${{ steps.draft_release.outputs.upload_url }}
