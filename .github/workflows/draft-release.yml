@@ -16,6 +16,9 @@ jobs:
       contents: write
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
       - name: Create Draft Release
         id: draft_release
         uses: release-drafter/release-drafter@v6
@@ -24,9 +27,77 @@ jobs:
         with:
           disable-autolabeler: true
 
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer
+
+      - name: Get Composer Cache Directory
+        id: composer-cache-dir
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Dependencies
+        id: cache-dependencies
+        uses: actions/cache@v4
+        with:
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          path: ${{ steps.composer-cache-dir.outputs.dir }}
+
+      - name: Install Dependencies
+        shell: bash
+        run: |
+          composer install \
+            --no-dev \
+            --no-progress \
+            --no-interaction \
+            --optimize-autoloader
+
+      - name: Build CLI
+        shell: bash
+        run: |
+          php skeleton app:build \
+            --no-interaction \
+            --build-version="v${{ steps.draft_release.outputs.resolved_version }}" skeleton
+
+      - name: Save Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: skeleton
+          path: builds/skeleton
+          retention-days: 1
+
+      - name: Archive CLI
+        shell: bash
+        run: |
+          # Change Directory
+          cd builds
+
+          if command -v zip >/dev/null 2>&1; then
+            echo "zip is installed"
+          else
+            echo "zip is not installed, installing..."
+
+            sudo apt-get update
+            sudo apt-get install -y zip
+          fi
+
+          # Create Archives
+          zip skeleton.zip skeleton
+          tar -czf skeleton.tar.gz skeleton
+
+          # Remove Unnecessary Files
+          rm -f phpacker.json
+
+      - name: Upload Release Assets
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.draft_release.outputs.upload_url }}
+          asset_path: builds/*
+
     outputs:
       upload_url: ${{ steps.draft_release.outputs.upload_url }}
-      resolved_version: ${{ steps.draft_release.outputs.resolved_version }}
+      composer-directory: ${{ steps.composer-cache-dir.outputs.dir }}
 
   build:
     strategy:
@@ -41,12 +112,18 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v5
+
+      - name: Restore Composer Cache
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          path: ${{ needs.draft-release.outputs.composer-directory }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '8.3'
           tools: composer
 
       - name: Install Dependencies
@@ -58,13 +135,6 @@ jobs:
             --no-interaction \
             --optimize-autoloader
 
-      - name: Build Phar
-        shell: bash
-        run: |
-          php skeleton app:build \
-            --no-interaction \
-            --build-version="v${{ needs.draft_release.outputs.resolved_version }}" skeleton.phar
-
       - name: Install PHPacker
         shell: bash
         run: |
@@ -74,31 +144,53 @@ jobs:
             --no-interaction \
             phpacker/phpacker
 
+      - name: Get Binaries Cache Key
+        id: binaries-cache-key
+        run: |
+          BINARIES="$HOME/.phpacker/binaries/**-php-bin"
+
+          echo "key=$(sha1sum $BINARIES/_version | awk '{print $1}')" >> $GITHUB_OUTPUT
+
       - name: Cache PHP Binaries
         id: cache-php-binaries
         uses: actions/cache@v4
         with:
-          path: '~/.phpacker/binaries'
-          key: php-binaries-${{ hashFiles('**/_version') }}
+          path: $HOME/.phpacker/binaries
+          key: php-binaries-${{ steps.binaries-cache-key.outputs.key }}
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: skeleton
+          path: ./builds
+
+      - name: Rename CLI
+        shell: bash
+        run: |
+          mv ./builds/skeleton ./builds/skeleton.phar
 
       - name: Build Binaries
         shell: bash
-        run: phpacker build ${{ matrix.platform }} --src=./builds/skeleton.phar
+        run: |
+          phpacker build ${{ matrix.platform }} --src=./builds/skeleton.phar
+
+      - name: Remove unnecessary Files
+        shell: bash
+        run: |
+          # Change Directory
+          cd builds
+
+          # Remove unnecessary files
+          rm -f phpacker.json skeleton.phar
 
       - name: Archive Artifacts
         shell: bash
         run: |
-          # Change to builds directory
+          # Change directory
           cd builds
-
-          # Remove extension from phar file
-          mv skeleton.phar skeleton
 
           # Move files to root of builds directory
           find build -type f -exec mv {} . \;
-
-          # Delete build directory and config file to avoid uploading unnecessary files
-          rm -rf build phpacker.json
 
           # Create zip and tar.gz archives from everything in builds directory
           find . \

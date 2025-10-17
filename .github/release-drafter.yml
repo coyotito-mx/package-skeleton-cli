@@ -6,7 +6,7 @@ categories:
   - title: '📂 Documentation'
     label: 'documentation'
   - title: '🚀 Features'
-    labels: 'feature'
+    label: 'feature'
   - title: '🐞 Bugfix'
     label: 'bugfix'
   - title: '🔥 Hotfix'
