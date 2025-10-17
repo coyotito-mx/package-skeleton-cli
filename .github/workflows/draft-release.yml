@@ -75,8 +75,8 @@ jobs:
           fi
 
           # Create Archives
-          zip -j skeleton.zip skeleton
-          tar -czf builds/skeleton.tar.gz -C skeleton skeleton.phar
+          zip skeleton.zip skeleton
+          tar -czf skeleton.tar.gz skeleton
 
           # Remove Unnecessary Files
           rm -f phpacker.json
