@@ -139,7 +139,7 @@ jobs:
       - name: Install PHPacker
         shell: bash
         run: |
-          Composer global require \
+          composer global require \
             --no-update \
             --no-progress \
             --no-interaction \
