@@ -163,7 +163,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: skeleton
-          path: ./builds/skeleton
+          path: ./builds
 
       - name: Rename CLI
         shell: bash
