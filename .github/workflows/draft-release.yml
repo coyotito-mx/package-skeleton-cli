@@ -19,6 +19,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - name: Create Draft Release
+        id: draft_release
+        uses: release-drafter/release-drafter@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          disable-autolabeler: true
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -50,7 +58,7 @@ jobs:
         run: |
           php skeleton app:build \
             --no-interaction \
-            --build-version="v${{ needs.draft_release.outputs.resolved_version }}" skeleton
+            --build-version="v${{ steps.draft_release.outputs.resolved_version }}" skeleton
 
       - name: Save Artifacts
         uses: actions/upload-artifact@v3
@@ -81,14 +89,6 @@ jobs:
           # Remove Unnecessary Files
           rm -f phpacker.json
 
-      - name: Create Draft Release
-        id: draft_release
-        uses: release-drafter/release-drafter@v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          disable-autolabeler: true
-
       - name: Upload Release Assets
         uses: shogo82148/actions-upload-release-asset@v1
         with:
@@ -97,7 +97,6 @@ jobs:
 
     outputs:
       upload_url: ${{ steps.draft_release.outputs.upload_url }}
-      resolved_version: ${{ steps.draft_release.outputs.resolved_version }}
       composer-directory: ${{ steps.composer-cache-dir.outputs.dir }}
 
   build:
