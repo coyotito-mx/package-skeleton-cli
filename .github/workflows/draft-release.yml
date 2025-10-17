@@ -65,6 +65,15 @@ jobs:
           # Change Directory
           cd builds
 
+          if command -v zip >/dev/null 2>&1; then
+            echo "zip is installed"
+          else
+            echo "zip is not installed, installing..."
+
+            sudo apt-get update
+            sudo apt-get install -y zip
+          fi
+
           # Create Archives
           zip -j skeleton.zip skeleton
           tar -czf builds/skeleton.tar.gz -C skeleton skeleton.phar
