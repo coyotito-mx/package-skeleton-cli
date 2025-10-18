@@ -139,9 +139,9 @@ jobs:
         shell: bash
         run: |
           composer global require \
-            --no-update \
             --no-progress \
             --no-interaction \
+            --optimize-autoloader \
             phpacker/phpacker
 
       - name: Get Binaries Cache Key
