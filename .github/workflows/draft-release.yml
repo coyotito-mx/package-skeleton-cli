@@ -194,6 +194,9 @@ jobs:
           # Move files to root of builds directory
           find build -type f -exec mv {} . \;
 
+          # Remove now empty build directory
+          rm -rf build
+
           # Create zip and tar.gz archives from everything in builds directory
           find . \
             -type f -not -name '*.*' \
