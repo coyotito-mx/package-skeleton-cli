@@ -172,7 +172,9 @@ jobs:
       - name: Build Binaries
         shell: bash
         run: |
-          phpacker build ${{ matrix.platform }} --src=./builds/skeleton.phar
+          GLOBAL_BINARIES="$HOME/.composer/vendor/bin"
+
+          $GLOBAL_BINARIES/phpacker build ${{ matrix.platform }} --src=./builds/skeleton.phar
 
       - name: Remove unnecessary Files
         shell: bash
