@@ -61,7 +61,7 @@ jobs:
             --build-version="v${{ steps.draft_release.outputs.resolved_version }}" skeleton
 
       - name: Save Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: skeleton
           path: builds/skeleton
