@@ -155,7 +155,7 @@ jobs:
         id: cache-php-binaries
         uses: actions/cache@v4
         with:
-          path: $HOME/.phpacker/binaries
+          path: $HOME/.phpacker/binaries/**-php-bin
           key: php-binaries-${{ steps.binaries-cache-key.outputs.key }}
 
       - name: Download Artifact
