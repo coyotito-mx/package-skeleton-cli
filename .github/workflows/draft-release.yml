@@ -114,26 +114,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Restore Composer Cache
-        uses: actions/cache/restore@v4
-        with:
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          path: ${{ needs.draft-release.outputs.composer-directory }}
-
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
           tools: composer
-
-      - name: Install Dependencies
-        shell: bash
-        run: |
-          composer install \
-            --no-dev \
-            --no-progress \
-            --no-interaction \
-            --optimize-autoloader
 
       - name: Install PHPacker
         shell: bash
