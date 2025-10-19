@@ -61,11 +61,10 @@ jobs:
             --build-version="v${{ steps.draft_release.outputs.resolved_version }}" skeleton
 
       - name: Save Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: skeleton
           path: builds/skeleton
-          retention-days: 1
 
       - name: Archive CLI
         shell: bash
@@ -114,49 +113,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Restore Composer Cache
-        uses: actions/cache/restore@v4
-        with:
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          path: ${{ needs.draft-release.outputs.composer-directory }}
-
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.4'
           tools: composer
-
-      - name: Install Dependencies
-        shell: bash
-        run: |
-          composer install \
-            --no-dev \
-            --no-progress \
-            --no-interaction \
-            --optimize-autoloader
 
       - name: Install PHPacker
         shell: bash
         run: |
           composer global require \
-            --no-update \
             --no-progress \
             --no-interaction \
+            --optimize-autoloader \
             phpacker/phpacker
-
-      - name: Get Binaries Cache Key
-        id: binaries-cache-key
-        run: |
-          BINARIES="$HOME/.phpacker/binaries/**-php-bin"
-
-          echo "key=$(sha1sum $BINARIES/_version | awk '{print $1}')" >> $GITHUB_OUTPUT
-
-      - name: Cache PHP Binaries
-        id: cache-php-binaries
-        uses: actions/cache@v4
-        with:
-          path: $HOME/.phpacker/binaries
-          key: php-binaries-${{ steps.binaries-cache-key.outputs.key }}
 
       - name: Download Artifact
         uses: actions/download-artifact@v4
@@ -169,10 +139,16 @@ jobs:
         run: |
           mv ./builds/skeleton ./builds/skeleton.phar
 
+      - name: Cache PHP Binaries
+        id: cache-php-binaries
+        uses: actions/cache@v4
+        with:
+          path: ~/.phpacker/binaries
+          key: php-binaries
+
       - name: Build Binaries
         shell: bash
-        run: |
-          phpacker build ${{ matrix.platform }} --src=./builds/skeleton.phar
+        run: phpacker build ${{ matrix.platform }} --src=./builds/skeleton.phar
 
       - name: Remove unnecessary Files
         shell: bash
@@ -191,6 +167,9 @@ jobs:
 
           # Move files to root of builds directory
           find build -type f -exec mv {} . \;
+
+          # Remove now empty build directory
+          rm -rf build
 
           # Create zip and tar.gz archives from everything in builds directory
           find . \
