@@ -65,6 +65,8 @@ jobs:
         with:
           name: skeleton
           path: builds/skeleton
+          retention-days: 1
+          overwrite: 'true'
 
       - name: Archive CLI
         shell: bash
