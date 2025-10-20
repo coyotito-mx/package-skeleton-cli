@@ -62,7 +62,7 @@ trait InteractsWithTestingDependency
 
     protected function testingDependencyAlreadyInstalled(): ?string
     {
-        foreach ($this->testingDependencies as $dep => $values) {
+        foreach ($this->testingDependencies as $dep) {
             if ($this->composer()->hasPackage($dep)) {
                 return $dep;
             }
