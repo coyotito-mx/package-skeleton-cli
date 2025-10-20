@@ -12,9 +12,11 @@ use Symfony\Component\Console\Input\InputOption;
 
 trait InteractsWithTestingDependency
 {
+    private const string DEFAULT_TESTING_DEPENDENCY = 'pest';
+
     protected array $testingDependencies = [
-        'pest' => 'pestphp/pest',
-        'phpunit' => 'phpunit/phpunit',
+        'pest' => ['pestphp/pest' => '^4.1.2'],
+        'phpunit' => ['phpunit/phpunit' => '^12.4.1'],
     ];
 
     #[NoReturn]
@@ -29,35 +31,36 @@ trait InteractsWithTestingDependency
         );
     }
 
-    protected function installTestingDependency(): void
+    protected function getTestingDependency(): array
     {
         if ($dep = $this->testingDependencyAlreadyInstalled()) {
             $this->info("Testing dependency '$dep' is already installed.");
 
-            return;
+            return [];
         }
 
         $dep = Str::lower($this->option('testing-dependency'));
 
-        match ($dep) {
-            'pest' => $this->installPest(),
-            'phpunit' => $this->installPHPUnit(),
-            default => $this->warn('Invalid testing dependency specified.'),
+        return match ($dep) {
+            'pest' => $this->getPest(),
+            'phpunit' => $this->getPHPUnit(),
+            default => $this->getDefault(),
         };
     }
 
-    protected function installPest(): void
+    protected function getPest(): array
     {
-        $package = $this->testingDependencies['pest'];
-
-        $this->composer()->requirePackages(["$package", '-W'], true, $this->getOutput());
+        return $this->testingDependencies['pest'];
     }
 
-    protected function installPHPUnit(): void
+    protected function getPHPUnit(): array
     {
-        $package = $this->testingDependencies['phpunit'];
+        return $this->testingDependencies['phpunit'];
+    }
 
-        $this->composer()->requirePackages([$package], true, $this->getOutput());
+    protected function getDefault(): array
+    {
+        return $this->testingDependencies[self::DEFAULT_TESTING_DEPENDENCY];
     }
 
     protected function testingDependencyAlreadyInstalled(): ?string
