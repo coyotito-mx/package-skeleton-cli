@@ -32,7 +32,7 @@ trait InteractsWithTestingDependency
     protected function installTestingDependency(): void
     {
         if ($dep = $this->testingDependencyAlreadyInstalled()) {
-            $this->info("Testing dependency '$dep' is already ");
+            $this->info("Testing dependency '$dep' is already installed.");
 
             return;
         }
