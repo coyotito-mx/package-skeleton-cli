@@ -5,6 +5,8 @@ namespace App\Commands;
 use App\Commands\Contracts\HasPackageConfiguration;
 use App\Commands\Exceptions\CliNotBuiltException;
 use App\Commands\Traits\InteractsWithPackageConfiguration;
+use App\Commands\Traits\InteractsWithTestingDependency;
+use App\Facades\Composer;
 use Illuminate\Console\Concerns\PromptsForMissingInput as ConcernsPromptsForMissingInput;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Pipeline\Pipeline;
@@ -28,6 +30,7 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
     use InteractsWithPackageConfiguration {
         InteractsWithPackageConfiguration::promptForMissingArgumentsUsing as packagePromptForMissingArgumentsUsing;
     }
+    use InteractsWithTestingDependency;
 
     protected $signature = 'init
                          {--dir=* : The excluded directories}
@@ -54,6 +57,8 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
         '.gitattributes',
         '.editorconfig',
     ];
+
+    protected ?\App\Composer $composer = null;
 
     public function handle(): int
     {
@@ -185,7 +190,9 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
             return;
         }
 
-        \App\Facades\Composer::setWorkingPath($this->getPackagePath())->installDependencies();
+        $this->composer()->installDependencies();
+
+        $this->installTestingDependency();
     }
 
     /**
@@ -247,5 +254,14 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
 
         collect($requiredArguments)
             ->each(fn (string $argument) => $this->input->setArgument($argument, null));
+    }
+
+    protected function composer(): \App\Composer
+    {
+        if (blank($this->composer)) {
+            $this->composer = Composer::setWorkingPath($this->getPackagePath());
+        }
+
+        return $this->composer;
     }
 }

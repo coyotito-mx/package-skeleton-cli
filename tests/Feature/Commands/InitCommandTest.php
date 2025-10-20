@@ -29,7 +29,9 @@ it('change command context', function () {
 });
 
 it('can init the package', function () {
-    Composer::partialMock()->expects('installDependencies')->andReturn(true);
+    $partial = Composer::partialMock();
+    $partial->expects('installDependencies')->andReturn(true);
+    $partial->expects('findComposer')->andReturn(['composer']);
 
     File::put(
         sandbox_path('composer.json'),
