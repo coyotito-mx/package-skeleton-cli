@@ -6,7 +6,6 @@
          stopOnError="true"
          stopOnFailure="true"
          stopOnIncomplete="true"
-         stopOnSkipped="true"
 >
     <testsuites>
         <testsuite name="Feature">
