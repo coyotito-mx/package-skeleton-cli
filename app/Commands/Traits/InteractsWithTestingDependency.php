@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace App\Commands\Traits;
 
-use App\Commands\Traits\Attributes\Order;
 use App\Commands\Traits\Attributes\Enums\Order as OrderEnum;
+use App\Commands\Traits\Attributes\Order;
 use Illuminate\Support\Str;
 use JetBrains\PhpStorm\NoReturn;
-use RuntimeException;
 use Symfony\Component\Console\Input\InputOption;
 
 trait InteractsWithTestingDependency
 {
     protected array $testingDependencies = [
         'pest' => 'pestphp/pest',
-        'phpunit' => 'phpunit/phpunit'
+        'phpunit' => 'phpunit/phpunit',
     ];
 
     #[NoReturn]
