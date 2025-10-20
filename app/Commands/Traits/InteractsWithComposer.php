@@ -22,5 +22,4 @@ trait InteractsWithComposer
 
         return $this->composer;
     }
-
 }

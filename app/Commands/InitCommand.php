@@ -27,11 +27,11 @@ use function Laravel\Prompts\table;
 class InitCommand extends Command implements HasPackageConfiguration, PromptsForMissingInput
 {
     use ConcernsPromptsForMissingInput;
+    use InteractsWithComposer;
     use InteractsWithPackageConfiguration {
         InteractsWithPackageConfiguration::promptForMissingArgumentsUsing as packagePromptForMissingArgumentsUsing;
     }
     use InteractsWithTestingDependency;
-    use InteractsWithComposer;
 
     protected $signature = 'init
                          {--dir=* : The excluded directories}
@@ -194,7 +194,7 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
                 'phpstan/phpstan' => '^2.1.31',
                 'laravel/pint' => 'v1.25.1',
             ],
-            ...$this->getTestingDependency()
+            ...$this->getTestingDependency(),
         ], dev: true);
 
         $this->composer()->installDependencies(

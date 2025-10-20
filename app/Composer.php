@@ -49,10 +49,6 @@ class Composer extends \Illuminate\Support\Composer
 
     /**
      * Add a dependency to the `composer.json` file.
-     *
-     * @param string|array $packages
-     * @param bool $dev
-     * @return void
      */
     public function addDependencies(string|array $packages, bool $dev = false): void
     {
