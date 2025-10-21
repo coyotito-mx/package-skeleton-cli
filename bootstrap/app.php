@@ -1,6 +1,7 @@
 <?php
 
 use LaravelZero\Framework\Application;
+
 use function Illuminate\Filesystem\join_paths;
 
 if (! defined('APP_DATA')) {

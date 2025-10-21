@@ -55,18 +55,18 @@ test('remove directory with files', function () {
     // Assert
     expect($folder)
         ->toBeDirectory()
-    ->and($file1)
+        ->and($file1)
         ->toBeFile()
-    ->and($file2)
+        ->and($file2)
         ->toBeFile();
 
     rmdir_recursive($folder);
 
     expect($folder)
         ->not->toBeDirectory()
-    ->and($file1)
+        ->and($file1)
         ->not->toBeFile()
-    ->and($file2)
+        ->and($file2)
         ->not->toBeFile();
 });
 
@@ -101,7 +101,7 @@ test('remove deeply nested files in a folder and leave root folder', function (a
                     'file1.txt',
                     'file2.txt',
                     'file3.txt',
-                    'folder' => []
+                    'folder' => [],
                 ],
                 'folder2' => [
                     'folder' => [
@@ -112,6 +112,5 @@ test('remove deeply nested files in a folder and leave root folder', function (a
                 ],
             ],
         ],
-    ]
+    ],
 ]);
-

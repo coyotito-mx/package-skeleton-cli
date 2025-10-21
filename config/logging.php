@@ -3,6 +3,7 @@
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
+
 use function Illuminate\Filesystem\join_paths;
 
 $logFile = join_paths(APP_DATA, config('app.name'));
