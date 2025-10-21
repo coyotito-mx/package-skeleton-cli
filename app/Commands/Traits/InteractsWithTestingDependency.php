@@ -20,7 +20,7 @@ trait InteractsWithTestingDependency
         ],
         'phpunit' => [
             'name' => 'phpunit/phpunit',
-            'version' => '^12.4.1'
+            'version' => '^12.4.1',
         ],
     ];
 
@@ -43,7 +43,7 @@ trait InteractsWithTestingDependency
     protected function getTestingDependency(): ?array
     {
         if ($this->testingDependencyAlreadyInstalled()) {
-            $this->info("Testing dependency is already installed.");
+            $this->info('Testing dependency is already installed.');
 
             return null;
         }

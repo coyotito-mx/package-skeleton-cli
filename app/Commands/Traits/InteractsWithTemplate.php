@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Commands\Traits;
 
-use Illuminate\Process\Exceptions\ProcessFailedException;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Sleep;
 use Illuminate\Support\Str;
@@ -26,7 +24,7 @@ trait InteractsWithTemplate
 
     protected function bootPackageInteractsWithTemplate(): void
     {
-        $list = join(', ', array_keys($this->bootstrapTypes));
+        $list = implode(', ', array_keys($this->bootstrapTypes));
 
         $this->addOption(
             name: 'bootstrap',
@@ -83,7 +81,7 @@ trait InteractsWithTemplate
         $excludedPaths = [config('app.name'), config('app.name').'.phar'];
 
         if (! $this->checkIfDirectoryIsEmpty($this->getPackagePath(), $excludedPaths)) {
-            throw new RuntimeException("The directory where you want to bootstrap the package is not empty (CLI file is ignore)");
+            throw new RuntimeException('The directory where you want to bootstrap the package is not empty (CLI file is ignore)');
         }
 
         app('git')
