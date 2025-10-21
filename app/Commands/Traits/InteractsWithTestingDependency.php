@@ -7,7 +7,6 @@ namespace App\Commands\Traits;
 use App\Commands\Traits\Attributes\Enums\Order as OrderEnum;
 use App\Commands\Traits\Attributes\Order;
 use Illuminate\Support\Str;
-use JetBrains\PhpStorm\NoReturn;
 use Symfony\Component\Console\Input\InputOption;
 
 trait InteractsWithTestingDependency
@@ -15,11 +14,16 @@ trait InteractsWithTestingDependency
     private const string DEFAULT_TESTING_DEPENDENCY = 'pest';
 
     protected array $testingDependencies = [
-        'pest' => ['pestphp/pest' => '^4.1.2'],
-        'phpunit' => ['phpunit/phpunit' => '^12.4.1'],
+        'pest' => [
+            'name' => 'pestphp/pest',
+            'version' => 'pestphp/pest',
+        ],
+        'phpunit' => [
+            'name' => 'phpunit/phpunit',
+            'version' => '^12.4.1'
+        ],
     ];
 
-    #[NoReturn]
     #[Order(OrderEnum::LAST)]
     public function bootPackageInteractsWithTestingDependency(): void
     {
@@ -31,12 +35,17 @@ trait InteractsWithTestingDependency
         );
     }
 
-    protected function getTestingDependency(): array
+    /**
+     * Get the dependency based on the option `testing-dependency` value
+     *
+     * @return ?array{name: string, version: string}
+     */
+    protected function getTestingDependency(): ?array
     {
-        if ($dep = $this->testingDependencyAlreadyInstalled()) {
-            $this->info("Testing dependency '$dep' is already installed.");
+        if ($this->testingDependencyAlreadyInstalled()) {
+            $this->info("Testing dependency is already installed.");
 
-            return [];
+            return null;
         }
 
         $dep = Str::lower($this->option('testing-dependency'));
@@ -63,14 +72,14 @@ trait InteractsWithTestingDependency
         return $this->testingDependencies[self::DEFAULT_TESTING_DEPENDENCY];
     }
 
-    protected function testingDependencyAlreadyInstalled(): ?string
+    protected function testingDependencyAlreadyInstalled(): bool
     {
-        foreach ($this->testingDependencies as $dep) {
-            if ($this->composer()->hasPackage($dep)) {
-                return $dep;
+        foreach ($this->testingDependencies as $_ => $config) {
+            if ($this->composer()->hasPackage($config['name'])) {
+                return true;
             }
         }
 
-        return null;
+        return false;
     }
 }

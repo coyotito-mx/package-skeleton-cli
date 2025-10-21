@@ -189,13 +189,12 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
             return;
         }
 
-        $this->composer()->addDependencies([
-            [
-                'phpstan/phpstan' => '^2.1.31',
-                'laravel/pint' => 'v1.25.1',
-            ],
-            ...$this->getTestingDependency(),
-        ], dev: true);
+        $testingDependency = $this->getTestingDependency() ?: [];
+
+        $this->composer()->addDependencies(array_merge([
+            'phpstan/phpstan' => '^2.1.31',
+            'laravel/pint' => 'v1.25.1',
+        ], $testingDependency), dev: true);
 
         $this->composer()->installDependencies(
             output: $this->getOutput()
