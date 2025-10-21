@@ -11,6 +11,8 @@
 |
 */
 
+use function Illuminate\Filesystem\join_paths;
+
 uses(Tests\TestCase::class)->in('Feature');
 
 /*
@@ -37,10 +39,12 @@ uses(Tests\TestCase::class)->in('Feature');
 
 function test_path(?string $path = null): string
 {
-    return base_path('tests'.($path ? DIRECTORY_SEPARATOR.$path : ''));
+    return join_paths(__DIR__, $path);
 }
 
 function sandbox_path(?string $path = null): string
 {
-    return test_path('sandbox'.($path ? DIRECTORY_SEPARATOR.$path : ''));
+    return test_path(
+        join_paths('sandbox', $path ?? '')
+    );
 }
