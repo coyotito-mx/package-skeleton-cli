@@ -7,30 +7,38 @@ namespace App\Helpers {
     /**
      * @throw InvalidArgumentException if the given path is a file.
      */
-    function rmdir_recursive(string $path): void
+    function rmdir_recursive(string $path, bool $preserveRoot = false): void
     {
-        if (! file_exists($path)) {
-            return;
-        }
+        $root = $path;
 
-        if (is_file($path)) {
-            throw new InvalidArgumentException("The given path is a file: $path");
-        }
-
-        foreach (scandir($path) as $file) {
-            if (in_array($file, ['.', '..'])) {
-                continue;
+        $walk = function ($path) use (&$walk, $root, $preserveRoot) {
+            if (! file_exists($path)) {
+                return;
             }
 
-            $file = $path.DIRECTORY_SEPARATOR.$file;
-
-            if (is_dir($file)) {
-                rmdir_recursive($file);
-            } else {
-                unlink($file);
+            if (is_file($path)) {
+                throw new InvalidArgumentException("The given path is a file: $path");
             }
-        }
 
-        rmdir($path);
+            foreach (scandir($path) as $file) {
+                if (in_array($file, ['.', '..'])) {
+                    continue;
+                }
+
+                $file = $path.DIRECTORY_SEPARATOR.$file;
+
+                if (is_dir($file)) {
+                    $walk($file);
+                } else {
+                    unlink($file);
+                }
+            }
+
+            if (! $preserveRoot || $path !== $root) {
+                rmdir($path);
+            }
+        };
+
+        $walk($path);
     }
 }
