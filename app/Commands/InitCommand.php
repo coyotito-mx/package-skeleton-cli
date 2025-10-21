@@ -176,7 +176,7 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
 
     protected function getPackagePath(?string $path = null): string
     {
-        return trim(($this->option('path') ?? getcwd()).($path ? DIRECTORY_SEPARATOR.$path : ''));
+        return trim(($this->option('path') ?? getcwd()).(trim($path) ? DIRECTORY_SEPARATOR.$path : ''));
     }
 
     protected function installDependencies(): void
