@@ -6,6 +6,7 @@ use App\Commands\Contracts\HasPackageConfiguration;
 use App\Commands\Exceptions\CliNotBuiltException;
 use App\Commands\Traits\InteractsWithComposer;
 use App\Commands\Traits\InteractsWithPackageConfiguration;
+use App\Commands\Traits\InteractsWithTemplate;
 use App\Commands\Traits\InteractsWithTestingDependency;
 use Illuminate\Console\Concerns\PromptsForMissingInput as ConcernsPromptsForMissingInput;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
@@ -31,6 +32,7 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
     use InteractsWithPackageConfiguration {
         InteractsWithPackageConfiguration::promptForMissingArgumentsUsing as packagePromptForMissingArgumentsUsing;
     }
+    use InteractsWithTemplate;
     use InteractsWithTestingDependency;
 
     protected $signature = 'init
@@ -62,6 +64,8 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
     public function handle(): int
     {
         try {
+            $this->shouldBootstrapPackage();
+
             retry(3, callback: function () {
                 ! $this->option('confirm') && $this->printConfiguration();
 
