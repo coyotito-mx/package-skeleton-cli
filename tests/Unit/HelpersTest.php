@@ -114,3 +114,15 @@ test('remove deeply nested files in a folder and leave root folder', function (a
         ],
     ],
 ]);
+
+it('can not delete given path if is a file', function () {
+    // Arrange
+    $filepath = sandbox_path('file.txt');
+    file_put_contents($filepath, 'Lorem ipsum dolor it');
+
+    // Act & Assert
+    expect($filepath)
+        ->toBeFile()
+    ->and(fn () => rmdir_recursive($filepath))
+        ->toThrow(InvalidArgumentException::class);
+});
