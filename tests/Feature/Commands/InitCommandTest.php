@@ -5,6 +5,8 @@ use App\Facades\Composer;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Sleep;
 
+use function App\Helpers\rmdir_recursive;
+
 beforeEach(function () {
     rmdir_recursive(sandbox_path());
     mkdir(sandbox_path());
@@ -29,8 +31,6 @@ it('change command context', function () {
 });
 
 it('can init the package', function () {
-    Composer::partialMock()->expects('installDependencies')->andReturn(true);
-
     File::put(
         sandbox_path('composer.json'),
         <<<'EOF'
@@ -62,7 +62,7 @@ it('can init the package', function () {
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
-        ->expectsQuestion('Do you want to install the dependencies?', 'yes')
+        ->expectsConfirmation('Do you want to install the dependencies?')
         ->expectsOutput('Self-deleting skipped')
         ->assertSuccessful();
 
@@ -686,5 +686,5 @@ describe('Build CLI and test self-delete functionality', function () {
             ->toBeTrue()
             ->and(File::exists(base_path('builds/skeleton')))
             ->toBeFalse('The CLI file still exists');
-    });
-})->skip(fn () => config('app.env') !== 'development');
+    })->skipOnCI();
+});

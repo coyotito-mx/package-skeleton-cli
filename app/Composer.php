@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App;
 
+use Illuminate\Support\Arr;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -44,5 +45,29 @@ class Composer extends \Illuminate\Support\Composer
                     ? fn ($type, $line) => $output->write('    '.$line)
                     : $output
             ) === 0;
+    }
+
+    /**
+     * Add a dependency to the `composer.json` file.
+     */
+    public function addDependencies(string|array $packages, bool $dev = false): void
+    {
+        $packages = Arr::wrap($packages);
+
+        $this->modify(
+            function (array $json) use ($packages, $dev): array {
+                $section = $dev ? 'require-dev' : 'require';
+
+                foreach ($packages as $package => $version) {
+                    if (is_int($package)) {
+                        [$package, $version] = [$version, '*'];
+                    }
+
+                    $json[$section][$package] = $version;
+                }
+
+                return $json;
+            }
+        );
     }
 }

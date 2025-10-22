@@ -31,28 +31,22 @@ trait InteractsWithPackageConfiguration
 
     protected function configureUsingFluentDefinition(): void
     {
-        // @phpstan-ignore isset.property
-        if (isset($this->signature)) {
-            [$name, $arguments, $options] = Parser::parse($this->signature);
+        [$name, $arguments, $options] = Parser::parse($this->signature);
 
-            $this->setName($name);
+        $this->setName($name);
 
-            /**
-             * Remove the signature to prevent the parent from calling again the fluent definition
-             * from the parent constructor.
-             */
-            unset($this->signature);
-        }
+        /**
+         * Remove the signature to prevent the parent from calling again the fluent definition
+         * from the parent constructor.
+         *
+         * @phpstan-ignore-next-line
+         */
+        unset($this->signature);
 
         parent::__construct();
-        $this->bootPackageTraits();
 
-        $this->addArguments(
-            collect($this->promptRequiredArguments)
-                ->map(fn (array $definition, string $name) => new InputArgument($name, InputArgument::REQUIRED, $definition['description']))
-                ->merge($arguments ?? [])
-                ->toArray()
-        )->addOptions($options ?? []);
+        $this->bootPackageTraits();
+        $this->configureCommand($arguments, $options);
     }
 
     public function getPackageReplacers(): array
@@ -136,5 +130,15 @@ trait InteractsWithPackageConfiguration
                 return [$name => $missing];
             })
             ->toArray();
+    }
+
+    private function configureCommand(array $arguments = [], array $options = []): void
+    {
+        $this->addArguments(
+            collect($this->promptRequiredArguments)
+                ->map(fn (array $definition, string $name) => new InputArgument($name, InputArgument::REQUIRED, $definition['description']))
+                ->merge($arguments)
+                ->toArray()
+        )->addOptions($options);
     }
 }

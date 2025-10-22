@@ -12,9 +12,10 @@
     ],
     "require": {
         "php": "^8.3",
+        "ext-pcntl": "*",
         "composer/spdx-licenses": "^1.5",
-        "laravel-zero/framework": "^v12.0.2",
-        "ext-pcntl": "*"
+        "illuminate/log": "^12.17",
+        "laravel-zero/framework": "^v12.0.2"
     },
     "require-dev": {
         "larastan/larastan": "^v3.7.2",
@@ -28,7 +29,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
@@ -40,7 +44,6 @@
         "style": "@php vendor/bin/pint --config=./pint.json",
         "style:test": "@php vendor/bin/pint --preset=laravel --test",
         "lint": "@php vendor/bin/phpstan analyse",
-        "lint:pro": "@php vendor/bin/phpstan analyse --pro",
         "lint:with-style": [
             "@lint",
             "@style:test"
