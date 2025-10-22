@@ -35,7 +35,7 @@ it('can init the package', function () {
         sandbox_path('composer.json'),
         <<<'EOF'
         {
-            "name": "{{namespace|lower,reverse}}",
+            "name": "{{namespace|slug,lower,reverse}}",
             "description": "{{description|ucfirst}}",
             "type": "{{type}}",
             "version": "{{version}}",
