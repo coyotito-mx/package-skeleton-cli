@@ -29,7 +29,6 @@ class NamespaceReplacer
                         default => explode('/', $replacement),
                     };
 
-
                     return implode($separator, [$modifier($vendor), $modifier($package)]);
                 };
             });
