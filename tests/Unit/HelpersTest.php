@@ -123,6 +123,6 @@ it('can not delete given path if is a file', function () {
     // Act & Assert
     expect($filepath)
         ->toBeFile()
-    ->and(fn () => rmdir_recursive($filepath))
+        ->and(fn () => rmdir_recursive($filepath))
         ->toThrow(InvalidArgumentException::class);
 });
