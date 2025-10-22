@@ -11,6 +11,8 @@
 |
 */
 
+use function Illuminate\Filesystem\join_paths;
+
 uses(Tests\TestCase::class)->in('Feature');
 
 /*
@@ -37,40 +39,12 @@ uses(Tests\TestCase::class)->in('Feature');
 
 function test_path(?string $path = null): string
 {
-    return base_path('tests'.($path ? DIRECTORY_SEPARATOR.$path : ''));
+    return join_paths(__DIR__, $path);
 }
 
 function sandbox_path(?string $path = null): string
 {
-    return test_path('sandbox'.($path ? DIRECTORY_SEPARATOR.$path : ''));
-}
-
-/**
- * @throw InvalidArgumentException if the given path is a file.
- */
-function rmdir_recursive(string $path): void
-{
-    if (! file_exists($path)) {
-        return;
-    }
-
-    if (is_file($path)) {
-        throw new InvalidArgumentException("The given path is a file: $path");
-    }
-
-    foreach (scandir($path) as $file) {
-        if (in_array($file, ['.', '..'])) {
-            continue;
-        }
-
-        $file = $path.DIRECTORY_SEPARATOR.$file;
-
-        if (is_dir($file)) {
-            rmdir_recursive($file);
-        } else {
-            unlink($file);
-        }
-    }
-
-    rmdir($path);
+    return test_path(
+        join_paths('sandbox', $path ?? '')
+    );
 }

@@ -3,10 +3,6 @@ includes:
     - vendor/nesbot/carbon/extension.neon
 
 parameters:
-    pro:
-        dnsServers!:
-            - '8.8.8.8'
-
     paths:
         - app/
 

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Composer;
+use App\Git;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -14,7 +16,11 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind('composer', function ($app) {
-            return new \App\Composer($app['files'], getcwd());
+            return new Composer($app['files'], getcwd());
+        });
+
+        $this->app->bind('git', function () {
+            return new Git(getcwd());
         });
     }
 }

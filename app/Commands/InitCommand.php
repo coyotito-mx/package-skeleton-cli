@@ -4,7 +4,9 @@ namespace App\Commands;
 
 use App\Commands\Contracts\HasPackageConfiguration;
 use App\Commands\Exceptions\CliNotBuiltException;
+use App\Commands\Traits\InteractsWithComposer;
 use App\Commands\Traits\InteractsWithPackageConfiguration;
+use App\Commands\Traits\InteractsWithTemplate;
 use Illuminate\Console\Concerns\PromptsForMissingInput as ConcernsPromptsForMissingInput;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Pipeline\Pipeline;
@@ -25,9 +27,11 @@ use function Laravel\Prompts\table;
 class InitCommand extends Command implements HasPackageConfiguration, PromptsForMissingInput
 {
     use ConcernsPromptsForMissingInput;
+    use InteractsWithComposer;
     use InteractsWithPackageConfiguration {
         InteractsWithPackageConfiguration::promptForMissingArgumentsUsing as packagePromptForMissingArgumentsUsing;
     }
+    use InteractsWithTemplate;
 
     protected $signature = 'init
                          {--dir=* : The excluded directories}
@@ -58,6 +62,8 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
     public function handle(): int
     {
         try {
+            $this->shouldBootstrapPackage();
+
             retry(3, callback: function () {
                 ! $this->option('confirm') && $this->printConfiguration();
 
@@ -172,7 +178,7 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
 
     protected function getPackagePath(?string $path = null): string
     {
-        return trim(($this->option('path') ?? getcwd()).($path ? DIRECTORY_SEPARATOR.$path : ''));
+        return trim(($this->option('path') ?? getcwd()).(trim($path) ? DIRECTORY_SEPARATOR.$path : ''));
     }
 
     protected function installDependencies(): void
@@ -185,7 +191,9 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
             return;
         }
 
-        \App\Facades\Composer::setWorkingPath($this->getPackagePath())->installDependencies();
+        $this->composer()->installDependencies(
+            output: $this->getOutput()
+        );
     }
 
     /**
