@@ -7,7 +7,6 @@ use App\Commands\Exceptions\CliNotBuiltException;
 use App\Commands\Traits\InteractsWithComposer;
 use App\Commands\Traits\InteractsWithPackageConfiguration;
 use App\Commands\Traits\InteractsWithTemplate;
-use App\Commands\Traits\InteractsWithTestingDependency;
 use Illuminate\Console\Concerns\PromptsForMissingInput as ConcernsPromptsForMissingInput;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Pipeline\Pipeline;
@@ -33,7 +32,6 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
         InteractsWithPackageConfiguration::promptForMissingArgumentsUsing as packagePromptForMissingArgumentsUsing;
     }
     use InteractsWithTemplate;
-    use InteractsWithTestingDependency;
 
     protected $signature = 'init
                          {--dir=* : The excluded directories}
@@ -192,13 +190,6 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
 
             return;
         }
-
-        $testingDependency = $this->getTestingDependency() ?: [];
-
-        $this->composer()->addDependencies(array_merge([
-            'phpstan/phpstan' => '^2.1.31',
-            'laravel/pint' => 'v1.25.1',
-        ], $testingDependency), dev: true);
 
         $this->composer()->installDependencies(
             output: $this->getOutput()
