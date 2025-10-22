@@ -19,7 +19,23 @@ class NamespaceReplacer
 
     public static function getModifiers(): array
     {
+        $modifiedModifiers = collect(Replacer::getDefaultModifiers())
+            ->map(function (\Closure $modifier, string $name) {
+                return static function ($replacement) use ($modifier) {
+                    $separator = static::identifySeparator($replacement);
+
+                    [$vendor, $package] = match (true) {
+                        $separator === '\\' => explode('\\', $replacement),
+                        default => explode('/', $replacement),
+                    };
+
+
+                    return implode($separator, [$modifier($vendor), $modifier($package)]);
+                };
+            });
+
         return [
+            ...$modifiedModifiers,
             'escape' => function (string $replacement): string {
                 return Str::of($replacement)->replaceMatches('/[\/\\\\]/', function ($matches) {
                     $separator = static::identifySeparator($matches[0]);
