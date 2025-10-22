@@ -59,10 +59,10 @@ class Replacer implements Contracts\Replacer
 
     public function getModifiers(): array
     {
-        return [...$this->getDefaultModifiers(), ...$this->modifiers];
+        return [...static::getDefaultModifiers(), ...$this->modifiers];
     }
 
-    public function getDefaultModifiers(): array
+    public static function getDefaultModifiers(): array
     {
         return [
             'upper' => fn (string $replacement) => Str::upper($replacement),
