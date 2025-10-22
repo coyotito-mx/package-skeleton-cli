@@ -20,6 +20,7 @@ trait InteractsWithTemplate
 {
     protected array $bootstrapTypes = [
         'vanilla' => 'git@github.com:coyotito-mx/package-skeleton.git',
+        'laravel' => 'git@github.com:coyotito-mx/laravel-package-skeleton.git'
     ];
 
     protected function bootPackageInteractsWithTemplate(): void
