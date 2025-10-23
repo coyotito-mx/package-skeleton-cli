@@ -19,4 +19,4 @@ style:
 tests:
   - head-branch: ['^test\/.+', '^tests\/.+']
 release:
-  - head-branch: ['^release\/.+']
+  - head-branch: ['dev']
