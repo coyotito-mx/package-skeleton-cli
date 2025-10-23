@@ -12,6 +12,17 @@ class Replacer implements Contracts\Replacer
 {
     protected array $modifiers = [];
 
+    /**
+     * Replacer class constructor
+     *
+     * The open and close tags will wrap the placeholder(s) to avoid matching only the string from the
+     * placeholder(s)
+     *
+     * @param string $placeholder The placeholder(s) to search for
+     * @param string $replacement The value from which the placeholder will be replaced
+     * @param string $openTag The opening tag
+     * @param string $closeTag The closing tag
+     */
     public function __construct(
         protected string|array $placeholder,
         protected string $replacement,
