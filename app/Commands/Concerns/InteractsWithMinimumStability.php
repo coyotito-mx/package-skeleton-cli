@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Commands\Traits;
+namespace App\Commands\Concerns;
 
 use App\Replacer;
 use Symfony\Component\Console\Input\InputOption;

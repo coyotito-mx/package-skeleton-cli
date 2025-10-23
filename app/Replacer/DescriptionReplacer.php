@@ -6,7 +6,7 @@ namespace App\Replacer;
 
 class DescriptionReplacer
 {
-    use Traits\InteractsWithReplacer;
+    use Concerns\InteractsWithReplacer;
 
-    protected static string $placeholder = 'description';
+    protected static string|array $placeholder = 'description';
 }

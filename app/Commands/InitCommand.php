@@ -2,13 +2,13 @@
 
 namespace App\Commands;
 
+use App\Commands\Concerns\InteractsWithComposer;
+use App\Commands\Concerns\InteractsWithPackageConfiguration;
+use App\Commands\Concerns\InteractsWithTemplate;
 use App\Commands\Contracts\HasPackageConfiguration;
 use App\Commands\Exceptions\CliNotBuiltException;
-use App\Commands\Traits\InteractsWithComposer;
-use App\Commands\Traits\InteractsWithPackageConfiguration;
-use App\Commands\Traits\InteractsWithTemplate;
-use Illuminate\Console\Concerns\PromptsForMissingInput as ConcernsPromptsForMissingInput;
-use Illuminate\Contracts\Console\PromptsForMissingInput;
+use Illuminate\Console\Concerns\PromptsForMissingInput;
+use Illuminate\Contracts\Console\PromptsForMissingInput as PromptsForMissingInputContract;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
@@ -24,13 +24,13 @@ use function Laravel\Prompts\info;
 use function Laravel\Prompts\spin;
 use function Laravel\Prompts\table;
 
-class InitCommand extends Command implements HasPackageConfiguration, PromptsForMissingInput
+class InitCommand extends Command implements HasPackageConfiguration, PromptsForMissingInputContract
 {
-    use ConcernsPromptsForMissingInput;
-    use InteractsWithComposer;
-    use InteractsWithPackageConfiguration {
-        InteractsWithPackageConfiguration::promptForMissingArgumentsUsing as packagePromptForMissingArgumentsUsing;
-    }
+    use InteractsWithComposer,
+        InteractsWithPackageConfiguration,
+        PromptsForMissingInput {
+            InteractsWithPackageConfiguration::promptForMissingArgumentsUsing as packagePromptForMissingArgumentsUsing;
+        }
     use InteractsWithTemplate;
 
     protected $signature = 'init
@@ -38,8 +38,8 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
                          {--file=* : The excluded files}
                          {--path= : The path where the package will be initialized}
                          {--confirm : Skip the confirmation prompt}
-                         {--dont-install-dependencies : Do not install the dependencies after initialization}
-                         {--no-self-delete : Do not delete this command after initialization}';
+                         {--d|do-not-install-dependencies : Do not install the dependencies after initialization}
+                         {--s|no-self-delete : Do not delete this command after initialization}';
 
     protected $description = 'Init package';
 
@@ -85,7 +85,7 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
 
         spin(fn () => $this->replacePlaceholdersInFiles($this->getFiles()), 'Processing files...');
 
-        ! $this->option('dont-install-dependencies') && $this->installDependencies();
+        ! $this->option('do-not-install-dependencies') && $this->installDependencies();
 
         $this->selfDelete();
 
