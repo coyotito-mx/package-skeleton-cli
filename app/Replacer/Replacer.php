@@ -117,7 +117,7 @@ class Replacer implements Contracts\Replacer
     protected function wrapPlaceholder(string|array $placeholder): string
     {
         // Wrap placeholder if not is an array
-        $placeholders = is_null($placeholder) ? [] : (is_array($placeholder) ? $placeholder : [$placeholder]);
+        $placeholders = is_array($placeholder) ? $placeholder : [$placeholder];
 
         $placeholders = array_map(fn (string $placeholder) => preg_quote($placeholder), $placeholders);
         $placeholders = implode('|', $placeholders);
