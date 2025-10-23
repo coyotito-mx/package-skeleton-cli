@@ -10,7 +10,7 @@ class NamespaceReplacer
 {
     use Concerns\InteractsWithReplacer;
 
-    protected static string $placeholder = 'namespace';
+    protected static string|array $placeholder = 'namespace';
 
     protected static array $reversedSeparators = [
         '/' => '\\',

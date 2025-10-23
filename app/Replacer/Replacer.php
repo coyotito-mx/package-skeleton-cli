@@ -13,7 +13,7 @@ class Replacer implements Contracts\Replacer
     protected array $modifiers = [];
 
     public function __construct(
-        protected string $placeholder,
+        protected string|array $placeholder,
         protected string $replacement,
         protected string $openTag = '{{',
         protected string $closeTag = '}}',
@@ -89,8 +89,8 @@ class Replacer implements Contracts\Replacer
         foreach ($matches as $match) {
             $replacement = $this->getReplacement();
 
-            if (isset($match[2])) {
-                $modifiers = explode(',', $match[2]);
+            if (isset($match[1])) {
+                $modifiers = explode(',', $match[1]);
 
                 foreach ($modifiers as $modifier) {
                     $replacement = $this->getModifier($modifier)($replacement);
@@ -103,8 +103,14 @@ class Replacer implements Contracts\Replacer
         return $text;
     }
 
-    protected function wrapPlaceholder(string $placeholder): string
+    protected function wrapPlaceholder(string|array $placeholder): string
     {
-        return Str::of(preg_quote($placeholder))->wrap("/{$this->openTag}(", ")(?:\|([\w,]+))?{$this->closeTag}/")->toString();
+        // Wrap placeholder if not is an array
+        $placeholders = is_null($placeholder) ? [] : (is_array($placeholder) ? $placeholder : [$placeholder]);
+
+        $placeholders = array_map(fn (string $placeholder) => preg_quote($placeholder), $placeholders);
+        $placeholders = join('|', $placeholders);
+
+        return Str::of($placeholders)->wrap("/{$this->openTag}(?:", ")(?:\|([\w,]+))?{$this->closeTag}/")->toString();
     }
 }

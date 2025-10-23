@@ -8,5 +8,5 @@ class AuthorReplacer
 {
     use Concerns\InteractsWithReplacer;
 
-    protected static string $placeholder = 'author';
+    protected static string|array $placeholder = 'author';
 }

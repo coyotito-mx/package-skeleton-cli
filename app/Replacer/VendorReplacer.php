@@ -8,5 +8,5 @@ class VendorReplacer
 {
     use Concerns\InteractsWithReplacer;
 
-    protected static string $placeholder = 'vendor';
+    protected static string|array $placeholder = 'vendor';
 }

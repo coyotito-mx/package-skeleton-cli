@@ -8,5 +8,5 @@ class MinimumStabilityReplacer
 {
     use Concerns\InteractsWithReplacer;
 
-    protected static string $placeholder = 'minimum-stability';
+    protected static string|array $placeholder = 'minimum-stability';
 }

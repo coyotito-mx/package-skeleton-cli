@@ -8,5 +8,5 @@ class PackageReplacer
 {
     use Concerns\InteractsWithReplacer;
 
-    protected static string $placeholder = 'package';
+    protected static string|array $placeholder = 'package';
 }

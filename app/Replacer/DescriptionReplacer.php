@@ -8,5 +8,5 @@ class DescriptionReplacer
 {
     use Concerns\InteractsWithReplacer;
 
-    protected static string $placeholder = 'description';
+    protected static string|array $placeholder = 'description';
 }

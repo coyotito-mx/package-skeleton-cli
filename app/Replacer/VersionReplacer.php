@@ -8,5 +8,5 @@ class VersionReplacer
 {
     use Concerns\InteractsWithReplacer;
 
-    protected static string $placeholder = 'version';
+    protected static string|array $placeholder = 'version';
 }

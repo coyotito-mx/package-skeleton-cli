@@ -8,5 +8,5 @@ class TypeReplacer
 {
     use Concerns\InteractsWithReplacer;
 
-    protected static string $placeholder = 'type';
+    protected static string|array $placeholder = 'type';
 }
