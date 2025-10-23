@@ -18,10 +18,10 @@ class Replacer implements Contracts\Replacer
      * The open and close tags will wrap the placeholder(s) to avoid matching only the string from the
      * placeholder(s)
      *
-     * @param string $placeholder The placeholder(s) to search for
-     * @param string $replacement The value from which the placeholder will be replaced
-     * @param string $openTag The opening tag
-     * @param string $closeTag The closing tag
+     * @param  string  $placeholder  The placeholder(s) to search for
+     * @param  string  $replacement  The value from which the placeholder will be replaced
+     * @param  string  $openTag  The opening tag
+     * @param  string  $closeTag  The closing tag
      */
     public function __construct(
         protected string|array $placeholder,
@@ -120,7 +120,7 @@ class Replacer implements Contracts\Replacer
         $placeholders = is_null($placeholder) ? [] : (is_array($placeholder) ? $placeholder : [$placeholder]);
 
         $placeholders = array_map(fn (string $placeholder) => preg_quote($placeholder), $placeholders);
-        $placeholders = join('|', $placeholders);
+        $placeholders = implode('|', $placeholders);
 
         return Str::of($placeholders)->wrap("/{$this->openTag}(?:", ")(?:\|([\w,]+))?{$this->closeTag}/")->toString();
     }

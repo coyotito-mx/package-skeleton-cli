@@ -5,7 +5,8 @@ use App\Facades\Composer;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Sleep;
 
-use function App\Helpers\{ rmdir_recursive, mkdir };
+use function App\Helpers\mkdir;
+use function App\Helpers\rmdir_recursive;
 
 beforeEach(function () {
     rmdir_recursive(sandbox_path());

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Replacer\Contracts;
 
-use Closure;
 use InvalidArgumentException;
 
 interface Replacer
@@ -12,8 +11,8 @@ interface Replacer
     /**
      * Replacer class constructor
      *
-     * @param string $placeholder The placeholder(s) to search for
-     * @param string $replacement The value from which the placeholder will be replaced
+     * @param  string  $placeholder  The placeholder(s) to search for
+     * @param  string  $replacement  The value from which the placeholder will be replaced
      * @return mixed
      */
     public function __construct(string|array $placeholder, string $replacement);

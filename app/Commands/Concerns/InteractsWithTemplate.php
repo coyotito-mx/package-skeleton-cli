@@ -13,7 +13,8 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
 use function Illuminate\Filesystem\join_paths;
-use function Laravel\Prompts\{ progress, spin };
+use function Laravel\Prompts\progress;
+use function Laravel\Prompts\spin;
 
 trait InteractsWithTemplate
 {
