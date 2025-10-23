@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Commands\Traits;
+namespace App\Commands\Concerns;
 
 use Illuminate\Console\Parser;
 use Symfony\Component\Console\Input\InputArgument;
@@ -12,14 +12,14 @@ use function Laravel\Prompts\text;
 
 trait InteractsWithPackageConfiguration
 {
-    use InteractsWithAuthor;
-    use InteractsWithDescription;
-    use InteractsWithLicense;
-    use InteractsWithMinimumStability;
-    use InteractsWithNamespace;
-    use InteractsWithType;
-    use InteractsWithVersion;
-    use WithPackageTraitsBootstrap;
+    use InteractsWithAuthor,
+        InteractsWithDescription,
+        InteractsWithLicense,
+        InteractsWithMinimumStability,
+        InteractsWithNamespace,
+        InteractsWithType,
+        InteractsWithVersion,
+        WithPackageTraitsBootstrap;
 
     /**
      * @var array<string, array{description: string, missing: string}> The missing arguments to prompt for.

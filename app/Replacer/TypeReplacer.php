@@ -6,7 +6,7 @@ namespace App\Replacer;
 
 class TypeReplacer
 {
-    use Traits\InteractsWithReplacer;
+    use Concerns\InteractsWithReplacer;
 
-    protected static string $placeholder = 'type';
+    protected static string|array $placeholder = 'type';
 }

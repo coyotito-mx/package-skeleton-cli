@@ -5,6 +5,7 @@ use App\Facades\Composer;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Sleep;
 
+use function App\Helpers\mkdir;
 use function App\Helpers\rmdir_recursive;
 
 beforeEach(function () {
@@ -20,7 +21,6 @@ afterEach(function () {
     chdir($this->oldPath);
 
     rmdir_recursive(sandbox_path());
-    rmdir_recursive(base_path('builds'));
 });
 
 it('change command context', function () {
@@ -671,7 +671,7 @@ describe('Build CLI and test self-delete functionality', function () {
             'package',
             'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
             '--confirm',
-            '--dont-install-dependencies',
+            '--do-not-install-dependencies',
         ])
             ->path(base_path());
 

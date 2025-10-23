@@ -46,12 +46,7 @@ jobs:
 
       - name: Install Dependencies
         shell: bash
-        run: |
-          composer install \
-            --no-dev \
-            --no-progress \
-            --no-interaction \
-            --optimize-autoloader
+        run: composer install --no-dev --no-progress --no-interaction --optimize-autoloader
 
       - name: Build CLI
         shell: bash
@@ -123,12 +118,7 @@ jobs:
 
       - name: Install PHPacker
         shell: bash
-        run: |
-          composer global require \
-            --no-progress \
-            --no-interaction \
-            --optimize-autoloader \
-            phpacker/phpacker
+        run: composer global require --no-progress --no-interaction phpacker/phpacker
 
       - name: Download Artifact
         uses: actions/download-artifact@v4
@@ -138,8 +128,7 @@ jobs:
 
       - name: Rename CLI
         shell: bash
-        run: |
-          mv ./builds/skeleton ./builds/skeleton.phar
+        run: mv ./builds/skeleton ./builds/skeleton.phar
 
       - name: Cache PHP Binaries
         id: cache-php-binaries

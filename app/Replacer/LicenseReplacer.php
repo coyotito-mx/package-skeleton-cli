@@ -6,7 +6,7 @@ namespace App\Replacer;
 
 class LicenseReplacer
 {
-    use Traits\InteractsWithReplacer;
+    use Concerns\InteractsWithReplacer;
 
-    protected static string $placeholder = 'license';
+    protected static string|array $placeholder = 'license';
 }

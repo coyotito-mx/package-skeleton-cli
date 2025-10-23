@@ -6,7 +6,7 @@ namespace App\Replacer;
 
 class MinimumStabilityReplacer
 {
-    use Traits\InteractsWithReplacer;
+    use Concerns\InteractsWithReplacer;
 
-    protected static string $placeholder = 'minimum-stability';
+    protected static string|array $placeholder = 'minimum-stability';
 }

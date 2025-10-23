@@ -38,6 +38,12 @@ it('can replace a placeholder with a custom modifier', function () {
     expect($replacer->replace('Hello, {{name|oddupper}}!'))->toBe('Hello, JoHn!');
 });
 
+it('cannot add a modifier without a valid callback', function () {
+    $replacer = new \App\Replacer\Replacer('name', 'John');
+
+    expect(fn () => $replacer->modifierUsing('oddupper'))->toThrow(InvalidArgumentException::class);
+});
+
 it('can\'t replace none existing placeholder', function () {
     $replacer = new \App\Replacer\Replacer('name', 'John');
 

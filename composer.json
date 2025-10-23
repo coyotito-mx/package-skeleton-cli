@@ -41,6 +41,7 @@
     },
     "scripts": {
         "test": "@php skeleton test",
+        "test:ci": "@php skeleton test --ci",
         "style": "@php vendor/bin/pint --config=./pint.json",
         "style:test": "@php vendor/bin/pint --preset=laravel --test",
         "lint": "@php vendor/bin/phpstan analyse",
