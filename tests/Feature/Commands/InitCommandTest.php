@@ -670,7 +670,7 @@ describe('Build CLI and test self-delete functionality', function () {
             'package',
             'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
             '--confirm',
-            '--dont-install-dependencies',
+            '--do-not-install-dependencies',
         ])
             ->path(base_path());
 

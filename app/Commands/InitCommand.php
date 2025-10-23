@@ -34,8 +34,8 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
                          {--file=* : The excluded files}
                          {--path= : The path where the package will be initialized}
                          {--confirm : Skip the confirmation prompt}
-                         {--dont-install-dependencies : Do not install the dependencies after initialization}
-                         {--no-self-delete : Do not delete this command after initialization}';
+                         {--d|do-not-install-dependencies : Do not install the dependencies after initialization}
+                         {--s|no-self-delete : Do not delete this command after initialization}';
 
     protected $description = 'Init package';
 
@@ -81,7 +81,7 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
 
         spin(fn () => $this->replacePlaceholdersInFiles($this->getFiles()), 'Processing files...');
 
-        ! $this->option('dont-install-dependencies') && $this->installDependencies();
+        ! $this->option('do-not-install-dependencies') && $this->installDependencies();
 
         $this->selfDelete();
 
