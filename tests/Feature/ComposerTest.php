@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Composer;
 
-use function App\Helpers\rmdir_recursive;
+use function App\Helpers\{ rmdir_recursive, mkdir };
 
 beforeEach(function () {
     mkdir(sandbox_path());

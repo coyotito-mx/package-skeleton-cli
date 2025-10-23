@@ -5,7 +5,7 @@ use App\Facades\Composer;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Sleep;
 
-use function App\Helpers\rmdir_recursive;
+use function App\Helpers\{ rmdir_recursive, mkdir };
 
 beforeEach(function () {
     rmdir_recursive(sandbox_path());
@@ -20,7 +20,6 @@ afterEach(function () {
     chdir($this->oldPath);
 
     rmdir_recursive(sandbox_path());
-    rmdir_recursive(base_path('builds'));
 });
 
 it('change command context', function () {

@@ -1,5 +1,7 @@
 <?php
 
+use App\Helpers;
+
 use function App\Helpers\rmdir_recursive;
 use function Illuminate\Filesystem\join_paths;
 
@@ -37,7 +39,7 @@ test('remove directory', function () {
 
     // Assert
     expect($folder)->toBeDirectory();
-    rmdir_recursive($folder);
+    Helpers\rmdir_recursive($folder);
     expect($folder)->not->toBeDirectory();
 });
 
@@ -60,7 +62,7 @@ test('remove directory with files', function () {
         ->and($file2)
         ->toBeFile();
 
-    rmdir_recursive($folder);
+    Helpers\rmdir_recursive($folder);
 
     expect($folder)
         ->not->toBeDirectory()
@@ -75,7 +77,7 @@ test('remove deeply nested files in a folder and leave root folder', function (a
 
     expect($root)->toBeDirectory();
 
-    rmdir_recursive($root, true);
+    Helpers\rmdir_recursive($root, true);
 
     expect($root)->toBeDirectory();
 
@@ -90,6 +92,8 @@ test('remove deeply nested files in a folder and leave root folder', function (a
     closedir($open);
 
     expect($entry)->toBeFalse();
+
+    rmdir_recursive($root);
 })->with([
     'folder structure' => [
         [
@@ -123,6 +127,38 @@ it('can not delete given path if is a file', function () {
     // Act & Assert
     expect($filepath)
         ->toBeFile()
-        ->and(fn () => rmdir_recursive($filepath))
+        ->and(fn () => Helpers\rmdir_recursive($filepath))
         ->toThrow(InvalidArgumentException::class);
+});
+
+it('can create a directory', function () {
+    // Arrange
+    $folder = sandbox_path('folder');
+
+    // Act & Assert
+    expect($folder)
+        ->not->toBeFile()
+        ->and(Helpers\mkdir($folder))
+        ->toBeTrue();
+
+    rmdir($folder);
+});
+
+test('attempt to create a directory that already exists will not fail', function () {
+    // Arrange
+    $folder = sandbox_path('folder');
+    mkdir($folder);
+
+    // Act & Assert
+    expect($folder)->toBeFile();
+
+    expect(Helpers\mkdir($folder))->toBeFalse();
+});
+
+it('fail to create a folder from a file path', function () {
+    // Arrange
+    $file = sandbox_path('file.txt');
+
+    // Act & Assert
+    expect(fn () => Helpers\mkdir($file))->toThrow(InvalidArgumentException::class);
 });
