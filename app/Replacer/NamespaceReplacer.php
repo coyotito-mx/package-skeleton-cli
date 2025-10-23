@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 class NamespaceReplacer
 {
-    use Traits\InteractsWithReplacer;
+    use Concerns\InteractsWithReplacer;
 
     protected static string $placeholder = 'namespace';
 

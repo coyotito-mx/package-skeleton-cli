@@ -4,9 +4,9 @@ namespace App\Commands;
 
 use App\Commands\Contracts\HasPackageConfiguration;
 use App\Commands\Exceptions\CliNotBuiltException;
-use App\Commands\Traits\InteractsWithComposer;
-use App\Commands\Traits\InteractsWithPackageConfiguration;
-use App\Commands\Traits\InteractsWithTemplate;
+use App\Commands\Concerns\InteractsWithComposer;
+use App\Commands\Concerns\InteractsWithPackageConfiguration;
+use App\Commands\Concerns\InteractsWithTemplate;
 use Illuminate\Console\Concerns\PromptsForMissingInput as ConcernsPromptsForMissingInput;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Pipeline\Pipeline;
@@ -18,19 +18,15 @@ use Phar;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
-use function Laravel\Prompts\clear;
-use function Laravel\Prompts\confirm;
-use function Laravel\Prompts\info;
-use function Laravel\Prompts\spin;
-use function Laravel\Prompts\table;
+use function Laravel\Prompts\{ clear, confirm, info, spin, table };
 
 class InitCommand extends Command implements HasPackageConfiguration, PromptsForMissingInput
 {
-    use ConcernsPromptsForMissingInput;
-    use InteractsWithComposer;
-    use InteractsWithPackageConfiguration {
-        InteractsWithPackageConfiguration::promptForMissingArgumentsUsing as packagePromptForMissingArgumentsUsing;
-    }
+    use ConcernsPromptsForMissingInput,
+        InteractsWithComposer,
+        InteractsWithPackageConfiguration {
+            InteractsWithPackageConfiguration::promptForMissingArgumentsUsing as packagePromptForMissingArgumentsUsing;
+        }
     use InteractsWithTemplate;
 
     protected $signature = 'init

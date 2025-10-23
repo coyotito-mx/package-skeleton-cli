@@ -6,7 +6,7 @@ namespace App\Replacer;
 
 class AuthorReplacer
 {
-    use Traits\InteractsWithReplacer;
+    use Concerns\InteractsWithReplacer;
 
     protected static string $placeholder = 'author';
 }

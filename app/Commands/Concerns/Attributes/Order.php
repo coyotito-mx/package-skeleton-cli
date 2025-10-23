@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Commands\Traits\Attributes;
+namespace App\Commands\Concerns\Attributes;
 
 #[\Attribute(\Attribute::TARGET_METHOD)]
 class Order

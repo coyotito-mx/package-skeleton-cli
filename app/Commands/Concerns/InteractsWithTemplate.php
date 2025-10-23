@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Commands\Traits;
+namespace App\Commands\Concerns;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Sleep;
@@ -13,8 +13,7 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
 use function Illuminate\Filesystem\join_paths;
-use function Laravel\Prompts\progress;
-use function Laravel\Prompts\spin;
+use function Laravel\Prompts\{ progress, spin };
 
 trait InteractsWithTemplate
 {

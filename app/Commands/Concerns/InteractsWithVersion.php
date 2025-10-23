@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Commands\Traits;
+namespace App\Commands\Concerns;
 
 use App\Replacer;
 use Illuminate\Support\Str;

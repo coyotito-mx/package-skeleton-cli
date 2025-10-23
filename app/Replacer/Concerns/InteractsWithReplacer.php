@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Replacer\Traits;
+namespace App\Replacer\Concerns;
 
 use App\Replacer\Replacer;
 

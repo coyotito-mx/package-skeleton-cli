@@ -6,7 +6,7 @@ namespace App\Replacer;
 
 class PackageReplacer
 {
-    use Traits\InteractsWithReplacer;
+    use Concerns\InteractsWithReplacer;
 
     protected static string $placeholder = 'package';
 }

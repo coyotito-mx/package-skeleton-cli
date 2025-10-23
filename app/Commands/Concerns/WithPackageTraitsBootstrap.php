@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Commands\Traits;
+namespace App\Commands\Concerns;
 
 use Illuminate\Support\Arr;
 
