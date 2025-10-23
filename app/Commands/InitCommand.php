@@ -7,8 +7,8 @@ use App\Commands\Exceptions\CliNotBuiltException;
 use App\Commands\Concerns\InteractsWithComposer;
 use App\Commands\Concerns\InteractsWithPackageConfiguration;
 use App\Commands\Concerns\InteractsWithTemplate;
-use Illuminate\Console\Concerns\PromptsForMissingInput as ConcernsPromptsForMissingInput;
-use Illuminate\Contracts\Console\PromptsForMissingInput;
+use Illuminate\Console\Concerns\PromptsForMissingInput;
+use Illuminate\Contracts\Console\PromptsForMissingInput as PromptsForMissingInputContract;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
@@ -20,9 +20,9 @@ use Symfony\Component\Finder\SplFileInfo;
 
 use function Laravel\Prompts\{ clear, confirm, info, spin, table };
 
-class InitCommand extends Command implements HasPackageConfiguration, PromptsForMissingInput
+class InitCommand extends Command implements HasPackageConfiguration, PromptsForMissingInputContract
 {
-    use ConcernsPromptsForMissingInput,
+    use PromptsForMissingInput,
         InteractsWithComposer,
         InteractsWithPackageConfiguration {
             InteractsWithPackageConfiguration::promptForMissingArgumentsUsing as packagePromptForMissingArgumentsUsing;
