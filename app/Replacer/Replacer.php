@@ -61,11 +61,11 @@ class Replacer implements Contracts\Replacer
         return $this;
     }
 
-    public function getModifier(string $modifier): Closure
+    public function getModifier(string $name): Closure
     {
-        $error = "Modifier [$modifier] not found.";
+        $error = "Modifier [$name] not found.";
 
-        return $this->getModifiers()[$modifier] ?? throw new InvalidArgumentException($error);
+        return $this->getModifiers()[$name] ?? throw new InvalidArgumentException($error);
     }
 
     public function getModifiers(): array
