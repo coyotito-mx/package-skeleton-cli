@@ -2,8 +2,7 @@ name: Release Drafter
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 permissions:
   contents: read
@@ -25,6 +24,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          commitish: ${{ github.ref }}
           disable-autolabeler: true
 
       - name: Setup PHP
