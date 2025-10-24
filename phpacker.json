@@ -1,0 +1,7 @@
+{
+    "src": "./builds/skeleton.phar",
+    "dest": "./builds",
+    "repository": "coyotito-mx/php-bin",
+    "platform": "mac",
+    "architectures": [ "arm" ]
+}

@@ -3,7 +3,6 @@
 /.vscode
 /.vagrant
 /builds/*
-!/builds/phpacker.json
 .phpunit.result.cache
 /tests/sandbox
 .DS_Store
