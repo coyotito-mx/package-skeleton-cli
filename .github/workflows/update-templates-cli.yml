@@ -9,8 +9,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check asset from Latest Release
-        id: latest-release
+      - name: Get asset download URL
+        id: download-url
         uses: actions/github-script@v8
         with:
           script: |
@@ -41,7 +41,7 @@ jobs:
           echo "::info::Downloading CLI..."
 
           # Download CLI - (silent, Remote name, Redirect)
-          curl -sOL "${{ steps.latest-release.outputs.asset-download-url }}"
+          curl -sOL "${{ steps.download-url.outputs.asset-download-url }}"
 
           if [ ! -f skeleton.tar.gz ]; then
             echo "::error::File not downloaded"q
