@@ -27,7 +27,6 @@ jobs:
 
             core.setOutput('asset-download-url', asset.browser_download_url);
 
-      # Cache the CLI download
       - name: Cache CLI
         id: cache
         uses: actions/cache@v4
