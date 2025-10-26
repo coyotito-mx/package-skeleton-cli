@@ -44,7 +44,7 @@ jobs:
           curl -sOL "${{ steps.download-url.outputs.asset-download-url }}"
 
           if [ ! -f skeleton.tar.gz ]; then
-            echo "::error::File not downloaded"q
+            echo "::error::File not downloaded"
 
             exit 1
           fi
