@@ -86,6 +86,7 @@ jobs:
       - name: Trigger CLI update
         uses: actions/github-script@v8
         with:
+          github-token: ${{ secrets.WORKFLOW_DISPATCH }}
           script: |
             const owner = context.repo.owner;
             const repo = ${{ toJson(matrix.repo) }};
