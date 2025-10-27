@@ -89,7 +89,8 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = ${{ toJson(matrix.repo) }};
-            const tag_name="${{ github.event.release.tag_name }}";
+            const tag_name = "${{ github.event.release.tag_name }}";
+            const download_url = `https://github.com/${owner}/${context.repo.repo}/releases/download/${tag_name}/skeleton.tar.gz`;
 
             try {
               core.info('Triggering Workflow [update-cli]');
@@ -100,13 +101,17 @@ jobs:
                 workflow_id: 'update-cli.yml',
                 ref: 'main',
                 inputs: {
-                  download_url: `https://github.com/coyotito-mx/package-skeleton-cli/releases/download/${tag_name}/skeleton.tar.gz`,
+                  download_url,
                 }
               });
             } catch (error) {
               core.setFailed(`We couldn't trigger the workflow for [${tag_name}]`);
 
               core.warning(error);
+
+              core.debug(download_url);
+
+              return;
             }
 
             core.info('Done, the templates will update their CLI to the newest');
