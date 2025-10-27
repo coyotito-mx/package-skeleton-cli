@@ -1,0 +1,118 @@
+name: Update CLI from templates
+
+on:
+  release:
+    types: [released]
+
+jobs:
+  ensure-asset-exists:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get asset download URL
+        id: download-url
+        uses: actions/github-script@v8
+        with:
+          script: |
+            core.info('Ensure `skeleton` CLI exists');
+
+            // Filter assets to find the `skeleton` binary (PHAR)
+            const asset = ${{ toJson(github.event.release.assets) }}.filter((asset) => asset.name === 'skeleton.tar.gz')[0] ?? null;
+
+            if (asset === null) {
+              core.setFailed('CLI not found in release [${{ github.event.release.name }}]');
+
+              return;
+            }
+
+            core.setOutput('asset-download-url', asset.browser_download_url);
+
+      - name: Cache CLI
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ./skeleton
+          key: ${{ runner.os }}-${{ github.event.release.tag_name }}-skeleton
+
+      - name: Download CLI
+        if: ${{ ! steps.cache.outputs.cache-hit }}
+        shell: bash
+        run: |
+          echo "::info::Downloading CLI..."
+
+          # Download CLI - (silent, Remote name, Redirect)
+          curl -sOL "${{ steps.download-url.outputs.asset-download-url }}"
+
+          if [ ! -f skeleton.tar.gz ]; then
+            echo "::error::File not downloaded"
+
+            exit 1
+          fi
+
+          echo "Extracting CLI"
+
+          # Extract file
+          tar -xf skeleton.tar.gz
+
+      - name: Check CLI version
+        shell: bash
+        run: |
+          cli_version="$(./skeleton -V | awk -F ' ' '{ print $2 }')"
+
+          normalize() { echo "$1" | sed -E 's/^[vV]?/v/'; }
+
+          cli_norm="$(normalize "$cli_version")"
+          tag_norm="$(normalize "${{ github.event.release.tag_name }}")"
+
+          echo "::notice::CLI version [$cli_norm] vs Tag name [$tag_norm]"
+
+          if [[ "$cli_norm" != "$tag_norm" ]]; then
+            echo "::error::The tag name and CLI version don't match"
+
+            exit 1
+          fi
+
+          echo "::notice::CLI version and Tag name match"
+
+  trigger-update:
+    needs: ensure-asset-exists
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        repo: [package-skeleton, laravel-package-skeleton]
+
+    steps:
+      - name: Trigger CLI update
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.WORKFLOW_DISPATCH }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = ${{ toJson(matrix.repo) }};
+            const tag_name = "${{ github.event.release.tag_name }}";
+            const download_url = `https://github.com/${owner}/${context.repo.repo}/releases/download/${tag_name}/skeleton.tar.gz`;
+
+            try {
+              core.info('Triggering Workflow [update-cli]');
+
+              await github.rest.actions.createWorkflowDispatch({
+                owner,
+                repo,
+                workflow_id: 'update-cli.yml',
+                ref: 'main',
+                inputs: {
+                  download_url,
+                }
+              });
+            } catch (error) {
+              core.setFailed(`We couldn't trigger the workflow for [${tag_name}]`);
+
+              core.warning(error);
+
+              core.debug(download_url);
+
+              return;
+            }
+
+            core.info('Done, the templates will update their CLI to the newest');
