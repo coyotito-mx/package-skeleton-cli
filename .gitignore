@@ -6,3 +6,5 @@
 .phpunit.result.cache
 /tests/sandbox
 .DS_Store
+/.secrets
+/event.json
