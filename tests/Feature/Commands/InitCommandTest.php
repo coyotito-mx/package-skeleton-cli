@@ -292,7 +292,7 @@ it('can init the package with custom values', function () {
             * @package Acme\Package
             * @author John Doe
             * @version 1.0.0
-            * @license Apache-2.0
+            * @license MIT
             */
             class SomeClass
             {
