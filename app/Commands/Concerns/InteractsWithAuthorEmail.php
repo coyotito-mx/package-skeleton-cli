@@ -42,7 +42,7 @@ trait InteractsWithAuthorEmail
 
         return text("Author's Email", required: true, validate: function (string $value) {
             if (! filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                return "The email is not a valid e-mail";
+                return 'The email is not a valid e-mail';
             }
 
             return null;

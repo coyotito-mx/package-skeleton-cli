@@ -123,9 +123,8 @@ it('can init package quickly', function () {
     );
 
     Process::fake([
-        "'git' 'config' 'user.email'" => Process::result(errorOutput: 'key does not contain a section: user.email', exitCode: 1)
+        "'git' 'config' 'user.email'" => Process::result(errorOutput: 'key does not contain a section: user.email', exitCode: 1),
     ]);
-
 
     $this->artisan('init', [
         'vendor' => 'Vendor',

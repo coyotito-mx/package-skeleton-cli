@@ -5,9 +5,10 @@ use Illuminate\Process\FakeProcessResult;
 use Illuminate\Support\Facades\Process;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 
-function getConfigUsing (array $data) {
+function getConfigUsing(array $data)
+{
     return fn (string $key, mixed $default = null) => data_get($data, $key, $default);
-};
+}
 
 it('can clone a repository', closure: function () {
     // Arrange
@@ -84,8 +85,8 @@ it('get user information', function () {
     // Act & Assert
     expect($git->getConfig('user.name'))
         ->toBeString()
-        ->toBe("asciito", 'User name not return')
+        ->toBe('asciito', 'User name not return')
         ->and($git->getConfig('user.email'))
         ->toBeString()
-        ->toBe("test@test.com", 'User email not return');
+        ->toBe('test@test.com', 'User email not return');
 });
