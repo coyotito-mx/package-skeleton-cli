@@ -66,6 +66,7 @@ The available placeholders:
 - `namespace`
 - `description`
 - `author`
+- `email` (Author's email)
 - `package-version`
 - `minimum-stability`
 - `license` (package license: MIT, GPL, etc.)
@@ -104,6 +105,7 @@ skeleton init [options] [--] <vendor> <package> <description>
 ### Options
 
 - `--author=`: The package author. If not provided, it will be generated automatically.
+- `--email=`: The package author email. If not provided, it will be generated automatically.
 - `--license=`: The package license. Available values: MIT, Apache-2.0, GPL-3.0, default: MIT.
 - `--namespace=`: The package namespace. If not provided, it will be generated automatically.
 - `--package-version=`: The package version. Default: v0.0.1.
@@ -125,7 +127,7 @@ skeleton init
 ### Example
 
 ```bash
-skeleton init asciito acme "This is a sample package" --author="John Doe" --license=MIT --namespace="Asciito\\Acme" --package-version=v1.0.0 --minimum-stability=stable --type=library --path=./packages
+skeleton init asciito acme "This is a sample package" --author="John Doe" --email="john@doe.com" --license=MIT --namespace="Asciito\\Acme" --package-version=v1.0.0 --minimum-stability=stable --type=library --path=./packages
 ```
 
 This command will initialize a new package with the provided details and options.
