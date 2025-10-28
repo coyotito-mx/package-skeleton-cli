@@ -13,6 +13,7 @@ use function Laravel\Prompts\text;
 trait InteractsWithPackageConfiguration
 {
     use InteractsWithAuthor,
+        InteractsWithAuthorEmail,
         InteractsWithDescription,
         InteractsWithLicense,
         InteractsWithMinimumStability,
