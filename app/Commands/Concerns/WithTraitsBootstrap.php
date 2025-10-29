@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Commands\Concerns;
 
+use Closure;
 use Illuminate\Support\Arr;
 
-trait WithPackageTraitsBootstrap
+trait WithTraitsBootstrap
 {
-    protected function bootPackageTraits(): void
+    protected function bootBootstrapTraits(): void
     {
         // Prepare arrays to hold traits by their boot order
         $beginning = [];
@@ -58,10 +59,10 @@ trait WithPackageTraitsBootstrap
             ...$default,
             ...$end,
         ])
-            ->each(fn (string $trait) => $this->bootPackageTraitUsing()($trait));
+            ->each(fn (string $trait) => $this->bootTraits()($trait));
     }
 
-    protected function bootPackageTraitUsing(?\Closure $using = null): \Closure
+    protected function bootTraits(?Closure $using = null): Closure
     {
         return $using ?? fn (string $trait) => $this->{'bootPackage'.class_basename($trait)}();
     }
