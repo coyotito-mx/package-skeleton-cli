@@ -23,7 +23,7 @@ trait InteractsWithTemplate
         'laravel' => 'git@github.com:coyotito-mx/laravel-package-skeleton.git',
     ];
 
-    protected function bootPackageInteractsWithTemplate(): void
+    protected function bootInteractsWithTemplate(): void
     {
         $list = implode(', ', array_keys($this->bootstrapTypes));
 

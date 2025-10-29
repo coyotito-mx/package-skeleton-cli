@@ -14,7 +14,7 @@ trait InteractsWithLicenseDescription
 {
     protected string $licenseStub = 'license.md.stub';
 
-    protected function bootPackageInteractsWithLicenseDescription(): void
+    protected function bootInteractsWithLicenseDescription(): void
     {
         $this
             ->addOption('replace-license', description: 'Force replace the `LICENSE.md` file')

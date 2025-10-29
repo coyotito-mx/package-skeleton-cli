@@ -18,7 +18,7 @@ trait WithTraitsBootstrap
         $end = [];
 
         foreach (class_uses_recursive($this) as $trait) {
-            $method = 'bootPackage'.class_basename($trait);
+            $method = 'boot'.class_basename($trait);
 
             try {
                 $reflected = new \ReflectionMethod($trait, $method);
@@ -64,6 +64,6 @@ trait WithTraitsBootstrap
 
     protected function bootTraits(?Closure $using = null): Closure
     {
-        return $using ?? fn (string $trait) => $this->{'bootPackage'.class_basename($trait)}();
+        return $using ?? fn (string $trait) => $this->{'boot'.class_basename($trait)}();
     }
 }

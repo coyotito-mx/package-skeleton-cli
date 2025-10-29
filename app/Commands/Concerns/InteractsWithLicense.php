@@ -10,7 +10,7 @@ trait InteractsWithLicense
 {
     use InteractsWithLicenseDescription;
 
-    public function bootPackageInteractsWithLicense(): void
+    public function bootInteractsWithLicense(): void
     {
         $this->addReplacers([
             Replacer\LicenseReplacer::class => fn (): string => $this->getPackageLicense(),

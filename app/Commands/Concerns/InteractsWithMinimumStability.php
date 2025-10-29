@@ -17,7 +17,7 @@ trait InteractsWithMinimumStability
         'dev',
     ];
 
-    public function bootPackageInteractsWithMinimumStability(): void
+    public function bootInteractsWithMinimumStability(): void
     {
         $this->addReplacers([
             Replacer\MinimumStabilityReplacer::class => fn (): string => $this->getPackageMinimumStability(),
