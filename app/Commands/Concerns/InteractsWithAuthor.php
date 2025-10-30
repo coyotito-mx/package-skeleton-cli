@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputOption;
 
 trait InteractsWithAuthor
 {
-    public function bootPackageInteractsWithAuthor(): void
+    public function bootInteractsWithAuthor(): void
     {
         $this->addReplacers([
             Replacer\AuthorReplacer::class => fn (): string => $this->getPackageAuthorName(),

@@ -25,7 +25,7 @@ trait InteractsWithType
         'typo3-cms-extension',
     ];
 
-    public function bootPackageInteractsWithType(): void
+    public function bootInteractsWithType(): void
     {
         $this->addReplacers([
             Replacer\TypeReplacer::class => fn (): string => $this->getPackageType(),

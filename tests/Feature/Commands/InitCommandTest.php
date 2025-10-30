@@ -1,7 +1,10 @@
 <?php
 
+use App\Commands\Command;
+use App\Commands\Concerns\InteractsWithLicenseDescription;
 use App\Commands\Exceptions\CliNotBuiltException;
 use App\Facades\Composer;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Sleep;
@@ -65,7 +68,7 @@ it('can init the package', function () {
         EOF
     );
 
-    $this->artisan('init', ['--no-self-delete' => true])
+    $this->artisan('init', ['--no-self-delete' => true, '--skip-license-generation' => true])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -160,7 +163,7 @@ it('failed to install dependencies', function () {
         ->expects('findComposerFile')
         ->andThrow(\RuntimeException::class);
 
-    $this->artisan('init', ['--no-self-delete' => true])
+    $this->artisan('init', ['--no-self-delete' => true, '--skip-license-generation' => true])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -217,7 +220,7 @@ it('can restart configure', function () {
         README
     );
 
-    $this->artisan('init', ['--no-self-delete' => true])
+    $this->artisan('init', ['--no-self-delete' => true, '--skip-license-generation' => true])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -325,8 +328,8 @@ it('can init the package with custom values', function () {
         '--package-version' => '1.0.0',
         '--minimum-stability' => 'stable',
         '--type' => 'project',
-        '--license' => 'Apache-2.0',
         '--no-self-delete' => true,
+        '--skip-license-generation' => true,
     ])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
@@ -353,7 +356,7 @@ it('can init the package with custom values', function () {
             * @author John Doe
             * @email test@test.com
             * @version 1.0.0
-            * @license Apache-2.0
+            * @license MIT
             */
             class SomeClass
             {
@@ -423,8 +426,8 @@ it('can init the package with custom values and restart configure', function () 
         '--package-version' => '1.0.0',
         '--minimum-stability' => 'stable',
         '--type' => 'project',
-        '--license' => 'Apache-2.0',
         '--no-self-delete' => true,
+        '--skip-license-generation' => true,
     ])
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
         ->expectsConfirmation('Do you want to install the dependencies?')
@@ -512,6 +515,7 @@ it('exclude directory and avoid replacements', function () {
     $this->artisan('init', [
         '--dir' => 'src',
         '--no-self-delete' => true,
+        '--skip-license-generation' => true,
     ])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
@@ -621,6 +625,7 @@ it('exclude files from being processed', function () {
         '--author' => 'John Doe',
         '--file' => ['package.json'],
         '--no-self-delete' => true,
+        '--skip-license-generation' => true,
     ])
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
         ->expectsConfirmation('Do you want to install the dependencies?')
@@ -659,9 +664,9 @@ it('replaces placeholders in file name', function (string $file, string $expecte
 
     $this->artisan('init', [
         '--author' => 'John Doe',
-        '--license' => 'MIT',
         '--type' => 'library',
         '--no-self-delete' => true,
+        '--skip-license-generation' => true,
     ])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
@@ -689,7 +694,7 @@ it('replaces placeholders in file name', function (string $file, string $expecte
 
 it('can\'t self delete because it\'s not a Phar file', function () {
     expect(function () {
-        $this->artisan('init', ['--no-self-delete' => false])
+        $this->artisan('init', ['--no-self-delete' => false, '--skip-license-generation' => true])
             ->expectsQuestion('What is the vendor name?', 'Acme')
             ->expectsQuestion('What is the package name?', 'Package')
             ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -700,7 +705,7 @@ it('can\'t self delete because it\'s not a Phar file', function () {
 });
 
 it('skips self delete', function () {
-    $this->artisan('init', ['--no-self-delete' => true])
+    $this->artisan('init', ['--no-self-delete' => true, '--skip-license-generation' => true])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -712,10 +717,13 @@ it('skips self delete', function () {
 
 describe('Build CLI and test self-delete functionality', function () {
     it('can self delete when built', function () {
-        $command = \Illuminate\Support\Facades\Process::command([
+        rmdir_recursive(base_path('builds'));
+
+        $command = Process::command([
             PHP_BINARY,
             'skeleton',
             'app:build',
+            '--build-version=unreleased',
         ])
             ->path(base_path());
 
@@ -725,7 +733,7 @@ describe('Build CLI and test self-delete functionality', function () {
             ->successful()
             ->toBeTrue();
 
-        $command = \Illuminate\Support\Facades\Process::command([
+        $command = Process::command([
             './builds/skeleton',
             'init',
             'asciito',
@@ -733,19 +741,87 @@ describe('Build CLI and test self-delete functionality', function () {
             'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
             '--confirm',
             '--do-not-install-dependencies',
+            '--skip-license-generation',
         ])
-            ->path(base_path());
-
-        $process = $command->run();
+            ->path(base_path())
+            ->run();
 
         Sleep::for(1)->seconds();
 
-        expect($process)
-            ->errorOutput()
+        expect($command->errorOutput())
             ->toBeEmpty()
-            ->successful()
+            ->and($command->successful())
             ->toBeTrue()
             ->and(File::exists(base_path('builds/skeleton')))
             ->toBeFalse('The CLI file still exists');
     })->skipOnCI();
+});
+
+it('generate license file', function () {
+    $file = File::partialMock();
+    $stub = base_path('stubs/license.md.stub');
+
+    $file
+        ->shouldReceive('exists')
+        ->andReturnFalse();
+
+    $this->artisan('init', [
+        'vendor' => 'Vendor',
+        'package' => 'Package',
+        'description' => 'Lorem ipsum dolor it',
+        '--confirm' => true,
+        '--do-not-install-dependencies' => true,
+        '--no-self-delete' => true,
+    ])
+        ->expectsOutput('Self-deleting skipped')
+        ->assertSuccessful();
+
+    /**
+     * Due to the first line will have the `Copyright {{year}} {{author|title}} {{email|lower}}` without being replaced
+     * when I test both files, the stub one and the already created, I must ensure the "content" is correct.
+     */
+    $removeFirstLine = fn (string $content) => explode("\n", $content, 2)[1];
+
+    expect(sandbox_path('LICENSE.md'))
+        ->toBeFile()
+        ->and(
+            $removeFirstLine(File::get(sandbox_path('LICENSE.md')))
+        )
+        ->toBe(
+            $removeFirstLine(File::get($stub))
+        );
+});
+
+it('can replace already defined `LICENSE.md` file', function () {
+    Artisan::registerCommand(new class extends Command
+    {
+        use InteractsWithLicenseDescription;
+
+        protected $signature = 'demo';
+
+        protected $description = 'Lorem ipsum dolor it';
+
+        public function handle(): bool
+        {
+            return $this->generateLicenseFile() ? self::SUCCESS : self::FAILURE;
+        }
+
+        protected function getPackagePath(?string $path = null): string
+        {
+            return sandbox_path($path);
+        }
+    });
+
+    File::shouldReceive('exists')->andReturnTrue();
+    File::shouldReceive('get')->andReturn('Lorem ipsum dolor it');
+    File::shouldReceive('put')->andReturnTrue();
+
+    $this->artisan('demo')
+        ->expectsOutputToContain('The `LICENSE.md` file already exists')
+        ->expectsConfirmation('Do you want to replace replace the `LICENSE.md` file?', 'yes')
+        ->assertSuccessful();
+
+    expect(
+        File::exists(base_path('stubs/license.md.stub'))
+    )->toBeTrue();
 });

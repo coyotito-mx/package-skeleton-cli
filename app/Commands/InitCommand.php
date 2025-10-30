@@ -4,16 +4,13 @@ namespace App\Commands;
 
 use App\Commands\Concerns\InteractsWithComposer;
 use App\Commands\Concerns\InteractsWithPackageConfiguration;
-use App\Commands\Concerns\InteractsWithTemplate;
+use App\Commands\Concerns\WithTraitsBootstrap;
 use App\Commands\Contracts\HasPackageConfiguration;
 use App\Commands\Exceptions\CliNotBuiltException;
-use Illuminate\Console\Concerns\PromptsForMissingInput;
-use Illuminate\Contracts\Console\PromptsForMissingInput as PromptsForMissingInputContract;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
-use LaravelZero\Framework\Commands\Command;
 use Phar;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
@@ -24,14 +21,11 @@ use function Laravel\Prompts\info;
 use function Laravel\Prompts\spin;
 use function Laravel\Prompts\table;
 
-class InitCommand extends Command implements HasPackageConfiguration, PromptsForMissingInputContract
+class InitCommand extends Command implements HasPackageConfiguration
 {
     use InteractsWithComposer,
         InteractsWithPackageConfiguration,
-        PromptsForMissingInput {
-            InteractsWithPackageConfiguration::promptForMissingArgumentsUsing as packagePromptForMissingArgumentsUsing;
-        }
-    use InteractsWithTemplate;
+        WithTraitsBootstrap;
 
     protected $signature = 'init
                          {--dir=* : The excluded directories}
@@ -82,6 +76,8 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
 
             return self::FAILURE;
         }
+
+        $this->generateLicenseFile();
 
         spin(fn () => $this->replacePlaceholdersInFiles($this->getFiles()), 'Processing files...');
 
@@ -241,11 +237,6 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
         }
 
         exit(self::SUCCESS);
-    }
-
-    protected function promptForMissingArgumentsUsing(): array
-    {
-        return $this->packagePromptForMissingArgumentsUsing();
     }
 
     protected function clear(): void

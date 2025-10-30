@@ -14,7 +14,7 @@ trait InteractsWithAuthorEmail
 {
     protected ?string $authorEmailResolved = null;
 
-    public function bootPackageInteractsWithAuthorEmail(): void
+    public function bootInteractsWithAuthorEmail(): void
     {
         $this->addReplacers([
             Replacer\AuthorEmailReplacer::class => fn (): string => $this->getPackageAuthorEmail(),

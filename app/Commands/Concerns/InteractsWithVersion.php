@@ -15,7 +15,7 @@ trait InteractsWithVersion
      */
     protected string $semverPattern = '/^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/';
 
-    public function bootPackageInteractsWithVersion(): void
+    public function bootInteractsWithVersion(): void
     {
         $this->addReplacers([
             Replacer\VersionReplacer::class => fn (): string => $this->getPackageVersion(),

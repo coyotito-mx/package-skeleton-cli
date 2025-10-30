@@ -11,7 +11,7 @@ use Symfony\Component\Console\Input\InputOption;
 trait InteractsWithNamespace
 {
     #[Attributes\Order(Attributes\Enums\Order::FIRST)]
-    public function bootPackageInteractsWithNamespace(): void
+    public function bootInteractsWithNamespace(): void
     {
         $this->addReplacers([
             Replacer\VendorReplacer::class => fn (): string => $this->getPackageVendor(),
