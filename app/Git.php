@@ -7,6 +7,7 @@ namespace App;
 use Illuminate\Process\PendingProcess;
 use Illuminate\Support\Facades\Process;
 use RuntimeException;
+use Symfony\Component\Console\Exception\CommandNotFoundException;
 
 /**
  * Simple Git wrapper to perform Git operations.
@@ -39,15 +40,45 @@ class Git
         $process->throw();
     }
 
+    public function getConfig(string $key, mixed $default = null): mixed
+    {
+        $this->ensureBinaryIsAvailable();
+
+        $process = $this->makeProcess(['config', $key])->run();
+
+        if ($process->seeInErrorOutput("key does not contain a section: $key")) {
+            return $default;
+        }
+
+        $value = trim($process->output());
+
+        if (ctype_digit($value)) {
+            return (int) $value;
+        }
+
+        if (ctype_alnum($value)) {
+            return (string) $value;
+        }
+
+        return $value ?: $default;
+    }
+
     /**
      * Ensure that the Git binary is available on the system.
+     *
+     * @throws CommandNotFoundException if the git command is not installed, or is not available in the $PATH
+     * @throws RuntimeException if something unexpected happen
      */
     protected function ensureBinaryIsAvailable(): void
     {
         $process = $this->makeProcess('--version')->run();
 
         if ($process->failed()) {
-            throw new RuntimeException('Git is not available on this system.');
+            if ($process->seeInErrorOutput('command not found')) {
+                throw new CommandNotFoundException('Git is not available on this system.');
+            }
+
+            throw new RuntimeException($process->errorOutput());
         }
     }
 

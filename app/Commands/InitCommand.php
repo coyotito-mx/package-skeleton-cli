@@ -135,11 +135,12 @@ class InitCommand extends Command implements HasPackageConfiguration
 
         info('These are the details you provided:');
         table(
-            ['Vendor', 'Package', 'Author', 'Description', 'Namespace', 'Package Version', 'Minimum Stability', 'Type', 'License'],
+            ['Vendor', 'Package', 'Author', 'Author Email', 'Description', 'Namespace', 'Package Version', 'Minimum Stability', 'Type', 'License'],
             [[
                 $this->getPackageVendor(),
                 $this->getPackageName(),
                 $this->getPackageAuthorName(),
+                $this->getPackageAuthorEmail(),
                 $this->getPackageDescription(),
                 $this->getPackageNamespace(),
                 $this->getPackageVersion(),

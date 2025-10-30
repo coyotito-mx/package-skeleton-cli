@@ -13,6 +13,12 @@ use function App\Helpers\mkdir;
 use function App\Helpers\rmdir_recursive;
 
 beforeEach(function () {
+    Process::fake([
+        "'git' '--version'" => Process::result(),
+        "'git' 'config' 'user.name'" => 'asciito',
+        "'git' 'config' 'user.email'" => 'test@test.com',
+    ]);
+
     rmdir_recursive(sandbox_path());
     mkdir(sandbox_path());
 
@@ -47,7 +53,8 @@ it('can init the package', function () {
             "license": "{{license}}",
             "authors": [
                 {
-                    "name": "{{author}}"
+                    "name": "{{author}}",
+                    "email": "{{email}}"
                 }
             ],
             "require": {
@@ -83,7 +90,8 @@ it('can init the package', function () {
                 "license": "MIT",
                 "authors": [
                     {
-                        "name": "Acme"
+                        "name": "Acme",
+                        "email": "test@test.com"
                     }
                 ],
                 "require": {
@@ -98,6 +106,56 @@ it('can init the package', function () {
         );
 
     File::delete(sandbox_path('composer.json'));
+});
+
+it('can init package quickly', function () {
+    File::put(
+        sandbox_path('composer.json'),
+        <<<'EOF'
+        {
+            "name": "{{namespace|slug,lower,reverse}}",
+            "description": "{{description|ucfirst}}",
+            "authors": [
+                {
+                    "name": "{{author}}",
+                    "email": "{{email}}"
+                }
+            ],
+        }
+        EOF
+    );
+
+    Process::fake([
+        "'git' 'config' 'user.email'" => Process::result(errorOutput: 'key does not contain a section: user.email', exitCode: 1),
+    ]);
+
+    $this->artisan('init', [
+        'vendor' => 'Vendor',
+        'package' => 'Acme',
+        'description' => 'Lorem ipsum dolor it',
+        '--no-self-delete' => true,
+        '--do-not-install-dependencies' => true,
+    ])
+        ->expectsQuestion("Author's Email", 'test@test.com')
+        ->expectsConfirmation('Do you want to use this configuration?', 'yes')
+        ->assertSuccessful();
+
+    expect(File::get(sandbox_path('composer.json')))
+        ->toBeString()
+        ->toBe(
+            <<<'EOF'
+            {
+                "name": "vendor/acme",
+                "description": "Lorem ipsum dolor it",
+                "authors": [
+                    {
+                        "name": "Vendor",
+                        "email": "test@test.com"
+                    }
+                ],
+            }
+            EOF
+        );
 });
 
 it('failed to install dependencies', function () {
@@ -246,6 +304,7 @@ it('can init the package with custom values', function () {
         *
         * @package {{namespace}}
         * @author {{author}}
+        * @email {{email}}
         * @version {{version}}
         * @license {{license}}
         */
@@ -295,6 +354,7 @@ it('can init the package with custom values', function () {
             *
             * @package Acme\Package
             * @author John Doe
+            * @email test@test.com
             * @version 1.0.0
             * @license MIT
             */

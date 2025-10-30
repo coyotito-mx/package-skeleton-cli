@@ -7,6 +7,7 @@ namespace App\Commands\Concerns;
 trait InteractsWithPackageConfiguration
 {
     use InteractsWithAuthor,
+        InteractsWithAuthorEmail,
         InteractsWithCurrentYear,
         InteractsWithDescription,
         InteractsWithLicense,
