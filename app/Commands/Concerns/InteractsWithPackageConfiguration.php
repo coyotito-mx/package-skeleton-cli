@@ -14,5 +14,6 @@ trait InteractsWithPackageConfiguration
         InteractsWithReplacers,
         InteractsWithTemplate,
         InteractsWithType,
-        InteractsWithVersion;
+        InteractsWithVersion,
+        InteractsWithCurrentYear;
 }

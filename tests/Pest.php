@@ -11,6 +11,11 @@
 |
 */
 
+use App\Commands\Command;
+use App\Commands\Concerns\InteractsWithReplacers;
+use App\Commands\Concerns\WithTraitsBootstrap;
+use Illuminate\Support\Facades\Artisan;
+
 use function Illuminate\Filesystem\join_paths;
 
 uses(Tests\TestCase::class)->in('Feature');
@@ -36,6 +41,66 @@ uses(Tests\TestCase::class)->in('Feature');
 | global functions to help you to reduce the number of lines of code in your test files.
 |
 */
+
+function testingReplacersInCommand(string $subject, string ...$uses): Command
+{
+    $setupNamespace = static function (string $class): string {
+        // Just in case
+        $segments = explode('/', $class);
+
+        if (count($segments) === 1) {
+            $class = array_pop($segments);
+            $segments = [];
+        } else {
+            $class = array_pop($segments);
+        }
+
+        $namespace = implode('\\', $segments);
+
+        return '\\'.($namespace ? $namespace.'\\' : '').$class;
+    };
+
+    $traitsCode = implode(
+        ', ',
+        array_map(
+            fn (string $trait) => $setupNamespace($trait),
+            [
+                WithTraitsBootstrap::class,
+                InteractsWithReplacers::class,
+                ...$uses,
+            ],
+        ),
+    );
+
+    $commandClass = $setupNamespace(Command::class);
+
+    $code = <<<PHP
+    return fn () => new class extends $commandClass {
+        use $traitsCode;
+
+        protected \$signature = 'demo';
+
+        protected \$description = 'Evaluated testing command';
+
+        public function handle(): void
+        {
+            \$output = (new \Illuminate\Pipeline\Pipeline)
+                ->send('$subject')
+                ->through(\$this->getPackageReplacers())
+                ->thenReturn();
+
+            \$this->line(\$output);
+        }
+    };
+    PHP;
+
+    /** @var Closure<Command> $class */
+    $class = eval($code);
+
+    Artisan::registerCommand($class = $class());
+
+    return $class;
+}
 
 function test_path(?string $path = null): string
 {
