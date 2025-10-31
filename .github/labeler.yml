@@ -16,6 +16,8 @@ refactor:
   - head-branch: ['^refactor\/.+']
 style:
   - head-branch: ['^style\/.+']
+chore:
+  - head-branch: ['^chore\/.+']
 tests:
   - head-branch: ['^test\/.+', '^tests\/.+']
 release:
