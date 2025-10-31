@@ -17,7 +17,7 @@ it('replace author', function (string $author) {
     $this->artisan('demo', ['--author' => $author])
         ->expectsOutput(ucfirst($author).' Doe')
         ->assertSuccessful();
-})->throwsNoExceptions()->with('author');
+})->with('author');
 
 it('replace author using namespace', function (string $author) {
     testingReplacersInCommand('{{author}} Doe', InteractsWithAuthor::class, InteractsWithNamespace::class);
