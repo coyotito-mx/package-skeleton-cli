@@ -2,6 +2,7 @@
 
 namespace App\Commands\Concerns;
 
+use App\Commands\Exceptions\InvalidFormatException;
 use App\Replacer;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputOption;
@@ -21,7 +22,7 @@ trait InteractsWithVersion
             Replacer\VersionReplacer::class => fn (): string => $this->getPackageVersion(),
         ]);
 
-        $this->addOption('package-version', mode: InputOption::VALUE_OPTIONAL, description: 'The package version', default: '0.0.1');
+        $this->addOption('package-version', mode: InputOption::VALUE_REQUIRED, description: 'The package version', default: '0.0.1');
     }
 
     public function getPackageVersion(): string
@@ -29,7 +30,7 @@ trait InteractsWithVersion
         $version = $this->option('package-version');
 
         if (! Str::isMatch($this->semverPattern, $version)) {
-            throw new \RuntimeException('Invalid package version format, please follow the semver pattern.');
+            throw new InvalidFormatException('Invalid package version format, please follow the semver pattern.', $version);
         }
 
         return Str::lower($version);
