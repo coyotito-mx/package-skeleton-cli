@@ -9,7 +9,7 @@ it('replace current year', function (int $year) {
     testingReplacersInCommand('{{year}}', InteractsWithCurrentYear::class);
 
     $this->artisan('demo')
-        ->expectsOutputToContain($year)
+        ->expectsOutput($year)
         ->assertSuccessful();
 })->with(function () {
     return collect(range(0, 10))
