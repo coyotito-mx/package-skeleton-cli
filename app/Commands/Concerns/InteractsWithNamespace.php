@@ -15,6 +15,8 @@ use function Laravel\Prompts\text;
 
 trait InteractsWithNamespace
 {
+    protected string $namespacePattern = '/^(?<vendor>[a-z0-9]+(?:-[a-z0-9]+)*)\/(?<package>[a-z0-9]+(?:-[a-z0-9]+)*)$/';
+
     #[Attributes\Order(Attributes\Enums\Order::FIRST)]
     public function bootInteractsWithNamespace(): void
     {
@@ -66,7 +68,7 @@ trait InteractsWithNamespace
     {
         $namespace = Str::lower($this->option('namespace'));
 
-        preg_match('/^(?<vendor>[a-z0-9]+(?:-[a-z0-9]+)*)\/(?<package>[a-z0-9]+(?:-[a-z0-9]+)*)$/', $namespace, $matches);
+        preg_match($this->namespacePattern, $namespace, $matches);
 
         if (empty($matches)) {
             throw new InvalidFormatException('The provided namespace does not match the format.', $namespace);
