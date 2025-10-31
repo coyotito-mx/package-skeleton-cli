@@ -11,7 +11,7 @@
         }
     ],
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
         "ext-pcntl": "*",
         "composer/spdx-licenses": "^1.5",
         "illuminate/log": "^12.17",
@@ -26,9 +26,7 @@
     },
     "autoload": {
         "psr-4": {
-            "App\\": "app/",
-            "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
+            "App\\": "app/"
         },
         "files": [
             "app/helpers.php"
