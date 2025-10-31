@@ -69,7 +69,7 @@ trait InteractsWithNamespace
         preg_match('/^(?<vendor>[a-z0-9]+(?:-[a-z0-9]+)*)\/(?<package>[a-z0-9]+(?:-[a-z0-9]+)*)$/', $namespace, $matches);
 
         if (empty($matches)) {
-            throw new InvalidFormatException($namespace);
+            throw new InvalidFormatException('The provided namespace does not match the format.', $namespace);
         }
 
         return [

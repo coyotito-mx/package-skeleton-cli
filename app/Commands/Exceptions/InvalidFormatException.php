@@ -7,10 +7,13 @@ use RuntimeException;
 class InvalidFormatException extends RuntimeException
 {
     /**
-     * @param string $namespace The malformed `namespace`
+     * Constructor function
+     *
+     * @param string $message The message to error to report
+     * @param string $value The malformed `value`
      */
-    public function __construct(protected(set) string $namespace)
+    public function __construct(string $message, protected(set) string $value)
     {
-        parent::__construct('The provided namespace does not match the format.');
+        parent::__construct($this->message);
     }
 }
