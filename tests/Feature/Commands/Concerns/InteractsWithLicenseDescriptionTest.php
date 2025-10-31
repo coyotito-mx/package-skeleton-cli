@@ -7,7 +7,9 @@ namespace Tests\Feature\Commands\Concerns;
 use App\Commands\Concerns\InteractsWithLicenseDescription;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\File;
-use function App\Helpers\{ rmdir_recursive, mkdir };
+
+use function App\Helpers\mkdir;
+use function App\Helpers\rmdir_recursive;
 
 beforeEach(function () {
     mkdir(sandbox_path());
@@ -75,4 +77,3 @@ it('fail if file does not exist', function () {
 
     $this->artisan('demo')->assertFailed();
 })->throws(FileNotFoundException::class);
-

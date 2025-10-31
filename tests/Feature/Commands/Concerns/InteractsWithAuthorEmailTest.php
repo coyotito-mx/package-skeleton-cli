@@ -14,11 +14,11 @@ dataset('email', [
 ]);
 
 it('replace author\'s email', function (string $email) {
-   testingReplacersInCommand('{{email}}', InteractsWithAuthorEmail::class);
+    testingReplacersInCommand('{{email}}', InteractsWithAuthorEmail::class);
 
-   $this->artisan('demo', ['--email' => $email])
-       ->expectsOutputToContain($email)
-       ->assertSuccessful();
+    $this->artisan('demo', ['--email' => $email])
+        ->expectsOutputToContain($email)
+        ->assertSuccessful();
 })->with('email');
 
 it('replace author\'s email using git config value', function (string $email) {
@@ -53,5 +53,3 @@ it('failed with non valid emails', function ($email) {
 
     $this->artisan('demo', ['--email' => $brokeEmail])->assertFailed();
 })->throws(InvalidArgumentException::class)->with('email');
-
-

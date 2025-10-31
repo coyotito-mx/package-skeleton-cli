@@ -21,7 +21,7 @@ it('replace description', function () {
     $description = 'Lorem ipsum dolor Sit amet, consectetur Adipiscing elit.';
 
     $this->artisan('demo', ['description' => $description])
-        ->expectsOutput(<<<JSON
+        ->expectsOutput(<<<'JSON'
         {
           "name": "vendor/package",
           "description": "lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -48,8 +48,8 @@ it('ask for description', function () {
     $description = 'Lorem ipsum dolor Sit amet, consectetur Adipiscing elit.';
 
     $this->artisan('demo')
-        ->expectsQuestion("What is the package description?", $description)
-        ->expectsOutput(<<<JSON
+        ->expectsQuestion('What is the package description?', $description)
+        ->expectsOutput(<<<'JSON'
         {
           "name": "vendor/package",
           "description": "lorem ipsum dolor sit amet, consectetur adipiscing elit.",

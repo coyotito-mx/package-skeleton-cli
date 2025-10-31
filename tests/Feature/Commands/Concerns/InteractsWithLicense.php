@@ -20,7 +20,7 @@ it('replace license', function () {
     JSON, InteractsWithLicense::class);
 
     $this->artisan('demo')
-        ->expectsOutput(<<<JSON
+        ->expectsOutput(<<<'JSON'
         {
           "name": "vendor/package",
           "description": "lorem ipsum dolor it sit amet",

@@ -9,6 +9,7 @@ use Closure;
 use Illuminate\Support\Str;
 use RuntimeException;
 use Symfony\Component\Console\Input\InputOption;
+
 use function Laravel\Prompts\text;
 
 trait InteractsWithNamespace

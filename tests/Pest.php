@@ -15,8 +15,8 @@ use App\Commands\Command;
 use App\Commands\Concerns\InteractsWithReplacers;
 use App\Commands\Concerns\WithTraitsBootstrap;
 use Illuminate\Support\Facades\Artisan;
-
 use Tests\Fixtures\Concerns\InteractsWithEntryMethod;
+
 use function Illuminate\Filesystem\join_paths;
 
 uses(Tests\TestCase::class)->in('Feature');
@@ -42,7 +42,6 @@ uses(Tests\TestCase::class)->in('Feature');
 | global functions to help you to reduce the number of lines of code in your test files.
 |
 */
-
 
 /**
  * @return Command&InteractsWithReplacers&WithTraitsBootstrap&InteractsWithEntryMethod
