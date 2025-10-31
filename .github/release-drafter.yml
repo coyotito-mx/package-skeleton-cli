@@ -17,11 +17,10 @@ categories:
     label: 'refactor'
   - title: '💅 Style'
     label: 'style'
-  - title: '🧰 Chore'
-    label: 'chore'
   - title: '✅ Tests'
     label: 'tests'
 exclude-labels:
+  - 'chore'
   - 'release'
   - 'changelog'
 change-template: '- $TITLE by @$AUTHOR in #$NUMBER'
