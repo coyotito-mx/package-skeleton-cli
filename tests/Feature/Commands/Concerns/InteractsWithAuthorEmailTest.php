@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 use App\Commands\Concerns\InteractsWithAuthorEmail;
 use Illuminate\Support\Facades\Process;
 

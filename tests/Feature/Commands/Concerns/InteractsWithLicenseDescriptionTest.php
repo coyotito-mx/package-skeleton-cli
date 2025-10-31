@@ -1,9 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Commands\Concerns;
-
 use App\Commands\Concerns\InteractsWithLicenseDescription;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\File;

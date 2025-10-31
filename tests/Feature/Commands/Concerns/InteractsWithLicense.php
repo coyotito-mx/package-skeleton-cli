@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Commands\Concerns;
-
 use App\Commands\Concerns\InteractsWithLicense;
 
 it('replace license', function () {
