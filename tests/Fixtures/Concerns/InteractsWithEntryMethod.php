@@ -13,7 +13,7 @@ trait InteractsWithEntryMethod
         return $this->usingEntry instanceof Closure;
     }
 
-    public function entry(): mixed
+    public function entry(): int
     {
         if (! $this->hasEntry()) {
             return $this->__handle();
