@@ -3,7 +3,7 @@
 use App\Commands\Concerns\InteractsWithDescription;
 
 it('replace description', function () {
-    testingReplacersInCommand(<<<'JSON'
+    configurable_testing_command(<<<'JSON'
     {
       "name": "vendor/package",
       "description": "{{description}}",
@@ -30,7 +30,7 @@ it('replace description', function () {
 });
 
 it('ask for description', function () {
-    testingReplacersInCommand(<<<'JSON'
+    configurable_testing_command(<<<'JSON'
     {
       "name": "vendor/package",
       "description": "{{description}}",

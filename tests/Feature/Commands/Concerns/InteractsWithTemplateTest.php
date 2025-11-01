@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 dataset('template', ['vanilla', 'laravel']);
 
 beforeEach(function () {
-    $this->command = testingReplacersInCommand('', InteractsWithTemplate::class);
+    $this->command = configurable_testing_command('', InteractsWithTemplate::class);
 
     $this->command->setEntryUsing(function () {
         $this->shouldBootstrapPackage();

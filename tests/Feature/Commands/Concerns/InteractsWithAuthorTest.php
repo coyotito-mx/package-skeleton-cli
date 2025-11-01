@@ -12,7 +12,7 @@ dataset('author', [
 ]);
 
 it('replace author', function (string $author) {
-    testingReplacersInCommand('{{author}} Doe', InteractsWithAuthor::class);
+    configurable_testing_command('{{author}} Doe', InteractsWithAuthor::class);
 
     $this->artisan('demo', ['--author' => $author])
         ->expectsOutput(ucfirst($author).' Doe')
@@ -20,7 +20,7 @@ it('replace author', function (string $author) {
 })->with('author');
 
 it('replace author using namespace', function (string $author) {
-    testingReplacersInCommand('{{author}} Doe', InteractsWithAuthor::class, InteractsWithNamespace::class);
+    configurable_testing_command('{{author}} Doe', InteractsWithAuthor::class, InteractsWithNamespace::class);
 
     $this->artisan('demo', ['--namespace' => "$author/package"])
         ->expectsOutput(ucfirst($author).' Doe')

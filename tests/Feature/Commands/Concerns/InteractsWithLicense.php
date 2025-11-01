@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Commands\Concerns\InteractsWithLicense;
 
 it('replace license', function () {
-    testingReplacersInCommand(<<<'JSON'
+    configurable_testing_command(<<<'JSON'
     {
       "name": "vendor/package",
       "description": "lorem ipsum dolor it sit amet",

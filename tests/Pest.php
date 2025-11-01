@@ -32,6 +32,48 @@ uses(Tests\TestCase::class)->in('Feature');
 |
 */
 
+expect()->extend('toBeFileContent', function (string $file) {
+    expect($this->value)->toBeFile();
+
+    $current = @file_get_contents($this->value);
+
+    if (is_file($file)) {
+        return expect($current)->toBe(@file_get_contents($file));
+    }
+
+    return expect($current)->toBe($file);
+});
+
+expect()->extend('toHaveFiles', function (?bool $dot = false) {
+    $haveFiles = function (string $directory, $dot) {
+        $handler = @opendir($directory);
+
+        // Will stop at first file encounter
+        while (false !== ($file = readdir($handler))) {
+            if ($file !== '.' && $file !== '..') {
+                continue;
+            }
+
+            $filepath = join_paths($directory, $file);
+
+            if ($dot && str_starts_with($file, '.') && is_file($filepath)) {
+                return true;
+            }
+
+            if (is_file($filepath)) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    return expect($this->value)
+        ->toBeDirectory()
+        ->and($haveFiles($this->value, $dot))
+        ->toBeTrue();
+});
+
 /*
 |--------------------------------------------------------------------------
 | Functions
@@ -46,7 +88,7 @@ uses(Tests\TestCase::class)->in('Feature');
 /**
  * @return Command&InteractsWithReplacers&WithTraitsBootstrap&InteractsWithEntryMethod
  */
-function testingReplacersInCommand(string $subject, string ...$uses): Command
+function configurable_testing_command(string $subject, string ...$uses): Command
 {
     $setupNamespace = static function (string $class): string {
         // Just in case

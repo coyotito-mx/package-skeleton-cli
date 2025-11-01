@@ -12,7 +12,7 @@ dataset('email', [
 ]);
 
 it('replace author\'s email', function (string $email) {
-    testingReplacersInCommand('{{email}}', InteractsWithAuthorEmail::class);
+    configurable_testing_command('{{email}}', InteractsWithAuthorEmail::class);
 
     $this->artisan('demo', ['--email' => $email])
         ->expectsOutputToContain($email)
@@ -20,7 +20,7 @@ it('replace author\'s email', function (string $email) {
 })->with('email');
 
 it('replace author\'s email using git config value', function (string $email) {
-    testingReplacersInCommand('{{email}}', InteractsWithAuthorEmail::class);
+    configurable_testing_command('{{email}}', InteractsWithAuthorEmail::class);
 
     Process::fake([
         "'git' 'config' 'user.email'" => $email,
@@ -32,7 +32,7 @@ it('replace author\'s email using git config value', function (string $email) {
 })->with('email');
 
 it('ask for email', function (string $email) {
-    testingReplacersInCommand('{{email}}', InteractsWithAuthorEmail::class);
+    configurable_testing_command('{{email}}', InteractsWithAuthorEmail::class);
 
     Process::fake([
         "'git' '--version'" => Process::result(errorOutput: 'command not found', exitCode: 1),
@@ -47,7 +47,7 @@ it('ask for email', function (string $email) {
 it('failed with non valid emails', function ($email) {
     $brokeEmail = explode('.', $email)[0];
 
-    testingReplacersInCommand('{{email}}', InteractsWithAuthorEmail::class);
+    configurable_testing_command('{{email}}', InteractsWithAuthorEmail::class);
 
     $this->artisan('demo', ['--email' => $brokeEmail])->assertFailed();
 })->throws(InvalidArgumentException::class)->with('email');

@@ -20,7 +20,7 @@ dataset('malformed-namespace', [
     'vendor/acme package',
 ]);
 
-beforeEach(fn () => testingReplacersInCommand('{{namespace}}', InteractsWithNamespace::class));
+beforeEach(fn () => configurable_testing_command('{{namespace}}', InteractsWithNamespace::class));
 
 it('replace namespace', function (string $namespace) {
     [$vendor, $package] = explode('/', $namespace);

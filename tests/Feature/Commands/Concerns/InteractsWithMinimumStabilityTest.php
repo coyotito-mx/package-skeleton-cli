@@ -16,7 +16,7 @@ dataset('values', function () {
     return $values = $prop->getDefaultValue();
 });
 
-beforeEach(fn () => $this->command = testingReplacersInCommand('{{minimum-stability}}', InteractsWithMinimumStability::class));
+beforeEach(fn () => $this->command = configurable_testing_command('{{minimum-stability}}', InteractsWithMinimumStability::class));
 
 it('replace minimum stability', function () {
     $this->artisan('demo')

@@ -2,7 +2,7 @@
 
 use App\Commands\Concerns\InteractsWithType;
 
-beforeEach(fn () => testingReplacersInCommand('{{type}}', InteractsWithType::class));
+beforeEach(fn () => configurable_testing_command('{{type}}', InteractsWithType::class));
 
 dataset('value', function () {
     static $values = null;

@@ -3,7 +3,7 @@
 use App\Commands\Concerns\InteractsWithVersion;
 use App\Commands\Exceptions\InvalidFormatException;
 
-beforeEach(fn () => $this->command = testingReplacersInCommand('{{version}}', InteractsWithVersion::class));
+beforeEach(fn () => $this->command = configurable_testing_command('{{version}}', InteractsWithVersion::class));
 
 dataset('version', function () {
     return collect(range(1, 6))

@@ -10,7 +10,7 @@ use function App\Helpers\rmdir_recursive;
 beforeEach(function () {
     mkdir(sandbox_path());
 
-    $command = testingReplacersInCommand('', InteractsWithLicenseDescription::class);
+    $command = configurable_testing_command('', InteractsWithLicenseDescription::class);
 
     $command->setEntryUsing(function () {
         return ! $this->generateLicenseFile();
