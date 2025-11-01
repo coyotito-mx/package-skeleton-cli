@@ -15,6 +15,7 @@ use App\Commands\Command;
 use App\Commands\Concerns\InteractsWithReplacers;
 use App\Commands\Concerns\WithTraitsBootstrap;
 use Illuminate\Support\Facades\Artisan;
+use Tests\Fixtures\Concerns\InteractsWithEntryMethod;
 
 use function Illuminate\Filesystem\join_paths;
 
@@ -42,6 +43,9 @@ uses(Tests\TestCase::class)->in('Feature');
 |
 */
 
+/**
+ * @return Command&InteractsWithReplacers&WithTraitsBootstrap&InteractsWithEntryMethod
+ */
 function testingReplacersInCommand(string $subject, string ...$uses): Command
 {
     $setupNamespace = static function (string $class): string {
@@ -67,6 +71,7 @@ function testingReplacersInCommand(string $subject, string ...$uses): Command
             [
                 WithTraitsBootstrap::class,
                 InteractsWithReplacers::class,
+                InteractsWithEntryMethod::class,
                 ...$uses,
             ],
         ),
@@ -82,7 +87,12 @@ function testingReplacersInCommand(string $subject, string ...$uses): Command
 
         protected \$description = 'Evaluated testing command';
 
-        public function handle(): void
+        public function handle(): int
+        {
+            return \$this->entry();
+        }
+
+        public function __handle(): int
         {
             \$output = (new \Illuminate\Pipeline\Pipeline)
                 ->send('$subject')
@@ -90,11 +100,17 @@ function testingReplacersInCommand(string $subject, string ...$uses): Command
                 ->thenReturn();
 
             \$this->line(\$output);
+
+            return  (int) !\$output;
+        }
+
+        protected function getPackagePath(?string \$path = null): string
+        {
+            return sandbox_path(\$path);
         }
     };
     PHP;
 
-    /** @var Closure<Command> $class */
     $class = eval($code);
 
     Artisan::registerCommand($class = $class());

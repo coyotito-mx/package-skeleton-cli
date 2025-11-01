@@ -4,12 +4,18 @@ declare(strict_types=1);
 
 namespace App\Commands\Concerns;
 
+use App\Commands\Exceptions\InvalidFormatException;
 use App\Replacer;
+use Closure;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputOption;
 
+use function Laravel\Prompts\text;
+
 trait InteractsWithNamespace
 {
+    protected string $namespacePattern = '/^(?<vendor>[a-z0-9]+(?:-[a-z0-9]+)*)\/(?<package>[a-z0-9]+(?:-[a-z0-9]+)*)$/';
+
     #[Attributes\Order(Attributes\Enums\Order::FIRST)]
     public function bootInteractsWithNamespace(): void
     {
@@ -19,24 +25,57 @@ trait InteractsWithNamespace
             Replacer\NamespaceReplacer::class => fn (): string => $this->getPackageNamespace(),
         ]);
 
+        $missing = function (string $message, string $key): string|Closure {
+            return function () use ($message, $key) {
+                if ($this->option('namespace')) {
+                    return $this->getNamespaceComponents()[$key];
+                } else {
+                    return text($message);
+                }
+            };
+        };
+
         $this
-            ->addPromptRequiredArgument('vendor', 'Vendor name', 'What is the vendor name?')
-            ->addPromptRequiredArgument('package', 'Package name', 'What is the package name?')
-            ->addOption('namespace', null, InputOption::VALUE_OPTIONAL, 'The namespace of the package');
+            ->addPromptRequiredArgument('vendor', 'Vendor name', $missing('What is the vendor name?', 'vendor'))
+            ->addPromptRequiredArgument('package', 'Package name', $missing('What is the package name?', 'package'))
+            ->addOption('namespace', null, InputOption::VALUE_REQUIRED, 'The namespace of the package');
     }
 
     public function getPackageVendor(): string
     {
-        return Str::lower($this->argument('vendor'));
+        return Str::slug($this->argument('vendor'));
     }
 
     public function getPackageName(): string
     {
-        return Str::lower($this->argument('package'));
+        return Str::slug($this->argument('package'));
     }
 
     public function getPackageNamespace(): string
     {
-        return Str::title($this->option('namespace') ?? "{$this->getPackageVendor()}\\{$this->getPackageName()}");
+        if ($this->option('namespace')) {
+            ['vendor' => $vendor, 'package' => $package] = $this->getNamespaceComponents();
+        } else {
+            $vendor = $this->getPackageVendor();
+            $package = $this->getPackageName();
+        }
+
+        return sprintf('%s\\%s', Str::pascal($vendor), Str::pascal($package));
+    }
+
+    private function getNamespaceComponents(): array
+    {
+        $namespace = Str::lower($this->option('namespace'));
+
+        preg_match($this->namespacePattern, $namespace, $matches);
+
+        if (empty($matches)) {
+            throw new InvalidFormatException('The provided namespace does not match the format.', $namespace);
+        }
+
+        return [
+            'vendor' => $matches['vendor'],
+            'package' => $matches['package'],
+        ];
     }
 }

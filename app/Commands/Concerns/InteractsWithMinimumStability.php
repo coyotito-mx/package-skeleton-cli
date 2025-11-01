@@ -11,7 +11,7 @@ trait InteractsWithMinimumStability
 {
     protected array $minimumStabilityAvailable = [
         'stable',
-        'rc' => 'RC',
+        'rc',
         'beta',
         'alpha',
         'dev',
@@ -23,7 +23,7 @@ trait InteractsWithMinimumStability
             Replacer\MinimumStabilityReplacer::class => fn (): string => $this->getPackageMinimumStability(),
         ]);
 
-        $this->addOption('minimum-stability', mode: InputOption::VALUE_OPTIONAL, description: 'The minimum stability allowed for the package', default: 'dev');
+        $this->addOption('minimum-stability', mode: InputOption::VALUE_REQUIRED, description: 'The minimum stability allowed for the package', default: 'dev');
     }
 
     public function getPackageMinimumStability(): string

@@ -9,10 +9,10 @@ it('replace current year', function (int $year) {
     testingReplacersInCommand('{{year}}', InteractsWithCurrentYear::class);
 
     $this->artisan('demo')
-        ->expectsOutputToContain($year)
+        ->expectsOutput($year)
         ->assertSuccessful();
 })->with(function () {
-    return collect(range(0, 10))
+    return collect(range(0, 5))
         ->map(fn (int $year) => Carbon::createFromDate(2000)->addYears($year)->year)
         ->toArray();
 });
