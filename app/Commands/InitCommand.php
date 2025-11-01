@@ -7,6 +7,7 @@ use App\Commands\Concerns\InteractsWithPackageConfiguration;
 use App\Commands\Concerns\WithTraitsBootstrap;
 use App\Commands\Contracts\HasPackageConfiguration;
 use App\Commands\Exceptions\CliNotBuiltException;
+use Exception;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
@@ -58,18 +59,21 @@ class InitCommand extends Command implements HasPackageConfiguration
         try {
             $this->shouldBootstrapPackage();
 
-            retry(3, callback: function () {
+            retry(3, callback: function (int $attempts) {
                 ! $this->option('confirm') && $this->printConfiguration();
 
                 if ($this->option('confirm') || confirm('Do you want to use this configuration?')) {
-                    return true;
+                    return;
                 }
 
-                $this->clear();
 
-                $this->promptForMissingArguments($this->input, $this->output);
+                if ($attempts !== 3) {
+                    $this->clear();
 
-                throw new \Exception('You did not confirm the package initialization.');
+                    $this->promptForMissingArguments($this->input, $this->output);
+                }
+
+                throw new Exception('You did not confirm the package initialization.');
             });
         } catch (\Throwable $th) {
             $this->error($th->getMessage());

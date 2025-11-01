@@ -230,6 +230,28 @@ it('can restart configure', function () {
     File::delete(sandbox_path('README.MD'));
 });
 
+it('does not init package', function () {
+    $vendor = 'Acme';
+    $package = 'Package';
+    $description = 'Lorem ipsum dolor sit amet consectetur adipisicing elit.';
+
+    $this->artisan('init', ['--no-self-delete', '--skip-license-generation'])
+        ->expectsQuestion('What is the vendor name?', $vendor)
+        ->expectsQuestion('What is the package name?', $package)
+        ->expectsQuestion('What is the package description?', $description)
+        ->expectsConfirmation('Do you want to use this configuration?')
+        ->expectsQuestion('What is the vendor name?', $vendor)
+        ->expectsQuestion('What is the package name?', $package)
+        ->expectsQuestion('What is the package description?', $description)
+        ->expectsConfirmation('Do you want to use this configuration?')
+        ->expectsQuestion('What is the vendor name?', $vendor)
+        ->expectsQuestion('What is the package name?', $package)
+        ->expectsQuestion('What is the package description?', $description)
+        ->expectsConfirmation('Do you want to use this configuration?')
+        ->expectsOutput('You did not confirm the package initialization.')
+        ->assertFailed();
+});
+
 it('can init the package with custom values', function () {
     mkdir(sandbox_path('src'));
 
