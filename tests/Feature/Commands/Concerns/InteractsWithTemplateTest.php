@@ -91,4 +91,3 @@ it('cannot bootstrap package on none empty directory', function () {
         ->option('bootstrap')
         ->not->toBeEmpty();
 })->throws(RuntimeException::class, 'The directory where you want to bootstrap the package is not empty (CLI file is ignore)');
-

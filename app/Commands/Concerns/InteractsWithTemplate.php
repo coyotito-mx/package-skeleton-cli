@@ -60,7 +60,7 @@ trait InteractsWithTemplate
         $files = File::files($directory, true);
 
         return collect($files)
-            ->map(fn($f) => $f->getPathname())
+            ->map(fn ($f) => $f->getPathname())
             ->merge($dirs)
             ->filter(fn (string $file) => ! in_array($file, $excludedPaths, true))
             ->isEmpty();
@@ -101,14 +101,14 @@ trait InteractsWithTemplate
         $files = File::files($from);
 
         $allFiles = collect($files)
-            ->map(fn($f) => $f->getPathname())
+            ->map(fn ($f) => $f->getPathname())
             ->merge($dirs)
             ->toArray();
 
         progress(
             'Moving files',
             $allFiles,
-            function (string $file, $progress) use ($from, $to) {
+            function (string $file, $progress) use ($to) {
                 $progress->label("Moving file [$file]");
 
                 if (File::isDirectory($file)) {

@@ -16,7 +16,7 @@ dataset('version', function () {
                 'dev',
             ];
 
-            $template = "%d.%d.%d";
+            $template = '%d.%d.%d';
 
             $extra = mt_rand(0, 1) ? '-'.$extras[random_int(0, count($extras) - 1)] : '';
 
@@ -36,7 +36,7 @@ dataset('invalid', function () {
                 'dev',
             ];
 
-            $template = "%d.%d";
+            $template = '%d.%d';
 
             $extra = mt_rand(0, 1) ? '-'.$extras[random_int(0, count($extras) - 1)] : '';
 

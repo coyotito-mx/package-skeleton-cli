@@ -8,7 +8,6 @@ use App\Commands\Exceptions\InvalidFormatException;
 use App\Replacer;
 use Closure;
 use Illuminate\Support\Str;
-use RuntimeException;
 use Symfony\Component\Console\Input\InputOption;
 
 use function Laravel\Prompts\text;
@@ -61,7 +60,7 @@ trait InteractsWithNamespace
             $package = $this->getPackageName();
         }
 
-        return sprintf("%s\\%s", Str::pascal($vendor), Str::pascal($package));
+        return sprintf('%s\\%s', Str::pascal($vendor), Str::pascal($package));
     }
 
     private function getNamespaceComponents(): array
