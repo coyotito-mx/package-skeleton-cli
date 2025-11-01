@@ -549,15 +549,21 @@ describe('Build CLI and test self-delete functionality', function () {
             '--confirm',
             '--do-not-install-dependencies',
             '--skip-license-generation',
+            '--path',
+            sandbox_path(),
         ])
             ->path(base_path())
             ->run();
 
-        Sleep::for(1)->seconds();
-
-        expect($command->errorOutput())
+        expect($command)
+            ->errorOutput()
             ->toBeEmpty()
-            ->and($command->successful())
+            ->errorOutput()
+            ->not->toContain('We could not self-delete the CLI')
+            ->output()
+            ->toContain('Self-deleting the CLI...')
+            ->toContain('Bye bye')
+            ->successful()
             ->toBeTrue()
             ->and(base_path('builds/skeleton'))
             ->not->toBeFile();

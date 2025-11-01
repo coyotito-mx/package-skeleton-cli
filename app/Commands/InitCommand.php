@@ -66,7 +66,6 @@ class InitCommand extends Command implements HasPackageConfiguration
                     return;
                 }
 
-
                 if ($attempts !== 3) {
                     $this->clear();
 
@@ -226,18 +225,23 @@ class InitCommand extends Command implements HasPackageConfiguration
             exit(self::FAILURE);
         }
 
-        if ($id !== 0) {
-            $this->info('Self-deleting the CLI...');
-        } else {
+        if ($id === 0) {
             $process = Process::command(['unlink', $binary])->run();
 
-            if ($process->failed()) {
-                $this->error('We could not self-delete the CLI');
+            exit($process->successful() ? 0 : 1);
+        }
 
-                exit(self::FAILURE);
-            }
+        $this->info('Self-deleting the CLI...');
 
+        // Wait for child to finish
+        pcntl_waitpid($id, $status);
+
+        if (pcntl_wifexited($status) && pcntl_wexitstatus($status) === 0) {
             $this->info('Bye bye 👋');
+        } else {
+            $this->error('We could not self-delete the CLI');
+
+            exit(self::FAILURE);
         }
 
         exit(self::SUCCESS);
