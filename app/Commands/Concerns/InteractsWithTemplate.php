@@ -30,6 +30,7 @@ trait InteractsWithTemplate
             shortcut: 'b',
             mode: InputOption::VALUE_REQUIRED,
             description: "Bootstrap a package using a template ($list)",
+            suggestedValues: array_keys($this->bootstrapTypes),
         );
     }
 

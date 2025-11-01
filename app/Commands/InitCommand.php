@@ -34,7 +34,7 @@ class InitCommand extends Command implements HasPackageConfiguration
                          {--path= : The path where the package will be initialized}
                          {--confirm : Skip the confirmation prompt}
                          {--d|do-not-install-dependencies : Do not install the dependencies after initialization}
-                         {--s|no-self-delete : Do not delete this command after initialization}';
+                         {--s|no-self-delete : Do not delete the CLI after initialization finished}';
 
     protected $description = 'Init package';
 
