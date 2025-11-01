@@ -4,7 +4,6 @@ use App\Commands\Exceptions\CliNotBuiltException;
 use App\Facades\Composer;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
-use Illuminate\Support\Sleep;
 
 use function App\Helpers\mkdir;
 use function App\Helpers\rmdir_recursive;
