@@ -21,6 +21,9 @@ trait InteractsWithAuthor
 
     public function getPackageAuthorName(): string
     {
-        return Str::title($this->option('author') ?? $this->getPackageVendor());
+        return Str::of($this->option('author') ?? $this->getPackageVendor())
+            ->snake(' ')
+            ->title()
+            ->toString();
     }
 }

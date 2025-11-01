@@ -7,6 +7,7 @@ use App\Commands\Concerns\InteractsWithPackageConfiguration;
 use App\Commands\Concerns\WithTraitsBootstrap;
 use App\Commands\Contracts\HasPackageConfiguration;
 use App\Commands\Exceptions\CliNotBuiltException;
+use Exception;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
@@ -58,18 +59,20 @@ class InitCommand extends Command implements HasPackageConfiguration
         try {
             $this->shouldBootstrapPackage();
 
-            retry(3, callback: function () {
+            retry(3, callback: function (int $attempts) {
                 ! $this->option('confirm') && $this->printConfiguration();
 
                 if ($this->option('confirm') || confirm('Do you want to use this configuration?')) {
-                    return true;
+                    return;
                 }
 
-                $this->clear();
+                if ($attempts !== 3) {
+                    $this->clear();
 
-                $this->promptForMissingArguments($this->input, $this->output);
+                    $this->promptForMissingArguments($this->input, $this->output);
+                }
 
-                throw new \Exception('You did not confirm the package initialization.');
+                throw new Exception('You did not confirm the package initialization.');
             });
         } catch (\Throwable $th) {
             $this->error($th->getMessage());
@@ -222,18 +225,23 @@ class InitCommand extends Command implements HasPackageConfiguration
             exit(self::FAILURE);
         }
 
-        if ($id !== 0) {
-            $this->info('Self-deleting the CLI...');
-        } else {
+        if ($id === 0) {
             $process = Process::command(['unlink', $binary])->run();
 
-            if ($process->failed()) {
-                $this->error('We could not self-delete the CLI');
+            exit($process->successful() ? 0 : 1);
+        }
 
-                exit(self::FAILURE);
-            }
+        $this->info('Self-deleting the CLI...');
 
+        // Wait for child to finish
+        pcntl_waitpid($id, $status);
+
+        if (pcntl_wifexited($status) && pcntl_wexitstatus($status) === 0) {
             $this->info('Bye bye 👋');
+        } else {
+            $this->error('We could not self-delete the CLI');
+
+            exit(self::FAILURE);
         }
 
         exit(self::SUCCESS);
