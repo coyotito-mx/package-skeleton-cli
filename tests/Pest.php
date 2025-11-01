@@ -104,7 +104,7 @@ function testingReplacersInCommand(string $subject, string ...$uses): Command
             return  (int) !\$output;
         }
 
-        protected function getPackagePath(?string \$path): string
+        protected function getPackagePath(?string \$path = null): string
         {
             return sandbox_path(\$path);
         }
