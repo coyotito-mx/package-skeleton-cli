@@ -54,6 +54,11 @@ jobs:
           # Extract file
           tar -xf skeleton.tar.gz
 
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+
       - name: Check CLI version
         shell: bash
         run: |
