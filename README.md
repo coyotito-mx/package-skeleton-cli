@@ -1,4 +1,3 @@
-
 # Package Skeleton CLI
 
 ![example workflow](https://github.com/coyotito-mx/package-skeleton-cli/actions/workflows/tests.yml/badge.svg)
@@ -10,21 +9,19 @@ The **Package Skeleton CLI** is a command-line interface that allows you to init
 ## Installation
 
 > ⚠️
-> The CLI **only** works on **macOS** 🤷‍♂️
+> The CLI currently **only** works on **macOS** 🤷‍♂️
 
 ### Downloading the CLI
 
 Using **cURL**:
 ```bash
 curl -L "https://github.com/coyotito-mx/package-skeleton-cli/releases/download/v0.0.3/skeleton" -o skeleton
-
 chmod +x skeleton
 ```
 
 Using **wget**:
 ```bash
 wget "https://github.com/coyotito-mx/package-skeleton-cli/releases/download/v0.0.3/skeleton" -O skeleton
-
 chmod +x skeleton
 ```
 
@@ -33,7 +30,7 @@ Then you can move the binary to the desired location and use it.
 ## Usage
 
 > ⚠️
-> To use the CLI, you must have a package skeleton with the placeholders you want to replace, or you could call the command with the option `--bootstrap=` and one of the valid templates to bootstrap (`vaniall`, `laravel`).
+> To use the CLI, you must have a package skeleton with the placeholders you want to replace, or you can call the command with the option `--bootstrap=` and one of the valid templates to bootstrap (`vanilla`, `laravel`).
 
 The [placeholders](#placeholders-and-modifiers) must be written in the following format: `{{placeholder}}`. You can use modifiers with the placeholders to format the values before replacing them. The modifiers must be written in the following format:
 
@@ -51,13 +48,13 @@ skeleton init \
   acme \
   "This is a sample package" \
   --author="John Doe" \
-  --email="john@doe.com" \+
+  --email="john@doe.com" \
   --license=MIT \
   --namespace="Asciito\\Acme" \
   --package-version=v1.0.0 \
   --minimum-stability=stable \
   --type=library \
-  --path="$HOME"
+  --path="$HOME" \
   --bootstrap=laravel
 ```
 
@@ -92,13 +89,13 @@ The available placeholders (replacers):
 - `reverse` (reverses the value)
 
 > ⚠️
-> Beware, the order is important, calling a modifier like `<placeholder>|upper,slug` might not be what you want.
+> Beware: the order is important, calling a modifier like `<placeholder>|upper,slug` might not be what you want.
 > 
 > For example, the value `John Doe` could be:
 > ```text
 > {{author|upper,slug}} → john-doe
 > ```
-> Instead. you must use then in the following order:
+> Instead, you must use them in the following order:
 > ```text
 > {{author|slug,upper}} → JOHN-DOE
 > ```
