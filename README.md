@@ -9,25 +9,8 @@ The **Package Skeleton CLI** is a command-line interface that allows you to init
 
 ## Installation
 
-The installation only works on Unix-like systems, such as Linux and macOS. To use it on Windows, you can use the Windows Subsystem for Linux (WSL) to be able to use the CLI.
-
-### Cloning the repository:
-
-```bash
-git clone https://github.com/coyotito-mx/package-skeleton-cli.git
-
-cd package-skeleton-cli
-
-php skeleton app:build skeleton
-
-chmod +x build/skeleton
-```
-
-Once the command is built, you can move the binary to the desired location and use it as a global command.
-
-```bash
-mv build/skeleton /usr/local/bin/skeleton
-```
+> ⚠️
+> The CLI **only** works on **macOS** 🤷‍♂️
 
 ### Downloading the CLI
 
@@ -45,34 +28,56 @@ wget "https://github.com/coyotito-mx/package-skeleton-cli/releases/download/v0.0
 chmod +x skeleton
 ```
 
-Then you can move the binary to the desired location and use it as a global command.
-
-```bash
-mv skeleton /usr/local/bin/skeleton
-```
+Then you can move the binary to the desired location and use it.
 
 ## Usage
 
-To use the CLI, you must have a package skeleton with the placeholders you want to replace. The placeholders must be written in the following format: `{{placeholder}}`. You can use modifiers with the placeholders to format the values before replacing them. The modifiers must be written in the following format:
+> ⚠️
+> To use the CLI, you must have a package skeleton with the placeholders you want to replace, or you could call the command with the option `--bootstrap=` and one of the valid templates to bootstrap (`vaniall`, `laravel`).
+
+The [placeholders](#placeholders-and-modifiers) must be written in the following format: `{{placeholder}}`. You can use modifiers with the placeholders to format the values before replacing them. The modifiers must be written in the following format:
 
 ```bash
 {{placeholder|modifier[,modifier]}}
 ```
 
-The available placeholders:
+### Running the CLI
+
+This command will bootstrap a `Laravel Project` using the `laravel` [template](https://github.com/coyotito-mx/laravel-package-skeleton) from one of our template skeletons.
+
+```bash
+skeleton init \
+  asciito \
+  acme \
+  "This is a sample package" \
+  --author="John Doe" \
+  --email="john@doe.com" \+
+  --license=MIT \
+  --namespace="Asciito\\Acme" \
+  --package-version=v1.0.0 \
+  --minimum-stability=stable \
+  --type=library \
+  --path="$HOME"
+  --bootstrap=laravel
+```
+
+### Placeholders and modifiers
+
+The available placeholders (replacers):
 
 - `vendor`
 - `package`
 - `namespace`
 - `description`
 - `author`
+- `email` (Author's email)
 - `package-version`
 - `minimum-stability`
-- `license` (package license: MIT, GPL, etc.)
+- `license` (package license: MIT)
 - `type` (package type: library, project, metapackage, composer-plugin, etc.)
 - **More placeholders will be added in the future.**
 
-The available modifiers (global):
+**Global modifiers**:
 
 - `upper` (converts the value to uppercase)
 - `lower` (converts the value to lowercase)
@@ -85,50 +90,48 @@ The available modifiers (global):
 - `kebab` (converts the value to kebab case)
 - `plural` (converts the value to plural)
 - `reverse` (reverses the value)
-- **More modifiers will be added in the future.**
+
+> ⚠️
+> Beware, the order is important, calling a modifier like `<placeholder>|upper,slug` might not be what you want.
+> 
+> For example, the value `John Doe` could be:
+> ```text
+> {{author|upper,slug}} → john-doe
+> ```
+> Instead. you must use then in the following order:
+> ```text
+> {{author|slug,upper}} → JOHN-DOE
+> ```
+
 
 Modifiers by `Replacer`:
 
 - `Namespace`
-    - `escape` (escapes the `namespace` separator)
-    - `reverse` (reverses the `namespace` separator)
+  - `escape` (escapes the `namespace` separator `\` to `\\`)
+  - `reverse` (reverses the `namespace` separator)
 
-### Initializing the package skeleton
+### CLI available arguments and options
 
-To initialize the package skeleton, you must run the following command:
-
-```bash
+```shell
 skeleton init [options] [--] <vendor> <package> <description>
+
+Options:
+      --namespace=NAMESPACE                  The namespace of the package
+      --author[=AUTHOR]                      The author of the package
+      --email=EMAIL                          The email of the author
+      --minimum-stability=MINIMUM-STABILITY  The minimum stability allowed for the package [default: "dev"]
+  -b, --bootstrap=BOOTSTRAP                  Bootstrap a package using a template (vanilla, laravel)
+      --type[=TYPE]                          The package type [default: "library"]
+      --package-version=PACKAGE-VERSION      The package version [default: "0.0.1"]
+      --replace-license                      Force replace the `LICENSE.md` file
+      --skip-license-generation              Skip license generation
+      --dir[=DIR]                            The excluded directories (multiple values allowed)
+      --file[=FILE]                          The excluded files (multiple values allowed)
+      --path[=PATH]                          The path where the package will be initialized
+      --confirm                              Skip the confirmation prompt
+  -d, --do-not-install-dependencies          Do not install the dependencies after initialization
+  -s, --no-self-delete                       Do not delete the CLI after initialization finished
 ```
-
-### Options
-
-- `--author=`: The package author. If not provided, it will be generated automatically.
-- `--license=`: The package license. Available values: MIT, Apache-2.0, GPL-3.0, default: MIT.
-- `--namespace=`: The package namespace. If not provided, it will be generated automatically.
-- `--package-version=`: The package version. Default: v0.0.1.
-- `--minimum-stability=`: The package minimum-stability. Available values: dev, alpha, beta, RC, stable.
-- `--type=`: The package type. Available values: project, library, metapackage, composer-plugin.
-- `--dir=*`: The excluded directories.
-- `--file=*`: The excluded files.
-- `--path=`: The path where the package will be initialized.
-- `--template=`: The path to a custom template for package initialization.
-
-> **Note**: If you want to know the available options, you can use the `--help` option.
-
-You can also run the command without any arguments. This will prompt you to enter the arguments needed to initialize the package skeleton.
-
-```bash
-skeleton init
-```
-
-### Example
-
-```bash
-skeleton init asciito acme "This is a sample package" --author="John Doe" --license=MIT --namespace="Asciito\\Acme" --package-version=v1.0.0 --minimum-stability=stable --type=library --path=./packages
-```
-
-This command will initialize a new package with the provided details and options.
 
 ## Contributing
 

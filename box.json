@@ -5,7 +5,8 @@
         "bootstrap",
         "config",
         "vendor",
-        "builds"
+        "builds",
+        "stubs"
     ],
     "files": [
         "composer.json"

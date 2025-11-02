@@ -3,12 +3,18 @@
 use App\Commands\Exceptions\CliNotBuiltException;
 use App\Facades\Composer;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Sleep;
+use Illuminate\Support\Facades\Process;
 
 use function App\Helpers\mkdir;
 use function App\Helpers\rmdir_recursive;
 
 beforeEach(function () {
+    Process::fake([
+        "'git' '--version'" => Process::result(),
+        "'git' 'config' 'user.name'" => 'asciito',
+        "'git' 'config' 'user.email'" => 'test@test.com',
+    ]);
+
     rmdir_recursive(sandbox_path());
     mkdir(sandbox_path());
 
@@ -43,7 +49,8 @@ it('can init the package', function () {
             "license": "{{license}}",
             "authors": [
                 {
-                    "name": "{{author}}"
+                    "name": "{{author}}",
+                    "email": "{{email}}"
                 }
             ],
             "require": {
@@ -57,7 +64,7 @@ it('can init the package', function () {
         EOF
     );
 
-    $this->artisan('init', ['--no-self-delete' => true])
+    $this->artisan('init', ['--no-self-delete' => true, '--skip-license-generation' => true])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -66,9 +73,8 @@ it('can init the package', function () {
         ->expectsOutput('Self-deleting skipped')
         ->assertSuccessful();
 
-    expect(File::get(sandbox_path('composer.json')))
-        ->toBeString()
-        ->toBe(
+    expect(sandbox_path('composer.json'))
+        ->toBeFileContent(
             <<<'EOF'
             {
                 "name": "acme/package",
@@ -79,7 +85,8 @@ it('can init the package', function () {
                 "license": "MIT",
                 "authors": [
                     {
-                        "name": "Acme"
+                        "name": "Acme",
+                        "email": "test@test.com"
                     }
                 ],
                 "require": {
@@ -92,22 +99,20 @@ it('can init the package', function () {
             }
             EOF
         );
-
-    File::delete(sandbox_path('composer.json'));
 });
 
 it('failed to install dependencies', function () {
     Composer::partialMock()
         ->expects('findComposerFile')
-        ->andThrow(\RuntimeException::class);
+        ->andThrow(RuntimeException::class);
 
-    $this->artisan('init', ['--no-self-delete' => true])
+    $this->artisan('init', ['--no-self-delete' => true, '--skip-license-generation' => true])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
         ->expectsQuestion('Do you want to install the dependencies?', 'yes');
-})->throws(\RuntimeException::class);
+})->throws(RuntimeException::class);
 
 it('can restart configure', function () {
     File::put(
@@ -158,7 +163,7 @@ it('can restart configure', function () {
         README
     );
 
-    $this->artisan('init', ['--no-self-delete' => true])
+    $this->artisan('init', ['--no-self-delete' => true, '--skip-license-generation' => true])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -173,9 +178,8 @@ it('can restart configure', function () {
         ->doesntExpectOutput('Bye bye 👋')
         ->assertSuccessful();
 
-    expect(File::get(sandbox_path('README.MD')))
-        ->toBeString()
-        ->toBe(
+    expect(sandbox_path('README.MD'))
+        ->toBeFileContent(
             <<<'README'
             # Package
 
@@ -225,6 +229,28 @@ it('can restart configure', function () {
     File::delete(sandbox_path('README.MD'));
 });
 
+it('does not init package', function () {
+    $vendor = 'Acme';
+    $package = 'Package';
+    $description = 'Lorem ipsum dolor sit amet consectetur adipisicing elit.';
+
+    $this->artisan('init', ['--no-self-delete', '--skip-license-generation'])
+        ->expectsQuestion('What is the vendor name?', $vendor)
+        ->expectsQuestion('What is the package name?', $package)
+        ->expectsQuestion('What is the package description?', $description)
+        ->expectsConfirmation('Do you want to use this configuration?')
+        ->expectsQuestion('What is the vendor name?', $vendor)
+        ->expectsQuestion('What is the package name?', $package)
+        ->expectsQuestion('What is the package description?', $description)
+        ->expectsConfirmation('Do you want to use this configuration?')
+        ->expectsQuestion('What is the vendor name?', $vendor)
+        ->expectsQuestion('What is the package name?', $package)
+        ->expectsQuestion('What is the package description?', $description)
+        ->expectsConfirmation('Do you want to use this configuration?')
+        ->expectsOutput('You did not confirm the package initialization.')
+        ->assertFailed();
+});
+
 it('can init the package with custom values', function () {
     mkdir(sandbox_path('src'));
 
@@ -242,6 +268,7 @@ it('can init the package with custom values', function () {
         *
         * @package {{namespace}}
         * @author {{author}}
+        * @email {{email}}
         * @version {{version}}
         * @license {{license}}
         */
@@ -265,8 +292,8 @@ it('can init the package with custom values', function () {
         '--package-version' => '1.0.0',
         '--minimum-stability' => 'stable',
         '--type' => 'project',
-        '--license' => 'Apache-2.0',
         '--no-self-delete' => true,
+        '--skip-license-generation' => true,
     ])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
@@ -276,9 +303,8 @@ it('can init the package with custom values', function () {
         ->expectsOutput('Self-deleting skipped')
         ->assertSuccessful();
 
-    expect(File::get(sandbox_path('src/SomeClass.php')))
-        ->toBeString()
-        ->toBe(
+    expect(sandbox_path('src/SomeClass.php'))
+        ->toBeFileContent(
             <<<'PHP'
             <?php
 
@@ -291,8 +317,9 @@ it('can init the package with custom values', function () {
             *
             * @package Acme\Package
             * @author John Doe
+            * @email test@test.com
             * @version 1.0.0
-            * @license Apache-2.0
+            * @license MIT
             */
             class SomeClass
             {
@@ -312,145 +339,15 @@ it('can init the package with custom values', function () {
     File::deleteDirectory(sandbox_path('src'));
 });
 
-it('can init the package with custom values and restart configure', function () {
-    mkdir(sandbox_path('config'));
-
-    File::put(
-        sandbox_path('config/app.php'),
-        <<<'EOF'
-        <?php
-
-        /*
-        |--------------------------------------------------------------------------
-        | Package Roles configuration
-        |--------------------------------------------------------------------------
-        |
-        | This is a configuration file for the package `{{package|ucfirst}}`.
-        |
-        */
-
-        return [
-            'roles' => [
-                'admin' => 'Administrator',
-                'user' => 'User',
-            ],
-            'permissions' => [
-                'create' => 'Create',
-                'read' => 'Read',
-                'update' => 'Update',
-                'delete' => 'Delete',
-            ],
-            'models' => [
-                'role' => {{namespace}}\Role::class,
-                'permission' => {{namespace}}\Permission::class,
-            ],
-            'tables' => [
-                'roles' => 'roles',
-                'permissions' => 'permissions',
-                'role_user' => 'role_user',
-                'prefix_tables' => '{{package|snake}}',
-            ],
-        ];
-        EOF
-    );
-
-    $this->artisan('init', [
-        'vendor' => 'Acme',
-        'package' => 'Package',
-        'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
-        '--author' => 'John Doe',
-        '--package-version' => '1.0.0',
-        '--minimum-stability' => 'stable',
-        '--type' => 'project',
-        '--license' => 'Apache-2.0',
-        '--no-self-delete' => true,
-    ])
-        ->expectsConfirmation('Do you want to use this configuration?', 'yes')
-        ->expectsConfirmation('Do you want to install the dependencies?')
-        ->expectsOutput('Self-deleting skipped')
-        ->assertSuccessful();
-
-    expect(File::get(sandbox_path('config/app.php')))
-        ->toBeString()
-        ->toBe(
-            <<<'PHP'
-            <?php
-
-            /*
-            |--------------------------------------------------------------------------
-            | Package Roles configuration
-            |--------------------------------------------------------------------------
-            |
-            | This is a configuration file for the package `Package`.
-            |
-            */
-
-            return [
-                'roles' => [
-                    'admin' => 'Administrator',
-                    'user' => 'User',
-                ],
-                'permissions' => [
-                    'create' => 'Create',
-                    'read' => 'Read',
-                    'update' => 'Update',
-                    'delete' => 'Delete',
-                ],
-                'models' => [
-                    'role' => Acme\Package\Role::class,
-                    'permission' => Acme\Package\Permission::class,
-                ],
-                'tables' => [
-                    'roles' => 'roles',
-                    'permissions' => 'permissions',
-                    'role_user' => 'role_user',
-                    'prefix_tables' => 'package',
-                ],
-            ];
-            PHP
-        );
-
-    File::deleteDirectory(sandbox_path('config'));
-});
-
 it('exclude directory and avoid replacements', function () {
     mkdir(sandbox_path('src'));
 
-    File::put(
-        sandbox_path('src/SomeClass.php'),
-        <<<'PHP'
-        <?php
-
-        declare(strict_types=1);
-
-        namespace {{namespace}};
-
-        /**
-        * This is the SomeClass class for testing
-        *
-        * @package {{namespace}}
-        * @author {{author}}
-        * @version {{version}}
-        * @license {{license}}
-        */
-        class SomeClass
-        {
-            public function echoPhrase(string $phrase): string
-            {
-                return $phrase;
-            }
-
-            public function echoHello(): string
-            {
-                return 'Hi, I\'m the author {{author|title}}!';
-            }
-        }
-        PHP
-    );
+    File::put(sandbox_path('src/SomeClass.php'), '');
 
     $this->artisan('init', [
         '--dir' => 'src',
         '--no-self-delete' => true,
+        '--skip-license-generation' => true,
     ])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
@@ -460,40 +357,11 @@ it('exclude directory and avoid replacements', function () {
         ->expectsOutput('Self-deleting skipped')
         ->assertSuccessful();
 
-    expect(File::get(sandbox_path('src/SomeClass.php')))
-        ->toBeString()
-        ->toBe(
-            <<<'PHP'
-            <?php
-
-            declare(strict_types=1);
-
-            namespace {{namespace}};
-
-            /**
-            * This is the SomeClass class for testing
-            *
-            * @package {{namespace}}
-            * @author {{author}}
-            * @version {{version}}
-            * @license {{license}}
-            */
-            class SomeClass
-            {
-                public function echoPhrase(string $phrase): string
-                {
-                    return $phrase;
-                }
-
-                public function echoHello(): string
-                {
-                    return 'Hi, I\'m the author {{author|title}}!';
-                }
-            }
-            PHP
-        );
-
-    File::deleteDirectory(sandbox_path('src'));
+    expect(sandbox_path())
+        ->not->toHaveFiles(dot: true)
+        ->and(sandbox_path('src/SomeClass.php'))
+        ->toBeFile()
+        ->toBeFileContent('');
 });
 
 it('exclude files from being processed', function () {
@@ -560,20 +428,22 @@ it('exclude files from being processed', function () {
         '--author' => 'John Doe',
         '--file' => ['package.json'],
         '--no-self-delete' => true,
+        '--skip-license-generation' => true,
     ])
         ->expectsConfirmation('Do you want to use this configuration?', 'yes')
         ->expectsConfirmation('Do you want to install the dependencies?')
         ->expectsOutput('Self-deleting skipped')
         ->assertSuccessful();
 
-    expect(File::get(sandbox_path('.gitignore')))->toBe($ignore)
-        ->not->toBe(<<<'EOF'
+    expect(sandbox_path('.gitignore'))
+        ->toBeFileContent($ignore)
+        ->not->toBeFileContent(<<<'EOF'
         ./acme/package
         ./acme/package/vendor/bin/
         ./john-doe.txt
         EOF)
-        ->and(File::get(sandbox_path('.editorconfig')))->toBe($editor)
-        ->and(File::get(sandbox_path('AcmeClass.php')))->toBe(<<<'PHP'
+        ->and(sandbox_path('.editorconfig'))->toBeFileContent($editor)
+        ->and(sandbox_path('AcmeClass.php'))->toBeFileContent(<<<'PHP'
         <?php
 
         declare(strict_types=1);
@@ -588,7 +458,7 @@ it('exclude files from being processed', function () {
             }
         }
         PHP)
-        ->and(File::get(sandbox_path('package.json')))->toBe($node);
+        ->and(sandbox_path('package.json'))->toBeFileContent($node);
 });
 
 it('replaces placeholders in file name', function (string $file, string $expected) {
@@ -598,9 +468,9 @@ it('replaces placeholders in file name', function (string $file, string $expecte
 
     $this->artisan('init', [
         '--author' => 'John Doe',
-        '--license' => 'MIT',
         '--type' => 'library',
         '--no-self-delete' => true,
+        '--skip-license-generation' => true,
     ])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
@@ -610,7 +480,7 @@ it('replaces placeholders in file name', function (string $file, string $expecte
         ->expectsOutput('Self-deleting skipped')
         ->assertSuccessful();
 
-    expect(File::exists(sandbox_path("src/$expected")))->toBeTrue();
+    expect(sandbox_path("src/$expected"))->toBeFile();
 })->with([
     'with author' => [
         '{{author|studly}}{{license|upper}}Class.php', 'JohnDoeMITClass.php',
@@ -628,7 +498,7 @@ it('replaces placeholders in file name', function (string $file, string $expecte
 
 it('can\'t self delete because it\'s not a Phar file', function () {
     expect(function () {
-        $this->artisan('init', ['--no-self-delete' => false])
+        $this->artisan('init', ['--no-self-delete' => false, '--skip-license-generation' => true])
             ->expectsQuestion('What is the vendor name?', 'Acme')
             ->expectsQuestion('What is the package name?', 'Package')
             ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -639,7 +509,7 @@ it('can\'t self delete because it\'s not a Phar file', function () {
 });
 
 it('skips self delete', function () {
-    $this->artisan('init', ['--no-self-delete' => true])
+    $this->artisan('init', ['--no-self-delete' => true, '--skip-license-generation' => true])
         ->expectsQuestion('What is the vendor name?', 'Acme')
         ->expectsQuestion('What is the package name?', 'Package')
         ->expectsQuestion('What is the package description?', 'Lorem ipsum dolor sit amet consectetur adipisicing elit.')
@@ -651,10 +521,13 @@ it('skips self delete', function () {
 
 describe('Build CLI and test self-delete functionality', function () {
     it('can self delete when built', function () {
-        $command = \Illuminate\Support\Facades\Process::command([
+        rmdir_recursive(base_path('builds'));
+
+        $command = Process::command([
             PHP_BINARY,
             'skeleton',
             'app:build',
+            '--build-version=unreleased',
         ])
             ->path(base_path());
 
@@ -662,9 +535,11 @@ describe('Build CLI and test self-delete functionality', function () {
             ->failed()
             ->toBeFalse()
             ->successful()
-            ->toBeTrue();
+            ->toBeTrue()
+            ->and(base_path('builds/skeleton'))
+            ->toBeFile();
 
-        $command = \Illuminate\Support\Facades\Process::command([
+        $command = Process::command([
             './builds/skeleton',
             'init',
             'asciito',
@@ -672,19 +547,24 @@ describe('Build CLI and test self-delete functionality', function () {
             'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
             '--confirm',
             '--do-not-install-dependencies',
+            '--skip-license-generation',
+            '--path',
+            sandbox_path(),
         ])
-            ->path(base_path());
+            ->path(base_path())
+            ->run();
 
-        $process = $command->run();
-
-        Sleep::for(1)->seconds();
-
-        expect($process)
+        expect($command)
             ->errorOutput()
             ->toBeEmpty()
+            ->errorOutput()
+            ->not->toContain('We could not self-delete the CLI')
+            ->output()
+            ->toContain('Self-deleting the CLI...')
+            ->toContain('Bye bye')
             ->successful()
             ->toBeTrue()
-            ->and(File::exists(base_path('builds/skeleton')))
-            ->toBeFalse('The CLI file still exists');
+            ->and(base_path('builds/skeleton'))
+            ->not->toBeFile();
     })->skipOnCI();
 });

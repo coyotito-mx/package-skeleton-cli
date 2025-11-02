@@ -25,13 +25,19 @@ trait InteractsWithType
         'typo3-cms-extension',
     ];
 
-    public function bootPackageInteractsWithType(): void
+    public function bootInteractsWithType(): void
     {
         $this->addReplacers([
             Replacer\TypeReplacer::class => fn (): string => $this->getPackageType(),
         ]);
 
-        $this->addOption('type', mode: InputOption::VALUE_OPTIONAL, description: 'The package type', default: 'library');
+        $this->addOption(
+            name: 'type',
+            mode: InputOption::VALUE_OPTIONAL,
+            description: 'The package type',
+            default: 'library',
+            suggestedValues: array_values($this->packageTypes)
+        );
     }
 
     public function getPackageType(): string

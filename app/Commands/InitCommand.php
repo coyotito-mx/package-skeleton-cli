@@ -4,16 +4,14 @@ namespace App\Commands;
 
 use App\Commands\Concerns\InteractsWithComposer;
 use App\Commands\Concerns\InteractsWithPackageConfiguration;
-use App\Commands\Concerns\InteractsWithTemplate;
+use App\Commands\Concerns\WithTraitsBootstrap;
 use App\Commands\Contracts\HasPackageConfiguration;
 use App\Commands\Exceptions\CliNotBuiltException;
-use Illuminate\Console\Concerns\PromptsForMissingInput;
-use Illuminate\Contracts\Console\PromptsForMissingInput as PromptsForMissingInputContract;
+use Exception;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
-use LaravelZero\Framework\Commands\Command;
 use Phar;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
@@ -24,14 +22,11 @@ use function Laravel\Prompts\info;
 use function Laravel\Prompts\spin;
 use function Laravel\Prompts\table;
 
-class InitCommand extends Command implements HasPackageConfiguration, PromptsForMissingInputContract
+class InitCommand extends Command implements HasPackageConfiguration
 {
     use InteractsWithComposer,
         InteractsWithPackageConfiguration,
-        PromptsForMissingInput {
-            InteractsWithPackageConfiguration::promptForMissingArgumentsUsing as packagePromptForMissingArgumentsUsing;
-        }
-    use InteractsWithTemplate;
+        WithTraitsBootstrap;
 
     protected $signature = 'init
                          {--dir=* : The excluded directories}
@@ -39,7 +34,7 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
                          {--path= : The path where the package will be initialized}
                          {--confirm : Skip the confirmation prompt}
                          {--d|do-not-install-dependencies : Do not install the dependencies after initialization}
-                         {--s|no-self-delete : Do not delete this command after initialization}';
+                         {--s|no-self-delete : Do not delete the CLI after initialization finished}';
 
     protected $description = 'Init package';
 
@@ -64,24 +59,28 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
         try {
             $this->shouldBootstrapPackage();
 
-            retry(3, callback: function () {
+            retry(3, callback: function (int $attempts) {
                 ! $this->option('confirm') && $this->printConfiguration();
 
                 if ($this->option('confirm') || confirm('Do you want to use this configuration?')) {
-                    return true;
+                    return;
                 }
 
-                $this->clear();
+                if ($attempts !== 3) {
+                    $this->clear();
 
-                $this->promptForMissingArguments($this->input, $this->output);
+                    $this->promptForMissingArguments($this->input, $this->output);
+                }
 
-                throw new \Exception('You did not confirm the package initialization.');
+                throw new Exception('You did not confirm the package initialization.');
             });
         } catch (\Throwable $th) {
             $this->error($th->getMessage());
 
             return self::FAILURE;
         }
+
+        $this->generateLicenseFile();
 
         spin(fn () => $this->replacePlaceholdersInFiles($this->getFiles()), 'Processing files...');
 
@@ -139,11 +138,12 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
 
         info('These are the details you provided:');
         table(
-            ['Vendor', 'Package', 'Author', 'Description', 'Namespace', 'Package Version', 'Minimum Stability', 'Type', 'License'],
+            ['Vendor', 'Package', 'Author', 'Author Email', 'Description', 'Namespace', 'Package Version', 'Minimum Stability', 'Type', 'License'],
             [[
                 $this->getPackageVendor(),
                 $this->getPackageName(),
                 $this->getPackageAuthorName(),
+                $this->getPackageAuthorEmail(),
                 $this->getPackageDescription(),
                 $this->getPackageNamespace(),
                 $this->getPackageVersion(),
@@ -225,26 +225,26 @@ class InitCommand extends Command implements HasPackageConfiguration, PromptsFor
             exit(self::FAILURE);
         }
 
-        if ($id !== 0) {
-            $this->info('Self-deleting the CLI...');
-        } else {
+        if ($id === 0) {
             $process = Process::command(['unlink', $binary])->run();
 
-            if ($process->failed()) {
-                $this->error('We could not self-delete the CLI');
+            exit($process->successful() ? 0 : 1);
+        }
 
-                exit(self::FAILURE);
-            }
+        $this->info('Self-deleting the CLI...');
 
+        // Wait for child to finish
+        pcntl_waitpid($id, $status);
+
+        if (pcntl_wifexited($status) && pcntl_wexitstatus($status) === 0) {
             $this->info('Bye bye 👋');
+        } else {
+            $this->error('We could not self-delete the CLI');
+
+            exit(self::FAILURE);
         }
 
         exit(self::SUCCESS);
-    }
-
-    protected function promptForMissingArgumentsUsing(): array
-    {
-        return $this->packagePromptForMissingArgumentsUsing();
     }
 
     protected function clear(): void

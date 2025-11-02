@@ -9,8 +9,6 @@ use Illuminate\Support\Sleep;
 use Illuminate\Support\Str;
 use RuntimeException;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Finder\SplFileInfo;
 
 use function Illuminate\Filesystem\join_paths;
 use function Laravel\Prompts\progress;
@@ -23,15 +21,16 @@ trait InteractsWithTemplate
         'laravel' => 'git@github.com:coyotito-mx/laravel-package-skeleton.git',
     ];
 
-    protected function bootPackageInteractsWithTemplate(): void
+    protected function bootInteractsWithTemplate(): void
     {
         $list = implode(', ', array_keys($this->bootstrapTypes));
 
         $this->addOption(
             name: 'bootstrap',
             shortcut: 'b',
-            mode: InputOption::VALUE_OPTIONAL,
+            mode: InputOption::VALUE_REQUIRED,
             description: "Bootstrap a package using a template ($list)",
+            suggestedValues: array_keys($this->bootstrapTypes),
         );
     }
 
@@ -46,7 +45,6 @@ trait InteractsWithTemplate
         $tempDirectory = spin(fn () => $this->downloadTemplate($template), 'Downloading template');
 
         $this->moveTemplateFiles($tempDirectory, $this->getPackagePath());
-
     }
 
     private function checkBoostrapTemplateExists(string $template): bool
@@ -59,14 +57,14 @@ trait InteractsWithTemplate
      */
     private function checkIfDirectoryIsEmpty(string $directory, array $excludedPaths): bool
     {
-        return collect(
-            Finder::create()
-                ->in($directory)
-                ->notPath($excludedPaths)
-                ->depth(0)
-                ->ignoreDotFiles(false)
-                ->getIterator()
-        )->isEmpty();
+        $dirs = File::directories($directory);
+        $files = File::files($directory, true);
+
+        return collect($files)
+            ->map(fn ($f) => $f->getPathname())
+            ->merge($dirs)
+            ->filter(fn (string $file) => ! in_array($file, $excludedPaths, true))
+            ->isEmpty();
     }
 
     /**
@@ -100,25 +98,26 @@ trait InteractsWithTemplate
      */
     private function moveTemplateFiles(string $from, string $to): void
     {
-        $files = Finder::create()
-            ->in($to)
-            ->depth(0)
-            ->ignoreDotFiles(false)
-            ->ignoreVCS(true)
-            ->getIterator();
+        $dirs = File::directories($from);
+        $files = File::files($from);
+
+        $allFiles = collect($files)
+            ->map(fn ($f) => $f->getPathname())
+            ->merge($dirs)
+            ->toArray();
 
         progress(
             'Moving files',
-            $files,
-            function (SplFileInfo $file, $progress) use ($from, $to) {
-                $progress->label("Moving file [{$file->getFilename()}]");
+            $allFiles,
+            function (string $file, $progress) use ($to) {
+                $progress->label("Moving file [$file]");
 
-                if ($file->isDir()) {
-                    File::moveDirectory($file->getPathname(), $to);
+                if (File::isDirectory($file)) {
+                    File::moveDirectory($file, $to);
                 } else {
-                    $filename = Str::after($to, $from);
+                    $filename = Str::afterLast($file, DIRECTORY_SEPARATOR);
 
-                    File::move($file->getPathname(), join_paths($to, $filename));
+                    File::move($file, join_paths($to, $filename));
                 }
 
                 Sleep::for(500_000)->microseconds();

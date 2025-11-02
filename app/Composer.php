@@ -12,8 +12,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Composer extends \Illuminate\Support\Composer
 {
-    use Concerns\WithLicense;
-
     /**
      * Install the dependencies from the current Composer lock file.
      *

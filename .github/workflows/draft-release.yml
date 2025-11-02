@@ -1,14 +1,16 @@
 name: Release Drafter
 
 on:
-  push:
+  pull_request:
     branches: [main]
+    types: [closed]
 
 permissions:
   contents: read
 
 jobs:
   draft-release:
+    if: ${{ github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
 
     permissions:
@@ -46,89 +48,16 @@ jobs:
 
       - name: Install Dependencies
         shell: bash
-        run: composer install --no-dev --no-progress --no-interaction --optimize-autoloader
+        run: |
+          composer install --no-dev --no-progress --no-interaction --optimize-autoloader &&
+          composer global require --no-progress --no-interaction phpacker/phpacker
 
       - name: Build CLI
         shell: bash
         run: |
-          php skeleton app:build \
+          php skeleton app:build skeleton.phar \
             --no-interaction \
-            --build-version="v${{ steps.draft_release.outputs.resolved_version }}" skeleton
-
-      - name: Save Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: skeleton
-          path: builds/skeleton
-          retention-days: 1
-          overwrite: 'true'
-
-      - name: Archive CLI
-        shell: bash
-        run: |
-          # Change Directory
-          cd builds
-
-          if command -v zip >/dev/null 2>&1; then
-            echo "zip is installed"
-          else
-            echo "zip is not installed, installing..."
-
-            sudo apt-get update
-            sudo apt-get install -y zip
-          fi
-
-          # Create Archives
-          zip skeleton.zip skeleton
-          tar -czf skeleton.tar.gz skeleton
-
-          # Remove Unnecessary Files
-          rm -f phpacker.json
-
-      - name: Upload Release Assets
-        uses: shogo82148/actions-upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.draft_release.outputs.upload_url }}
-          asset_path: builds/*
-
-    outputs:
-      upload_url: ${{ steps.draft_release.outputs.upload_url }}
-      composer-directory: ${{ steps.composer-cache-dir.outputs.dir }}
-
-  build:
-    strategy:
-      matrix:
-        platform: [ 'mac', 'linux' ]
-
-    needs: draft-release
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          tools: composer
-
-      - name: Install PHPacker
-        shell: bash
-        run: composer global require --no-progress --no-interaction phpacker/phpacker
-
-      - name: Download Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: skeleton
-          path: ./builds
-
-      - name: Rename CLI
-        shell: bash
-        run: mv ./builds/skeleton ./builds/skeleton.phar
+            --build-version="v${{ steps.draft_release.outputs.resolved_version }}"
 
       - name: Cache PHP Binaries
         id: cache-php-binaries
@@ -139,37 +68,40 @@ jobs:
 
       - name: Build Binaries
         shell: bash
-        run: phpacker build ${{ matrix.platform }} --src=./builds/skeleton.phar
+        run: |
+          # Build macOS binary
+          phpacker build
 
-      - name: Remove unnecessary Files
+          # Move binary to builds root folder and rename it
+          mv builds/mac/mac-arm builds/skeleton-mac
+
+          # Remove directory
+          rm -rf builds/mac
+
+      - name: Archive CLI
         shell: bash
         run: |
-          # Change Directory
-          cd builds
+          if command -v zip >/dev/null 2>&1; then
+            echo "zip is installed"
+          else
+            echo "zip is not installed, installing..."
 
-          # Remove unnecessary files
-          rm -f phpacker.json skeleton.phar
+            sudo apt-get update
+            sudo apt-get install -y zip
+          fi
 
-      - name: Archive Artifacts
-        shell: bash
-        run: |
-          # Change directory
-          cd builds
-
-          # Move files to root of builds directory
-          find build -type f -exec mv {} . \;
-
-          # Remove now empty build directory
-          rm -rf build
+          # Rename Phar binary
+          mv skeleton.phar skeleton
 
           # Create zip and tar.gz archives from everything in builds directory
           find . \
             -type f -not -name '*.*' \
             -exec zip -j "$(basename {})".zip {} \; \
             -exec tar -czf "$(basename {})".tar.gz {} \;
+        working-directory: builds
 
       - name: Upload Release Assets
         uses: shogo82148/actions-upload-release-asset@v1
         with:
-          upload_url: ${{ needs.draft-release.outputs.upload_url }}
+          upload_url: ${{ steps.draft_release.outputs.upload_url }}
           asset_path: builds/*

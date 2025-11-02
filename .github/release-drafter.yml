@@ -20,6 +20,7 @@ categories:
   - title: '✅ Tests'
     label: 'tests'
 exclude-labels:
+  - 'chore'
   - 'release'
   - 'changelog'
 change-template: '- $TITLE by @$AUTHOR in #$NUMBER'
