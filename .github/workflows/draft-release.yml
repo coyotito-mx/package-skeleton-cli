@@ -1,9 +1,10 @@
 name: Release Drafter
 
 on:
-  pull_request:
+  push:
     branches: [main]
-    types: [closed]
+    paths-ignore: [CHANGELOG.md]
+    branches-ignore: [docs/update-changelog]
 
 permissions:
   contents: read
