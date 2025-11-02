@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths-ignore: [CHANGELOG.md]
-    branches-ignore: [docs/update-changelog]
+    branches-ignore: ['docs/update-changelog']
 
 permissions:
   contents: read
