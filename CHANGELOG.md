@@ -1,5 +1,24 @@
 # Release Notes
 
+## v1.0.1 - 2025-11-02
+
+### What's changed
+
+- Update `CHANGELOG` by @[github-actions[bot]](https://github.com/apps/github-actions) in #92
+
+### 🐞 Bugfix
+
+- Fix `workflows` by [@asciito](https://github.com/asciito) in #98
+- Add missing php setup by [@asciito](https://github.com/asciito) in #95
+- Add permissions for reading PRs by [@asciito](https://github.com/asciito) in #94
+
+### 🔥 Hotfix
+
+- Remove condition to skip job when is not a PR by [@asciito](https://github.com/asciito) in #102
+- Remove `branches-ignore` option by [@asciito](https://github.com/asciito) in #101
+- Escape branch names by [@asciito](https://github.com/asciito) in #100
+- Add field for template `name` and `tag` by [@asciito](https://github.com/asciito) in #97
+
 ## v1.0.0 - 2025-11-02
 
 ### What's changed
