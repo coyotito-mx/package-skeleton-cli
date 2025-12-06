@@ -15,8 +15,17 @@ it('replace placeholder with modifiers', function () {
 
     expect($replacer)
         ->replace('Hello, {{name|upper}}!')->toBe('Hello, JOHN DOE!')
+        ->replace('Hello, {{name|lower}}!')->toBe('Hello, john doe!')
         ->replace('Hello, {{name|title}}!')->toBe('Hello, John Doe!')
-        ->replace('Hello, {{name|lower}}!')->toBe('Hello, john doe!');
+        ->replace('Hello, {{name|snake}}!')->toBe('Hello, john_doe!')
+        ->replace('Hello, {{name|kebab}}!')->toBe('Hello, john-doe!')
+        ->replace('Hello, {{name|camel}}!')->toBe('Hello, johnDoe!')
+        ->replace('Hello, {{name|slug}}!')->toBe('Hello, john-doe!');
+
+    $replacer = Replacer::make('name', 'mit');
+
+    expect($replacer)
+        ->replace('Hello, {{name|acronym}}!')->toBe('Hello, MIT!');
 });
 
 it('replace placeholder with multiple modifiers', function () {

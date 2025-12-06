@@ -98,7 +98,7 @@ final class Replacer
             'kebab'   => fn (Stringable $replacement) => $replacement->kebab(),
             'camel'   => fn (Stringable $replacement) => $replacement->camel(),
             'slug'    => fn (Stringable $replacement) => $replacement->slug(),
-            'acronym' => fn (Stringable $replacement) => $replacement->replace(' ', '')->ucfirst(),
+            'acronym' => fn (Stringable $replacement) => $replacement->replace(' ', '')->upper(),
         ];
     }
 
