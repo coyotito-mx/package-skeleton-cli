@@ -3,6 +3,7 @@
 namespace App;
 
 use Closure;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 
@@ -14,6 +15,8 @@ final class Replacer
      * @var array <string, Closure>
      */
     protected array $modifiers = [];
+
+    protected array $excludeModifiers = [];
 
     /**
      * The opening pattern for placeholders.
@@ -94,6 +97,7 @@ final class Replacer
             'snake'   => fn (Stringable $replacement) => $replacement->snake(),
             'kebab'   => fn (Stringable $replacement) => $replacement->kebab(),
             'camel'   => fn (Stringable $replacement) => $replacement->camel(),
+            'slug'    => fn (Stringable $replacement) => $replacement->slug(),
             'acronym' => fn (Stringable $replacement) => $replacement->replace(' ', '')->ucfirst(),
         ];
     }
@@ -107,10 +111,10 @@ final class Replacer
     {
         $defaultModifiers = [...$this->getDefaultModifiers(), ...$this->modifiers];
 
-        return array_filter(
-            array_map(fn (string $modifier) => $defaultModifiers[$modifier] ?? null, $modifiers),
-            fn (?Closure $modifier) => $modifier !== null
-        );
+        return collect($modifiers)
+            ->mapWithKeys(fn (string $modifier) => [$modifier => $defaultModifiers[$modifier] ?? null])
+            ->filter(fn (?Closure $modifier, string $name) => $modifier !== null && !Arr::exists($this->excludeModifiers, $name))
+            ->all();
     }
 
     /**
@@ -126,6 +130,13 @@ final class Replacer
         return $this;
     }
 
+    public function excludeModifiers(array $modifiers): self
+    {
+        $this->excludeModifiers = $modifiers;
+
+        return $this;
+    }
+
     /**
      * Normalize the replacement string.
      *
@@ -135,8 +146,8 @@ final class Replacer
     {
         return (
             $this->replacementNormalizer ??
-            fn (Stringable $replacement) => $replacement->headline())(Str::of($this->replacement)
-        );
+            fn (Stringable $replacement) => $replacement->headline()
+        )(Str::of($this->replacement));
     }
 
     public function normalizeReplacementUsing(?Closure $closure = null): self
