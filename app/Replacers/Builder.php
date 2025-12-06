@@ -12,12 +12,12 @@ abstract class Builder
     /**
      * Constructor
      *
-     * @param string $namespace
+     * @param string $replacement
      * @throws Exception if the namespace is invalid
      */
-    public function __construct(protected string $namespace)
+    public function __construct(protected string $replacement)
     {
-        InvalidNamespace::verification($namespace);
+        InvalidNamespace::verification($replacement);
     }
 
     /**
@@ -25,9 +25,9 @@ abstract class Builder
      *
      * @throws Exception if the namespace is invalid
      */
-    public static function make(string $namespace): Replacer
+    public static function make(string $replacement): Replacer
     {
-        return new static($namespace)->build();
+        return new static($replacement)->build();
     }
 
     /*
@@ -35,7 +35,7 @@ abstract class Builder
      */
     protected function build(): Replacer
     {
-        $replacer = Replacer::make(static::getPlaceholder(), $this->namespace);
+        $replacer = Replacer::make(static::getPlaceholder(), $this->replacement);
 
         $this->configure($replacer);
 
