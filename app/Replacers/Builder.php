@@ -69,7 +69,10 @@ abstract class Builder
      *
      * @return array<string, Closure(Stringable $replacement): Stringable
      */
-    abstract protected function modifiers(): array;
+    protected function modifiers(): array
+    {
+        return [];
+    }
 
     /**
      * Get the list of excluded modifiers
