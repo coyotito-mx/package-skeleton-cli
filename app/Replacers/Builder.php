@@ -17,7 +17,7 @@ abstract class Builder
      */
     public function __construct(protected string $replacement)
     {
-        InvalidNamespace::verification($replacement);
+        //
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Replacers;
 
+use _PHPStan_6597ef616\Nette\IOException;
 use App\Replacer;
 use App\Replacers\Exceptions\InvalidNamespace;
 use Closure;
@@ -12,6 +13,13 @@ use Illuminate\Support\Stringable;
 class NamespaceReplacer extends Builder
 {
     protected static string $placeholder = 'namespace';
+
+    public function __construct(string $replacement)
+    {
+        InvalidNamespace::verification($replacement);
+
+        parent::__construct($replacement);
+    }
 
     protected function configure(Replacer $replacer): void
     {

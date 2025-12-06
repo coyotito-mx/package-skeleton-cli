@@ -1,5 +1,6 @@
 <?php
 
+use App\Replacers\Exceptions\InvalidNamespace;
 use App\Replacers\NamespaceReplacer;
 
 it('replace namespace placeholder', function () {
@@ -8,6 +9,15 @@ it('replace namespace placeholder', function () {
     expect($replacer)
         ->replace('Namespace: {{namespace}}')->toBe('Namespace: Coyotito\\PackageSkeleton');
 });
+
+it('throw and error on invalid namespace format', function (string $namespace) {
+    expect(fn() => NamespaceReplacer::make($namespace))
+        ->toThrow(InvalidNamespace::class);
+})->with([
+    'double slashes' => ['Coyotito//PackageSkeleton'],
+    'space in namespace' => ['Coyotito\\Package Skeleton'],
+    'single forward slash' => ['Coyotito/PackageSkeleton'],
+]);
 
 it('replace namespace placeholder with modifiers', function () {
     $replacer = NamespaceReplacer::make('Coyotito\\PackageSkeleton');

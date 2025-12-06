@@ -8,19 +8,19 @@ use Illuminate\Support\Str;
 
 class InvalidNamespace extends Exception
 {
-    protected static string $pattern = '/^[A-Za-z_][A-Za-z0-9_\\\\]*$/';
+    protected static string $namespacePattern = '/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*\\\\[a-zA-Z0-9_\x7f-\xff]*$/';
 
     /**
      * Validate the given namespace.
      *
-     * @throws static if the namespace is invalid
+     * @throws self if the namespace is invalid
      */
     public static function verification(string $namespace): void
     {
-        if (Str::isMatch(static::$pattern, $namespace)) {
+        if (Str::isMatch(static::$namespacePattern, $namespace)) {
             return;
         }
 
-        throw new static('Invalid namespace provided');
+        throw new self('Invalid namespace provided');
     }
 }
