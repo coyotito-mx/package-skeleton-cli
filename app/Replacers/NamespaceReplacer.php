@@ -65,7 +65,7 @@ class NamespaceReplacer extends Builder
         parent::configure($replacer);
 
         tap($replacer)->normalizeReplacementUsing(fn (Stringable $replacement) => static::unwrapNamespace(fn (Stringable $replacement) => $replacement->trim()->headline())($replacement)
-        )->transformBeforeReplaceUsing(fn (Stringable $replacement) => $replacement->replace(' ', ''));
+        )->transformBeforeReplaceUsing(fn (Stringable $replacement): string => (string) $replacement->replace(' ', ''));
     }
 
     protected function modifiers(): array

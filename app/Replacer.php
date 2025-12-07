@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App;
 
 use Closure;
@@ -153,6 +155,7 @@ final class Replacer
             $replacement = $this->normalizedReplacement();
 
             foreach ($this->getModifiers($modifiers) as $modifier) {
+                /** @var Stringable $replacement */
                 $replacement = $modifier(replacement: $replacement);
             }
 
@@ -263,7 +266,7 @@ final class Replacer
 
     protected function transformBeforeReplace(Stringable $replacement): string
     {
-        return ($this->transformBeforeReplaceUsing ?? fn (Stringable $replacement) => $replacement)($replacement);
+        return ($this->transformBeforeReplaceUsing ?? fn (Stringable $replacement) => (string) $replacement)($replacement);
     }
 
     public function transformBeforeReplaceUsing(?Closure $closure = null): self
