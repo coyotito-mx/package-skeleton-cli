@@ -7,6 +7,27 @@ use App\Replacers\Exceptions\InvalidVersion;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 
+/**
+ * Replacer for version placeholders
+ *
+ * A `version` is composed of up to five parts: `major`, `minor`, `patch`, `pre-release`, and `metadata`, following the Semantic Versioning specification.
+ *
+ * @see https://semver.org/
+ *
+ * Examples of valid versions:
+ * - 1.0.0
+ * - 2.1.3-alpha
+ * - 3.0.0+build.123
+ * - 4.2.1-beta+exp.sha.5114f85
+ *
+ * Modifiers supported:
+ * - `major`: The major version number (e.g., `1` in `1.0.0`)
+ * - `minor`: The minor version number (e.g., `0` in `1.0.0`)
+ * - `patch`: The patch version number (e.g., `0` in `1.0.0`)
+ * - `pre`: The pre-release identifier (e.g., `alpha` in `2.1.3-alpha`)
+ * - `meta`: The build metadata (e.g., `build.123` in `3.0.0+build.123`)
+ * - `prefix`: Adds a 'v' prefix if not already present (e.g., `v1.0.0`)
+ */
 class VersionReplacer extends Builder
 {
     public static string $placeholder = 'version';

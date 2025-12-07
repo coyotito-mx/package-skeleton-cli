@@ -4,6 +4,9 @@ namespace App\Replacers\Exceptions;
 
 use Illuminate\Support\Str;
 
+/**
+ * Exception thrown when a version string is not in a valid semantic versioning format.
+ */
 class InvalidVersion extends InvalidFormatException
 {
     /*
