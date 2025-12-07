@@ -3,7 +3,6 @@
 namespace App\Replacers;
 
 use App\Replacer;
-use App\Replacers\Exceptions\InvalidNamespace;
 use Exception;
 use Illuminate\Support\Stringable;
 
@@ -12,7 +11,6 @@ abstract class Builder
     /**
      * Constructor
      *
-     * @param string $replacement
      * @throws Exception if the namespace is invalid
      */
     public function __construct(protected string $replacement)

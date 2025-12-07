@@ -18,7 +18,7 @@ it('replace year with current year when no year is provided', function () {
     $replacer = YearReplacer::make();
 
     expect($replacer->replace('{{year}}'))->toBe('2024')
-        ->and($replacer->replace('Year: {{year}}'))->toBe("Year: 2024");
+        ->and($replacer->replace('Year: {{year}}'))->toBe('Year: 2024');
 });
 
 it('throws an exception for invalid year', function (string $year) {

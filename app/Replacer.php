@@ -3,7 +3,6 @@
 namespace App;
 
 use Closure;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 
@@ -31,7 +30,7 @@ final class Replacer
     /**
      * The placeholder normalizer closure.
      *
-     * @var ?Closure(Stringable $replacement): Stringable
+     * @var ?Closure(Stringable): Stringable
      */
     protected ?Closure $replacementNormalizer = null;
 
@@ -40,8 +39,8 @@ final class Replacer
     /**
      * Constructor
      *
-     * @param string $placeholder The placeholder to be replaced
-     * @param string $replacement The replacement string
+     * @param  string  $placeholder  The placeholder to be replaced
+     * @param  string  $replacement  The replacement string
      */
     protected function __construct(public string $placeholder, public string $replacement)
     {
@@ -51,8 +50,8 @@ final class Replacer
     /**
      * Create a new Replacer instance.
      *
-     * @param string $placeholder The placeholder to be replaced
-     * @param string $replacement The replacement string
+     * @param  string  $placeholder  The placeholder to be replaced
+     * @param  string  $replacement  The replacement string
      */
     public static function make(string $placeholder, string $replacement): self
     {
@@ -62,7 +61,7 @@ final class Replacer
     /**
      * Replace the placeholder in the given content with the replacement string,
      *
-     * @param string $content The content in which to perform the replacement
+     * @param  string  $content  The content in which to perform the replacement
      */
     public function replace(string $content): string
     {
@@ -91,13 +90,13 @@ final class Replacer
     protected function getDefaultModifiers(): array
     {
         return [
-            'upper'   => fn (Stringable $replacement) => $replacement->upper(),
-            'lower'   => fn (Stringable $replacement) => $replacement->lower(),
-            'title'   => fn (Stringable $replacement) => $replacement->title(),
-            'snake'   => fn (Stringable $replacement) => $replacement->snake(),
-            'kebab'   => fn (Stringable $replacement) => $replacement->kebab(),
-            'camel'   => fn (Stringable $replacement) => $replacement->camel(),
-            'slug'    => fn (Stringable $replacement) => $replacement->slug(),
+            'upper' => fn (Stringable $replacement) => $replacement->upper(),
+            'lower' => fn (Stringable $replacement) => $replacement->lower(),
+            'title' => fn (Stringable $replacement) => $replacement->title(),
+            'snake' => fn (Stringable $replacement) => $replacement->snake(),
+            'kebab' => fn (Stringable $replacement) => $replacement->kebab(),
+            'camel' => fn (Stringable $replacement) => $replacement->camel(),
+            'slug' => fn (Stringable $replacement) => $replacement->slug(),
             'acronym' => fn (Stringable $replacement) => $replacement->replace(' ', '')->upper(),
         ];
     }
@@ -105,7 +104,7 @@ final class Replacer
     /**
      * Get the available modifiers.
      *
-     * @param array $modifiers The modifiers to filter
+     * @param  array  $modifiers  The modifiers to filter
      */
     public function getModifiers(array $modifiers = []): array
     {
@@ -120,8 +119,8 @@ final class Replacer
     /**
      * Add a custom modifier.
      *
-     * @param string $name The name of the modifier
-     * @param Closure $closure The closure that defines the modifier
+     * @param  string  $name  The name of the modifier
+     * @param  Closure  $closure  The closure that defines the modifier
      */
     public function addModifier(string $name, Closure $closure): self
     {
@@ -139,8 +138,6 @@ final class Replacer
 
     /**
      * Normalize the replacement string.
-     *
-     * @return Stringable
      */
     public function normalizedReplacement(): Stringable
     {

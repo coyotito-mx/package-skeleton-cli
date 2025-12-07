@@ -1,7 +1,5 @@
 <?php
 
-
-
 it('init package', function () {
     artisan('init', ['vendor' => 'vendor', 'package' => 'acme', '--proceed' => true])
         ->expectsOutputToContain('Package [Vendor\\Package] initialized successfully!')

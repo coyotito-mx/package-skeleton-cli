@@ -2,9 +2,7 @@
 
 namespace App\Replacers\Exceptions;
 
-use Exception;
 use Illuminate\Support\Str;
-
 
 class InvalidNamespace extends InvalidFormatException
 {

@@ -11,7 +11,7 @@ it('replace namespace placeholder', function () {
 });
 
 it('throw and error on invalid namespace format', function (string $namespace) {
-    expect(fn() => NamespaceReplacer::make($namespace))
+    expect(fn () => NamespaceReplacer::make($namespace))
         ->toThrow(InvalidNamespace::class);
 })->with([
     'double slashes' => ['Coyotito//PackageSkeleton'],
