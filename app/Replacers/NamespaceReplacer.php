@@ -9,6 +9,7 @@ use App\Replacers\Exceptions\InvalidNamespace;
 use Closure;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
+use Override;
 
 /**
  * Replacer for `namespace` placeholders
@@ -67,6 +68,7 @@ class NamespaceReplacer extends Builder
         parent::__construct($replacement);
     }
 
+    #[Override]
     protected function configure(Replacer $replacer): void
     {
         parent::configure($replacer);
@@ -75,6 +77,7 @@ class NamespaceReplacer extends Builder
         )->transformBeforeReplaceUsing(fn (Stringable $replacement): string => (string) $replacement->replace(' ', ''));
     }
 
+    #[Override]
     protected function modifiers(): array
     {
         return [
@@ -101,6 +104,7 @@ class NamespaceReplacer extends Builder
         ];
     }
 
+    #[Override]
     protected function getExcludedModifiers(): array
     {
         return ['acronym'];

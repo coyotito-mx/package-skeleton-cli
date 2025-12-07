@@ -6,6 +6,7 @@ namespace App\Replacers;
 
 use App\Replacer;
 use App\Replacers\Exceptions\InvalidYear;
+use Override;
 
 /**
  * Replacer for `year` placeholders.
@@ -34,6 +35,7 @@ class YearReplacer extends Builder
         parent::__construct($replacement);
     }
 
+    #[Override]
     public static function make(?string $replacement = null): Replacer
     {
         if ($replacement === null) {
@@ -43,6 +45,7 @@ class YearReplacer extends Builder
         return parent::make($replacement);
     }
 
+    #[Override]
     protected function getExcludedModifiers(): array
     {
         return ['upper', 'lower', 'title', 'snake', 'kebab', 'camel', 'slug', 'acronym'];
