@@ -22,10 +22,10 @@ it('replace placeholder with modifiers', function () {
         ->replace('Hello, {{name|camel}}!')->toBe('Hello, johnDoe!')
         ->replace('Hello, {{name|slug}}!')->toBe('Hello, john-doe!');
 
-    $replacer = Replacer::make('name', 'mit');
+    $replacer = Replacer::make('name', 'The United Mexican States');
 
     expect($replacer)
-        ->replace('Hello, {{name|acronym}}!')->toBe('Hello, MIT!');
+        ->replace('Hello, {{name|acronym}}!')->toBe('Hello, UMS!');
 });
 
 it('replace placeholder with multiple modifiers', function () {

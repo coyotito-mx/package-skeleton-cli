@@ -37,6 +37,88 @@ final class Replacer
     protected ?Closure $transformBeforeReplaceUsing = null;
 
     /**
+     * Non-essential words to ignore when generating acronyms.
+     *
+     * @var string[]
+     */
+    protected static array $stopWords = [
+        // Conjunctions
+        'and',
+        'or',
+        'nor',
+        'but',
+        'yet',
+        'so',
+
+        // Articles
+        'a',
+        'an',
+        'the',
+
+        // Prepositions (common, short)
+        'about',
+        'above',
+        'across',
+        'after',
+        'against',
+        'along',
+        'amid',
+        'among',
+        'around',
+        'as',
+        'at',
+        'before',
+        'behind',
+        'below',
+        'beneath',
+        'beside',
+        'besides',
+        'between',
+        'beyond',
+        'by',
+        'despite',
+        'down',
+        'during',
+        'except',
+        'for',
+        'from',
+        'in',
+        'inside',
+        'into',
+        'like',
+        'near',
+        'of',
+        'off',
+        'on',
+        'onto',
+        'out',
+        'outside',
+        'over',
+        'past',
+        'per',
+        'plus',
+        'round',
+        'since',
+        'than',
+        'through',
+        'throughout',
+        'till',
+        'to',
+        'toward',
+        'towards',
+        'under',
+        'underneath',
+        'unlike',
+        'until',
+        'up',
+        'upon',
+        'via',
+        'with',
+        'within',
+        'without',
+    ];
+
+    /**
      * Constructor
      *
      * @param  string  $placeholder  The placeholder to be replaced
@@ -97,7 +179,18 @@ final class Replacer
             'kebab' => fn (Stringable $replacement) => $replacement->kebab(),
             'camel' => fn (Stringable $replacement) => $replacement->camel(),
             'slug' => fn (Stringable $replacement) => $replacement->slug(),
-            'acronym' => fn (Stringable $replacement) => $replacement->replace(' ', '')->upper(),
+            'acronym' => function (Stringable $replacement): Stringable {
+                $acronym = $replacement
+                    ->headline()
+                    ->split('/\s/')
+                    ->filter(function (string $str): bool {
+                        return ! in_array(strtolower($str), self::$stopWords);
+                    })
+                    ->map(fn (string $acronym) => substr(ucfirst($acronym), 0, 1))
+                    ->join('');
+
+                return Str::of($acronym);
+            },
         ];
     }
 
