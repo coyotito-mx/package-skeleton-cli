@@ -39,8 +39,8 @@ class VersionReplacer extends Builder
             'minor' => fn (Stringable $replacement) => $getSegment($replacement, 'minor'),
             'patch' => fn (Stringable $replacement) => $getSegment($replacement, 'patch'),
             'pre' => fn (Stringable $replacement) => $getSegment($replacement, 'prerelease'),
-            'meta' => fn (Stringable $replacement) => $getSegment($replacement, 'metadata'),
-            'prefix' => fn (Stringable $replacement) => $replacement->when(! $replacement->startsWith('v'), fn (Stringable $replacement) => $replacement->prepend('v')),
+            'meta' => fn (Stringable $replacement) => $getSegment($replacement, 'buildmetadata'),
+            'prefix' => fn (Stringable $replacement) => $replacement->prepend('v'),
         ];
     }
 
