@@ -113,7 +113,7 @@ final class Replacer
 
         return collect($modifiers)
             ->mapWithKeys(fn (string $modifier) => [$modifier => $defaultModifiers[$modifier] ?? null])
-            ->filter(fn (?Closure $modifier, string $name) => $modifier !== null && !Arr::exists($this->excludeModifiers, $name))
+            ->filter(fn (?Closure $modifier, string $name) => $modifier !== null && ! in_array($name, $this->excludeModifiers))
             ->all();
     }
 

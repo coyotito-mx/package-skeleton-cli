@@ -63,3 +63,15 @@ it('register custom modifier', function () {
     expect($replacer)
         ->replace('Hello, {{name|reverse}}!')->toBe('Hello, eoD nhoJ!');
 });
+
+it('exclude modifiers', function () {
+    $replacer = tap(Replacer::make('name', 'john doe'))
+        ->excludeModifiers(['upper', 'lower']);
+
+    expect($replacer)
+        ->replace('Hello, {{name|upper}}!')->toBe('Hello, John Doe!')
+        ->replace('Hello, {{name|lower}}!')->toBe('Hello, John Doe!')
+        ->replace('Hello, {{name|slug}}!')->toBe('Hello, john-doe!')
+        ->excludeModifiers(['slug'])
+        ->replace('Hello, {{name|slug}}!')->toBe('Hello, John Doe!');
+});
