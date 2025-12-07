@@ -6,7 +6,7 @@ use Exception;
 use Illuminate\Support\Str;
 
 
-class InvalidNamespace extends Exception
+class InvalidNamespace extends InvalidFormatException
 {
     protected static string $namespacePattern = '/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*\\\\[a-zA-Z0-9_\x7f-\xff]*$/';
 
@@ -15,9 +15,9 @@ class InvalidNamespace extends Exception
      *
      * @throws self if the namespace is invalid
      */
-    public static function verification(string $namespace): void
+    public static function validate(string $value): void
     {
-        if (Str::isMatch(static::$namespacePattern, $namespace)) {
+        if (Str::isMatch(static::$namespacePattern, $value)) {
             return;
         }
 

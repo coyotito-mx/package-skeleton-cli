@@ -11,7 +11,7 @@ class YearReplacer extends Builder
 
     public function __construct(string $replacement)
     {
-        InvalidYear::verification($replacement);
+        InvalidYear::validate($replacement);
 
         parent::__construct($replacement);
     }

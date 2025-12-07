@@ -16,7 +16,7 @@ class NamespaceReplacer extends Builder
 
     public function __construct(string $replacement)
     {
-        InvalidNamespace::verification($replacement);
+        InvalidNamespace::validate($replacement);
 
         parent::__construct($replacement);
     }
