@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App;
 
 use Closure;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 
@@ -35,7 +36,19 @@ final class Replacer
      */
     protected array $modifiers = [];
 
+    /**
+     * The list of modifiers to exclude.
+     *
+     * @var string[]
+     */
     protected array $excludeModifiers = [];
+
+    /**
+     * The list of modifiers to only allow.
+     *
+     * @var string[]
+     */
+    protected array $onlyWith = [];
 
     /**
      * The opening pattern for placeholders.
@@ -144,7 +157,7 @@ final class Replacer
      * @param  string  $placeholder  The placeholder to be replaced
      * @param  string  $replacement  The replacement string
      */
-    protected function __construct(public string $placeholder, public string $replacement)
+    protected function __construct(protected(set) string $placeholder, public string $replacement)
     {
         //
     }
@@ -224,10 +237,14 @@ final class Replacer
     {
         $defaultModifiers = [...$this->getDefaultModifiers(), ...$this->modifiers];
 
-        return collect($modifiers)
-            ->mapWithKeys(fn (string $modifier) => [$modifier => $defaultModifiers[$modifier] ?? null])
-            ->filter(fn (?Closure $modifier, string $name) => $modifier !== null && ! in_array($name, $this->excludeModifiers))
-            ->all();
+        $modifiers = collect($modifiers)->mapWithKeys(fn (string $modifier) => [$modifier => $defaultModifiers[$modifier] ?? null]);
+
+        return $modifiers
+            ->when(
+                $this->onlyWith,
+                fn (Collection $collection) => $collection->filter(fn (?Closure $modifier, string $name) => $modifier !== null && in_array($name, $this->onlyWith)),
+                fn (Collection $collection) => $collection->filter(fn (?Closure $modifier, string $name) => $modifier !== null && ! in_array($name, $this->excludeModifiers))
+            )->all();
     }
 
     /**
@@ -250,6 +267,13 @@ final class Replacer
         return $this;
     }
 
+    public function onlyWith(array $modifiers): self
+    {
+        $this->onlyWith = $modifiers;
+
+        return $this;
+    }
+
     /**
      * Normalize the replacement string.
      */
@@ -261,6 +285,12 @@ final class Replacer
         )(Str::of($this->replacement));
     }
 
+    /**
+     * Set the replacement normalizer closure.
+     *
+     * @param ?Closure(Stringable $replacement): Stringable $closure
+     * @return $this
+     */
     public function normalizeReplacementUsing(?Closure $closure = null): self
     {
         $this->replacementNormalizer = $closure;

@@ -75,6 +75,23 @@ it('register custom modifier', function () {
         ->replace('Hello, {{name|reverse}}!')->toBe('Hello, eoD nhoJ!');
 });
 
+it('permit only specific modifiers', function () {
+    $replacer = tap(Replacer::make('name', 'john doe'))
+            ->onlyWith(['upper', 'lower']);
+
+    expect($replacer)
+        ->replace('Hello, {{name|upper}}!')->toBe('Hello, JOHN DOE!')
+        ->replace('Hello, {{name|lower}}!')->toBe('Hello, john doe!')
+        ->replace('Hello, {{name|slug}}!')->toBe('Hello, John Doe!')
+        ->replace('Hello, {{name|title}}!')->toBe('Hello, John Doe!')
+        ->onlyWith(['slug'])
+        ->replace('Hello, {{name|slug}}!')->toBe('Hello, john-doe!')
+        ->replace('Hello, {{name|upper}}!')->toBe('Hello, John Doe!')
+        ->onlyWith(['snake'])
+        ->replace('Hello, {{name|slug}}!')->toBe('Hello, John Doe!')
+        ->replace('Hello, {{name|snake}}!')->toBe('Hello, john_doe!');
+});
+
 it('exclude modifiers', function () {
     $replacer = tap(Replacer::make('name', 'john doe'))
         ->excludeModifiers(['upper', 'lower']);
