@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 
 /**
- * Replacer for version placeholders
+ * Replacer for `version` placeholders
  *
  * A `version` is composed of up to five parts: `major`, `minor`, `patch`, `pre-release`, and `metadata`, following the Semantic Versioning specification.
  *

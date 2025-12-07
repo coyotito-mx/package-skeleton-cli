@@ -11,11 +11,18 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 
 /**
- * Replacer for namespace placeholders
+ * Replacer for `namespace` placeholders
  *
  * A `namespace` is composed of two parts: `vendor` and `package`, separated by either a backslash (`\`).
  *
  * @see InvalidNamespace::$namespacePattern for the regex pattern used to validate the namespace format.
+ *
+ * Examples of valid namespaces:
+ * - Acme\Utils
+ * - FooBar\BazQux
+ * - Vendor\Package
+ * - Vendor123\Package456
+ * - Coyotito\PackageSkeleton
  *
  * Modifiers supported:
  * - upper

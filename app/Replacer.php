@@ -8,6 +8,24 @@ use Closure;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 
+/**
+ * Replacer class to handle placeholder replacements with optional modifiers.
+ *
+ * Modifiers supported by default:
+ * - upper: Converts the replacement string to uppercase.
+ * - lower: Converts the replacement string to lowercase.
+ * - title: Converts the replacement string to title case.
+ * - snake: Converts the replacement string to snake_case.
+ * - kebab: Converts the replacement string to kebab-case.
+ * - camel: Converts the replacement string to camelCase.
+ * - slug: Converts the replacement string to a URL-friendly slug.
+ * - acronym: Converts the replacement string to an acronym in uppercase (e.g. "The United Mexican States" -> "UMS"), using common English stop words.
+ *
+ * > **Note**:
+ * >
+ * > Modifiers can be chained in using a comma as a separator, e.g. `{{placeholder|upper,slug}}`. Also,
+ * > keep in mind, if you use the same modifier multiple times, the first one will take precedence, and the rest will be ignored.
+ */
 final class Replacer
 {
     /**
@@ -161,7 +179,7 @@ final class Replacer
 
             $replacement = $this->transformBeforeReplace($replacement);
 
-            $content = str_replace($placeholder, (string) $replacement, $content);
+            $content = str_replace($placeholder, $replacement, $content);
         }
 
         return $content;
