@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 /**
  * Exception thrown when a version string is not in a valid semantic versioning format.
  */
-class InvalidVersion extends InvalidFormatException
+final class InvalidVersion extends InvalidFormatException
 {
     /*
      * The regex pattern for validating semantic versioning (SemVer) format.
@@ -19,14 +19,14 @@ class InvalidVersion extends InvalidFormatException
     /**
      * Validate the given version string.
      *
-     * @param string $value  The version string to validate.
+     * @param  string  $value  The version string to validate.
      *
      * @throws self If the version string is not valid format based on the SemVer specification.
      */
     public static function validate(string $value): void
     {
-        if (! Str::isMatch(static::$pattern, $value)) {
-            throw new static("The version '$value' is not a valid semantic version.");
+        if (! Str::isMatch(self::$pattern, $value)) {
+            throw new self("The version '$value' is not a valid semantic version.");
         }
     }
 }

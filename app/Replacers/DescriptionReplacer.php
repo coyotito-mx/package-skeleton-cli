@@ -11,5 +11,5 @@ namespace App\Replacers;
  */
 class DescriptionReplacer extends Builder
 {
-    public static string $placeholder = 'description';
+    protected static string $placeholder = 'description';
 }

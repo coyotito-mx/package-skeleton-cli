@@ -142,9 +142,9 @@ class NamespaceReplacer extends Builder
      *    ); // returns Stringable('CoyotitoPackageSkeleton') unchanged because no separator is found
      * </code>
      *
-     * @param string $namespace The namespace string
-     * @param ?Closure(string $namespace): string $backslash The closure to run if the namespace uses backslash
-     * @param ?Closure(string $namespace): string $slash The closure to run if the namespace uses forward slash
+     * @param  string  $namespace  The namespace string
+     * @param  ?Closure(string $namespace): string  $backslash  The closure to run if the namespace uses backslash
+     * @param  ?Closure(string $namespace): string  $slash  The closure to run if the namespace uses forward slash
      */
     public static function handleNamespaceSeparator(string $namespace, ?Closure $backslash = null, ?Closure $slash = null): Stringable
     {
@@ -163,7 +163,7 @@ class NamespaceReplacer extends Builder
     /**
      * Identify if the namespace uses a single type of separator (either backslash or forward slash)
      *
-     * @param string $namespace The namespace string
+     * @param  string  $namespace  The namespace string
      * @return ?string Returns the separator if found, null otherwise
      */
     public static function identifySingleSeparator(string $namespace): ?string

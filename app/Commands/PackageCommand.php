@@ -36,7 +36,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
      */
     public function handle(): int
     {
-        //
+        return self::SUCCESS;
     }
 
     protected function promptForMissingArgumentsUsing(): array

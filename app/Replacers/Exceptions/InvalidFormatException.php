@@ -12,7 +12,6 @@ abstract class InvalidFormatException extends Exception
     /**
      * Validate the given value.
      *
-     * @param string $value
      *
      * @throws static if the value has an invalid format
      */

@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 /**
  * Exception thrown when an invalid namespace format is provided.
  */
-class InvalidNamespace extends InvalidFormatException
+final class InvalidNamespace extends InvalidFormatException
 {
     /**
      * Regex pattern to validate a namespace format.
@@ -27,13 +27,13 @@ class InvalidNamespace extends InvalidFormatException
     /**
      * Validate the given namespace.
      *
-     * @param string $value The namespace to validate
+     * @param  string  $value  The namespace to validate
      *
      * @throws self if the namespace has an invalid format
      */
     public static function validate(string $value): void
     {
-        if (Str::isMatch(static::$namespacePattern, $value)) {
+        if (Str::isMatch(self::$namespacePattern, $value)) {
             return;
         }
 

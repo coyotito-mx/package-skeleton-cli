@@ -16,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         Stringable::macro('matchAllWithGroups', function (string $pattern): Collection {
-            preg_match_all($pattern, $this->value, $matches, PREG_SET_ORDER);
+            preg_match_all($pattern, $this->value(), $matches, PREG_SET_ORDER);
 
             return collect($matches)->map(fn ($match) => collect($match)->filter(fn (mixed $value, int|string $key) => is_string($key)));
         });

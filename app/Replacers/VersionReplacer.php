@@ -32,7 +32,7 @@ use Illuminate\Support\Stringable;
  */
 class VersionReplacer extends Builder
 {
-    public static string $placeholder = 'version';
+    protected static string $placeholder = 'version';
 
     public function __construct(string $replacement)
     {

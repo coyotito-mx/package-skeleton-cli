@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Replacers;
 
 use App\Replacer;
+use Closure;
 use Exception;
 use Illuminate\Support\Stringable;
 
 abstract class Builder
 {
+    protected static string $placeholder;
+
     /**
      * Constructor
      *
@@ -23,10 +26,13 @@ abstract class Builder
     /**
      * Create a new replacer instance
      *
+     * @return Replacer the replacer instance
+     *
      * @throws Exception if the namespace is invalid
      */
     public static function make(string $replacement): Replacer
     {
+        /** @phpstan-ignore-next-line */
         return new static($replacement)->build();
     }
 
@@ -67,7 +73,7 @@ abstract class Builder
     /**
      * The array of modifiers to be added to the replacer
      *
-     * @return array<string, Closure(Stringable $replacement): Stringable
+     * @return array<string, Closure(Stringable $replacement): Stringable>
      */
     protected function modifiers(): array
     {
@@ -86,9 +92,11 @@ abstract class Builder
 
     /**
      * Get the placeholder string
+     *
+     * @throws Exception if the placeholder is not defined in the subclass
      */
     public static function getPlaceholder(): string
     {
-        return static::$placeholder ?? throw new Exception('Placeholder not defined in subclass.');
+        return static::$placeholder;
     }
 }
