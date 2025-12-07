@@ -38,6 +38,17 @@ it('replace placeholder with multiple modifiers', function () {
         ->replace('Hello, {{name|title,lower}}!')->toBe('Hello, john doe!');
 });
 
+it('ignores duplicate modifiers after the first occurrence', function () {
+    $replacer = Replacer::make('name', 'john doe');
+
+    expect($replacer)
+        ->replace('Hello, {{name|upper,lower,upper}}!')->toBe('Hello, john doe!')
+        ->replace('Hello, {{name|lower,upper,lower}}!')->toBe('Hello, JOHN DOE!')
+        ->replace('Hello, {{name|slug,upper,slug}}!')->toBe('Hello, JOHN-DOE!')
+        ->replace('Hello, {{name|slug,lower,slug}}!')->toBe('Hello, john-doe!')
+        ->replace('Hello, {{name|title,upper,title}}!')->toBe('Hello, JOHN DOE!');
+});
+
 it('cannot replace malformed placeholder', function () {
     $replacer = Replacer::make('name', 'john doe');
 
