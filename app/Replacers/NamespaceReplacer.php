@@ -10,6 +10,30 @@ use Closure;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 
+/**
+ * Replacer for namespace placeholders
+ *
+ * A `namespace` is composed of two parts: `vendor` and `package`, separated by either a backslash (`\`).
+ *
+ * @see InvalidNamespace::$namespacePattern for the regex pattern used to validate the namespace format.
+ *
+ * Modifiers supported:
+ * - upper
+ * - lower
+ * - title
+ * - snake
+ * - kebab
+ * - slug
+ * - camel
+ * - escape
+ * - reverse
+ *
+ * > Note:
+ * >
+ * > 1. The `escape` modifier will escape single backslashes only, not already escaped ones or forward slashes.
+ * > 2. The `reverse` modifier will switch single backslashes to forward slashes and vice versa, but not escaped backslashes or double slashes.
+ * > 3. Modifiers are applied to both parts of the namespace (`vendor` and `package`) separately.
+ */
 class NamespaceReplacer extends Builder
 {
     protected static string $placeholder = 'namespace';
@@ -17,7 +41,7 @@ class NamespaceReplacer extends Builder
     /**
      * Pattern to match an unescaped backslash, or a single slash (forward slash), but not escaped backslashes or double slashes
      *
-     * Raw pattern:`/(?<separator>(?:(?<!\\)\\(?!\\)|(?<!\/)\/(?!\/)))/`
+     * Raw pattern: `/(?<separator>(?:(?<!\\)\\(?!\\)|(?<!\/)\/(?!\/)))/`
      *
      * Pattern breakdown:
      * - `/.../` : Delimiters for the regex pattern
@@ -54,14 +78,12 @@ class NamespaceReplacer extends Builder
             'kebab' => static::unwrapNamespace(static fn (Stringable $replacement) => $replacement->kebab()),
             'slug' => static::unwrapNamespace(static fn (Stringable $replacement) => $replacement->slug()),
             'camel' => static::unwrapNamespace(static fn (Stringable $replacement) => $replacement->camel()),
-            // Only single backslashes will be escaped, not already escaped ones or forward slashes
             'escape' => static function (Stringable $replacement): Stringable {
                 return static::handleNamespaceSeparator(
                     (string) $replacement,
                     fn (string $namespace) => str_replace('\\', '\\\\', $namespace),
                 );
             },
-            // Reverse will only be applied to single type of separator found (backslash or forward slash), but not escaped ones
             'reverse' => static function (Stringable $replacement): Stringable {
                 return static::handleNamespaceSeparator(
                     (string) $replacement,
