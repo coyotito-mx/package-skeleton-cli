@@ -6,7 +6,7 @@ use Illuminate\Support\Str;
 
 class InvalidNamespace extends InvalidFormatException
 {
-    protected static string $namespacePattern = '/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*\\\\[a-zA-Z0-9_\x7f-\xff]*$/';
+    public static string $namespacePattern = '/^(?<vendor>[A-Z][A-Za-z0-9]*)(?<separator>\\\\)(?<package>[A-Z][A-Za-z0-9]*)$/';
 
     /**
      * Validate the given namespace.
