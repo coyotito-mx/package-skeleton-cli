@@ -54,6 +54,14 @@ it('replace pre-release version', function () {
         ->toBe('Pre-release version: alpha');
 });
 
+it('replace build metadata version', function () {
+    $replacer = VersionReplacer::make('1.0.0+20130313144700');
+
+    expect($replacer)
+        ->replace('Build metadata version: {{version|meta}}')
+        ->toBe('Build metadata version: 20130313144700');
+});
+
 test('chaining multiple replacer will only use the first one', function () {
     $replacer = VersionReplacer::make('2.5.3');
 
