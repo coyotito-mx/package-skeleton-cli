@@ -19,9 +19,9 @@ class InvalidVersion extends InvalidFormatException
     /**
      * Validate the given version string.
      *
-     * @param  string  $value  The version string to validate.
+     * @param string $value  The version string to validate.
      *
-     * @throws static If the version string is not valid format based on the SemVer specification.
+     * @throws self If the version string is not valid format based on the SemVer specification.
      */
     public static function validate(string $value): void
     {

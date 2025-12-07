@@ -27,6 +27,8 @@ class InvalidNamespace extends InvalidFormatException
     /**
      * Validate the given namespace.
      *
+     * @param string $value The namespace to validate
+     *
      * @throws self if the namespace has an invalid format
      */
     public static function validate(string $value): void
