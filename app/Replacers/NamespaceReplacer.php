@@ -48,7 +48,7 @@ class NamespaceReplacer extends Builder
         return ['acronym'];
     }
 
-    protected function unwrapNamespace(Closure $both): Closure
+    protected static function unwrapNamespace(Closure $both): Closure
     {
         return function (Stringable $replacement) use ($both): Stringable {
             $separator = $replacement->contains('\\') ? '\\' : '/';
