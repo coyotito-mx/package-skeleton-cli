@@ -2,7 +2,7 @@
 
 namespace App\Replacers\Exceptions;
 
-class InvalidEmail extends InvalidFormatException
+final class InvalidEmail extends InvalidFormatException
 {
     public static function validate(string $value): void
     {
