@@ -19,20 +19,22 @@ it('throw and error on invalid namespace format', function (string $namespace) {
     'single forward slash' => ['Coyotito/PackageSkeleton'],
 ]);
 
-it('replace namespace placeholder with modifiers', function () {
+it('replace namespace placeholder with modifiers', function (string $modifier, string $expected) {
     $replacer = NamespaceReplacer::make('Coyotito\\PackageSkeleton');
 
     expect($replacer)
-        ->replace('Namespace Upper: {{namespace|upper}}')->toBe('Namespace Upper: COYOTITO\\PACKAGESKELETON')
-        ->replace('Namespace Lower: {{namespace|lower}}')->toBe('Namespace Lower: coyotito\\packageskeleton')
-        ->replace('Namespace Title: {{namespace|title}}')->toBe('Namespace Title: Coyotito\\PackageSkeleton')
-        ->replace('Namespace Snake: {{namespace|snake}}')->toBe('Namespace Snake: coyotito\\package_skeleton')
-        ->replace('Namespace Kebab: {{namespace|kebab}}')->toBe('Namespace Kebab: coyotito\\package-skeleton')
-        ->replace('Namespace Slug: {{namespace|slug}}')->toBe('Namespace Slug: coyotito\\package-skeleton')
-        ->replace('Namespace Camel: {{namespace|camel}}')->toBe('Namespace Camel: coyotito\\packageSkeleton')
-        ->replace('Namespace Escape: {{namespace|escape}}')->toBe('Namespace Escape: Coyotito\\\\PackageSkeleton')
-        ->replace('Namespace Reverse: {{namespace|reverse}}')->toBe('Namespace Reverse: Coyotito/PackageSkeleton');
-});
+        ->replace("Namespace $modifier: {{namespace|$modifier}}")->toBe("Namespace $modifier: $expected");
+})->with([
+    'upper' => ['upper', 'COYOTITO\\PACKAGESKELETON'],
+    'lower' => ['lower', 'coyotito\\packageskeleton'],
+    'title' => ['title', 'Coyotito\\PackageSkeleton'],
+    'snake' => ['snake', 'coyotito\\package_skeleton'],
+    'kebab' => ['kebab', 'coyotito\\package-skeleton'],
+    'slug' => ['slug', 'coyotito\\package-skeleton'],
+    'camel' => ['camel', 'coyotito\\packageSkeleton'],
+    'escape' => ['escape', 'Coyotito\\\\PackageSkeleton'],
+    'reverse' => ['reverse', 'Coyotito/PackageSkeleton'],
+]);
 
 test('cannot apply excluded modifier', function () {
     $replacer = NamespaceReplacer::make('Coyotito\\PackageSkeleton');
@@ -41,18 +43,23 @@ test('cannot apply excluded modifier', function () {
         ->replace('Namespace Acronym: {{namespace|acronym}}')->toBe('Namespace Acronym: Coyotito\\PackageSkeleton');
 });
 
-it('replace namespace placeholder with multiple modifiers', function () {
+it('replace namespace placeholder with multiple modifiers', function (array $modifiers, string $expected) {
     $replacer = NamespaceReplacer::make('Coyotito\\PackageSkeleton');
 
+    $modifiersList = implode(',', $modifiers);
+    $modifiersString = implode(' + ', $modifiers);
+
     expect($replacer)
-        ->replace('Namespace Snake + Upper: {{namespace|snake,upper}}')->toBe('Namespace Snake + Upper: COYOTITO\\PACKAGE_SKELETON')
-        ->replace('Namespace Upper + Snake: {{namespace|upper,snake}}')->toBe('Namespace Upper + Snake: c_o_y_o_t_i_t_o\\p_a_c_k_a_g_e_s_k_e_l_e_t_o_n')
-        ->replace('Namespace Lower + Kebab: {{namespace|lower,kebab}}')->toBe('Namespace Lower + Kebab: coyotito\\package-skeleton')
-        ->replace('Namespace Kebab + Lower: {{namespace|kebab,lower}}')->toBe('Namespace Kebab + Lower: coyotito\\package-skeleton')
-        ->replace('namespace kebab + Upper: {{namespace|kebab,upper}}')->tobe('namespace kebab + Upper: COYOTITO\\PACKAGE-SKELETON')
-        ->replace('Namespace Slug + Title: {{namespace|slug,title}}')->toBe('Namespace Slug + Title: Coyotito\\Package-Skeleton')
-        ->replace('Namespace Title + Slug: {{namespace|title,slug}}')->toBe('Namespace Title + Slug: coyotito\\package-skeleton')
-        ->replace('Namespace Camel + Upper: {{namespace|camel,upper}}')->toBe('Namespace Camel + Upper: COYOTITO\\PACKAGESKELETON')
-        ->replace('Namespace Escape + Reverse: {{namespace|escape,reverse}}')->toBe('Namespace Escape + Reverse: Coyotito\\\\PackageSkeleton')
-        ->replace('Namespace Reverse + Escape: {{namespace|reverse,escape}}')->toBe('Namespace Reverse + Escape: Coyotito/PackageSkeleton');
-});
+        ->replace("Namespace $modifiersString: {{namespace|$modifiersList}}")->toBe("Namespace $modifiersString: $expected");
+})->with([
+    'snake + upper' => [['snake', 'upper'], 'COYOTITO\\PACKAGE_SKELETON'],
+    'upper + snake' => [['upper', 'snake'], 'c_o_y_o_t_i_t_o\\p_a_c_k_a_g_e_s_k_e_l_e_t_o_n'],
+    'lower + kebab' => [['lower', 'kebab'], 'coyotito\\package-skeleton'],
+    'kebab + lower' => [['kebab', 'lower'], 'coyotito\\package-skeleton'],
+    'kebab + upper' => [['kebab', 'upper'], 'COYOTITO\\PACKAGE-SKELETON'],
+    'slug + title' => [['slug', 'title'], 'Coyotito\\Package-Skeleton'],
+    'title + slug' => [['title', 'slug'], 'coyotito\\package-skeleton'],
+    'camel + upper' => [['camel', 'upper'], 'COYOTITO\\PACKAGESKELETON'],
+    'escape + reverse' => [['escape', 'reverse'], 'Coyotito\\\\PackageSkeleton'],
+    'reverse + escape' => [['reverse', 'escape'], 'Coyotito/PackageSkeleton'],
+]);
