@@ -34,6 +34,13 @@ it('replace namespace placeholder with modifiers', function () {
         ->replace('Namespace Reverse: {{namespace|reverse}}')->toBe('Namespace Reverse: Coyotito/PackageSkeleton');
 });
 
+test('cannot apply excluded modifier', function () {
+    $replacer = NamespaceReplacer::make('Coyotito\\PackageSkeleton');
+
+    expect($replacer)
+        ->replace('Namespace Acronym: {{namespace|acronym}}')->toBe('Namespace Acronym: Coyotito\\PackageSkeleton');
+});
+
 it('replace namespace placeholder with multiple modifiers', function () {
     $replacer = NamespaceReplacer::make('Coyotito\\PackageSkeleton');
 

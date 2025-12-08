@@ -34,10 +34,17 @@ it('throws an exception for invalid year', function (string $year) {
         '20-20',
     ]);
 
-it('does not apply any modifier', function () {
-    $replacer = YearReplacer::make('2022');
+test('cannot apply excluded modifiers', function (string $modifier) {
+    $replacer = YearReplacer::make('1990');
 
-    expect($replacer->replace('{{year|slug}}'))->toBe('2022')
-        ->and($replacer->replace('{{year|snake}}'))->toBe('2022')
-        ->and($replacer->replace('{{year|capitalize}}'))->toBe('2022');
-});
+    expect($replacer)
+        ->replace("Year: {{year|$modifier}}")->toBe('Year: 1990');
+})->with([
+    'lower',
+    'title',
+    'snake',
+    'kebab',
+    'camel',
+    'slug',
+    'acronym',
+]);

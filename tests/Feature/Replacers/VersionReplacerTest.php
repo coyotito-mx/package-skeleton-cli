@@ -78,6 +78,22 @@ it('prefix with v', function () {
         ->toBe('Version: v1.2.3');
 });
 
+test('cannot apply excluded modifier', function (string $modifier) {
+    $replacer = VersionReplacer::make('1.2.3');
+
+    expect($replacer)
+        ->replace("Version: {{version|$modifier}}")->toBe('Version: 1.2.3');
+})->with([
+    'upper',
+    'lower',
+    'title',
+    'snake',
+    'kebab',
+    'camel',
+    'slug',
+    'acronym',
+]);
+
 it('cannot only be prefix once', function () {
     $replacer = VersionReplacer::make('1.2.3');
 
