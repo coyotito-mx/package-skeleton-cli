@@ -271,9 +271,14 @@ final class Replacer
         return $this;
     }
 
+    /**
+     * Exclude specific modifiers from being used.
+     *
+     * @param string[] $modifiers List of modifier names to exclude
+     */
     public function excludeModifiers(array $modifiers): self
     {
-        $this->excludeModifiers = $modifiers;
+        $this->excludeModifiers = [...$this->excludeModifiers, ...$modifiers];
 
         return $this;
     }
