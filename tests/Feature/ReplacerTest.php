@@ -77,7 +77,7 @@ it('register custom modifier', function () {
 
 it('permit only specific modifiers', function () {
     $replacer = tap(Replacer::make('name', 'john doe'))
-            ->onlyWith(['upper', 'lower']);
+        ->onlyWith(['upper', 'lower']);
 
     expect($replacer)
         ->replace('Hello, {{name|upper}}!')->toBe('Hello, JOHN DOE!')

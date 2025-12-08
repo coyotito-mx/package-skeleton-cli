@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App;
 
 use Closure;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 
@@ -206,6 +205,7 @@ final class Replacer
     protected function getDefaultModifiers(): array
     {
         return [
+            'ucfirst' => fn (Stringable $replacement) => $replacement->ucfirst(),
             'upper' => fn (Stringable $replacement) => $replacement->upper(),
             'lower' => fn (Stringable $replacement) => $replacement->lower(),
             'title' => fn (Stringable $replacement) => $replacement->title(),
@@ -274,7 +274,7 @@ final class Replacer
     /**
      * Exclude specific modifiers from being used.
      *
-     * @param string[] $modifiers List of modifier names to exclude
+     * @param  string[]  $modifiers  List of modifier names to exclude
      */
     public function excludeModifiers(array $modifiers): self
     {
@@ -288,7 +288,6 @@ final class Replacer
      *
      * This will override any previously set excluded modifiers
      *
-     * @param array|null $modifiers
      * @return $this
      */
     public function onlyWith(?array $modifiers = []): self
@@ -316,7 +315,7 @@ final class Replacer
     /**
      * Set the replacement normalizer closure.
      *
-     * @param ?Closure(Stringable $replacement): Stringable $closure
+     * @param  ?Closure(Stringable $replacement): Stringable  $closure
      * @return $this
      */
     public function normalizeReplacementUsing(?Closure $closure = null): self
