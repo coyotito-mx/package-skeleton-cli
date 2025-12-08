@@ -52,12 +52,12 @@ final class Replacer
     /**
      * The opening pattern for placeholders.
      */
-    protected static string $openPattern = '{{(?:';
+    protected static string $openPattern = '(?<!{){{(?:';
 
     /**
      * The closing pattern for placeholders.
      */
-    protected static string $closePattern = ')(?:\|(?<modifiers>[^|,}\s]+(?:,[^|,}\s]+)*))?}}';
+    protected static string $closePattern = ')(?:\|(?<modifiers>[^|,}\s]+(?:,[^|,}\s]+)*))?}}(?!})';
 
     /**
      * The placeholder normalizer closure.
