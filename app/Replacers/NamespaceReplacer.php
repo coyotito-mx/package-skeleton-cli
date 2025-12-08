@@ -46,6 +46,8 @@ class NamespaceReplacer extends Builder
 {
     protected static string $placeholder = 'namespace';
 
+    protected static ?string $invalidFormatException = InvalidNamespaceException::class;
+
     /**
      * Pattern to match an unescaped backslash, or a single slash (forward slash), but not escaped backslashes or double slashes
      *
@@ -61,24 +63,23 @@ class NamespaceReplacer extends Builder
      */
     protected static string $singleSeparatorPattern = '/(?<separator>(?:(?<!\\\\)\\\\(?!\\\\)|(?<!\/)\/(?!\/)))/';
 
-    public function __construct(string $replacement)
+    #[Override]
+    protected function configure(): Replacer
     {
-        InvalidNamespaceException::validate($replacement);
+        tap($this->replacer)
+            ->normalizeReplacementUsing(
+                function (Stringable $replacement): Stringable {
+                    $normalizerCallback = fn (Stringable $replacement) => $replacement->trim()->headline();
 
-        parent::__construct($replacement);
+                    return static::unwrapNamespace($normalizerCallback)($replacement);
+            })
+            ->transformBeforeReplaceUsing(fn (Stringable $replacement): string => (string) $replacement->replace(' ', ''));
+
+        return parent::configure();
     }
 
     #[Override]
-    protected function configure(Replacer $replacer): void
-    {
-        parent::configure($replacer);
-
-        tap($replacer)->normalizeReplacementUsing(fn (Stringable $replacement) => static::unwrapNamespace(fn (Stringable $replacement) => $replacement->trim()->headline())($replacement)
-        )->transformBeforeReplaceUsing(fn (Stringable $replacement): string => (string) $replacement->replace(' ', ''));
-    }
-
-    #[Override]
-    protected function modifiers(): array
+    public function modifiers(): array
     {
         return [
             'upper' => static::unwrapNamespace(static fn (Stringable $replacement) => $replacement->upper()),
@@ -105,7 +106,7 @@ class NamespaceReplacer extends Builder
     }
 
     #[Override]
-    protected function getExcludedModifiers(): array
+    public function getExcludedModifiers(): array
     {
         return ['acronym'];
     }

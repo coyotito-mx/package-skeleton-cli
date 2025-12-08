@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Replacers;
 
 use App\Replacer;
+use App\Replacers\Exceptions\InvalidEmailException;
 use Closure;
 use Exception;
 use Illuminate\Support\Stringable;
@@ -14,13 +15,24 @@ abstract class Builder
     protected static string $placeholder;
 
     /**
+     * Validation format exception
+     *
+     * This class string represent the exception to use to validate the replacement
+     *
+     * @var ?class-string<InvalidEmailException>
+     */
+    protected static ?string $invalidFormatException = null;
+
+    /**
      * Constructor
      *
      * @throws Exception if the namespace is invalid
      */
-    public function __construct(protected string $replacement)
+    final public function __construct(protected string $replacement, protected Replacer $replacer)
     {
-        //
+        if (static::$invalidFormatException) {
+            static::$invalidFormatException::validate($this->replacement);
+        }
     }
 
     /**
@@ -32,42 +44,43 @@ abstract class Builder
      */
     public static function make(string $replacement): Replacer
     {
-        /** @phpstan-ignore-next-line */
-        return new static($replacement)->build();
+        return new static($replacement, Replacer::make(static::getPlaceholder(), $replacement))->build();
     }
 
     /*
      * Build the replacer instance
      */
-    protected function build(): Replacer
+    public function build(): Replacer
     {
-        $replacer = Replacer::make(static::getPlaceholder(), $this->replacement);
-
-        $this->configure($replacer);
-
-        return $replacer;
+        return $this->configure();
     }
 
     /**
      * Configure the replacer with modifiers
      */
-    protected function configure(Replacer $replacer): void
+    protected function configure(): Replacer
     {
-        $this->setupModifiers($replacer);
+        $this->setupModifiers(
+            customModifiers: $this->modifiers(),
+            modifiersToExclude: $this->getExcludedModifiers()
+        );
+
+        return $this->replacer;
     }
 
     /**
      * Setup the modifiers for the replacer
+     *
+     * @param array<string, \Closure(Stringable $replacement): Stringable> $customModifiers
+     * @param string[] $modifiersToExclude
      */
-    protected function setupModifiers(Replacer $replacer): void
+    final protected function setupModifiers(array $customModifiers = [], array $modifiersToExclude = []): void
     {
-        foreach ($this->modifiers() as $name => $callback) {
-            $replacer->addModifier($name, $callback);
+        foreach ($customModifiers as $name => $callback) {
+            $this->replacer->addModifier($name, $callback);
         }
 
-        $replacer->excludeModifiers(
-            $this->getExcludedModifiers()
-        );
+        $this->replacer->excludeModifiers($modifiersToExclude);
     }
 
     /**
@@ -75,7 +88,7 @@ abstract class Builder
      *
      * @return array<string, Closure(Stringable $replacement): Stringable>
      */
-    protected function modifiers(): array
+    public function modifiers(): array
     {
         return [];
     }
@@ -85,7 +98,7 @@ abstract class Builder
      *
      * @return list<string>
      */
-    protected function getExcludedModifiers(): array
+    public function getExcludedModifiers(): array
     {
         return [];
     }
@@ -95,7 +108,7 @@ abstract class Builder
      *
      * @throws Exception if the placeholder is not defined in the subclass
      */
-    public static function getPlaceholder(): string
+    final public static function getPlaceholder(): string
     {
         return static::$placeholder;
     }
