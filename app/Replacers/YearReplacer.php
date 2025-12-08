@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Replacers;
 
 use App\Replacer;
-use App\Replacers\Exceptions\InvalidYear;
+use App\Replacers\Exceptions\InvalidYearException;
 use Override;
 
 /**
@@ -30,7 +30,7 @@ class YearReplacer extends Builder
 
     public function __construct(string $replacement)
     {
-        InvalidYear::validate($replacement);
+        InvalidYearException::validate($replacement);
 
         parent::__construct($replacement);
     }

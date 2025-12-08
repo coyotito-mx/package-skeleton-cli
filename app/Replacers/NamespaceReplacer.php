@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Replacers;
 
 use App\Replacer;
-use App\Replacers\Exceptions\InvalidNamespace;
+use App\Replacers\Exceptions\InvalidNamespaceException;
 use Closure;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
@@ -16,7 +16,7 @@ use Override;
  *
  * A `namespace` is composed of two parts: `vendor` and `package`, separated by either a backslash (`\`).
  *
- * @see InvalidNamespace::$namespacePattern for the regex pattern used to validate the namespace format.
+ * @see InvalidNamespaceException::$namespacePattern for the regex pattern used to validate the namespace format.
  *
  * Examples of valid namespaces:
  * - Acme\Utils
@@ -63,7 +63,7 @@ class NamespaceReplacer extends Builder
 
     public function __construct(string $replacement)
     {
-        InvalidNamespace::validate($replacement);
+        InvalidNamespaceException::validate($replacement);
 
         parent::__construct($replacement);
     }

@@ -2,7 +2,7 @@
 
 namespace App\Replacers\Exceptions;
 
-final class InvalidPackageType extends InvalidFormatException
+final class InvalidPackageTypeException extends InvalidFormatException
 {
     public static array $validTypes = [
         'library',

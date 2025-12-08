@@ -1,6 +1,6 @@
 <?php
 
-use App\Replacers\Exceptions\InvalidYear;
+use App\Replacers\Exceptions\InvalidYearException;
 use App\Replacers\YearReplacer;
 use Illuminate\Support\Carbon;
 
@@ -24,7 +24,7 @@ it('replace year with current year when no year is provided', function () {
 it('throws an exception for invalid year', function (string $year) {
     YearReplacer::make($year);
 })
-    ->throws(InvalidYear::class)
+    ->throws(InvalidYearException::class)
     ->with([
         'abcd',
         '20a0',

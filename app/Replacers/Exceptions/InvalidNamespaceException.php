@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 /**
  * Exception thrown when an invalid namespace format is provided.
  */
-final class InvalidNamespace extends InvalidFormatException
+final class InvalidNamespaceException extends InvalidFormatException
 {
     /**
      * Regex pattern to validate a namespace format.

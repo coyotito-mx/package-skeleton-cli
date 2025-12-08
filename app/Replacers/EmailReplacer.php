@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Replacers;
 
 use App\Replacer;
-use App\Replacers\Exceptions\InvalidEmail;
+use App\Replacers\Exceptions\InvalidEmailException;
 use Closure;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
@@ -16,7 +16,7 @@ class EmailReplacer extends Builder
 
     public function __construct(string $replacement)
     {
-        InvalidEmail::validate($replacement);
+        InvalidEmailException::validate($replacement);
 
         parent::__construct($replacement);
     }

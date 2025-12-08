@@ -1,6 +1,6 @@
 <?php
 
-use App\Replacers\Exceptions\InvalidVersion;
+use App\Replacers\Exceptions\InvalidVersionException;
 use App\Replacers\VersionReplacer;
 
 it('relace version placeholder', function () {
@@ -13,7 +13,7 @@ it('relace version placeholder', function () {
 
 it('throw exception when version is invalid', function (string $version) {
     expect(fn () => VersionReplacer::make($version))
-        ->toThrow(InvalidVersion::class, "The version '$version' is not a valid semantic version.");
+        ->toThrow(InvalidVersionException::class, "The version '$version' is not a valid semantic version.");
 })
     ->with([
         'invalid-version',

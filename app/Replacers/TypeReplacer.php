@@ -3,7 +3,7 @@
 namespace App\Replacers;
 
 use App\Replacer;
-use App\Replacers\Exceptions\InvalidPackageType;
+use App\Replacers\Exceptions\InvalidPackageTypeException;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 
@@ -15,7 +15,7 @@ class TypeReplacer extends Builder
     {
         $replacement = Str::slug($replacement);
 
-        InvalidPackageType::validate($replacement);
+        InvalidPackageTypeException::validate($replacement);
 
         parent::__construct($replacement);
     }

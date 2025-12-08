@@ -1,6 +1,6 @@
 <?php
 
-use App\Replacers\Exceptions\InvalidPackageType;
+use App\Replacers\Exceptions\InvalidPackageTypeException;
 use App\Replacers\TypeReplacer;
 
 it('replace placeholder', function (string $type) {
@@ -8,11 +8,11 @@ it('replace placeholder', function (string $type) {
 
     expect($replacer)
         ->replace("type: {{type}}")->toBe("type: $type");
-})->with(InvalidPackageType::$validTypes);
+})->with(InvalidPackageTypeException::$validTypes);
 
 it('replace placeholder with invalid type', function (string $type) {
     $replacer = TypeReplacer::make($type);
-})->throws(InvalidPackageType::class, 'Invalid package type provided')->with([
+})->throws(InvalidPackageTypeException::class, 'Invalid package type provided')->with([
     'none',
     'custom',
     'none-standard',

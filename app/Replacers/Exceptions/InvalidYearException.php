@@ -8,7 +8,7 @@ use Illuminate\Support\Carbon;
 /**
  * Exception thrown when a year string is not in a valid year format.
  */
-final class InvalidYear extends InvalidFormatException
+final class InvalidYearException extends InvalidFormatException
 {
     /**
      * Validate the given year string.

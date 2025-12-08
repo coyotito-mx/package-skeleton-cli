@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Replacers;
 
 use App\Replacer;
-use App\Replacers\Exceptions\InvalidVersion;
+use App\Replacers\Exceptions\InvalidVersionException;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 use Override;
@@ -37,7 +37,7 @@ class VersionReplacer extends Builder
 
     public function __construct(string $replacement)
     {
-        InvalidVersion::validate($replacement);
+        InvalidVersionException::validate($replacement);
 
         parent::__construct($replacement);
     }
@@ -56,7 +56,7 @@ class VersionReplacer extends Builder
     protected function modifiers(): array
     {
         $getSegment = function (Stringable $replacement, string $segment): Stringable {
-            $pattern = InvalidVersion::$pattern;
+            $pattern = InvalidVersionException::$pattern;
             $matches = $replacement->matchAllWithGroups($pattern);
 
             return Str::of(($matches[0] ?? collect())->get($segment, $replacement));

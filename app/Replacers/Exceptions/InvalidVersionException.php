@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 /**
  * Exception thrown when a version string is not in a valid semantic versioning format.
  */
-final class InvalidVersion extends InvalidFormatException
+final class InvalidVersionException extends InvalidFormatException
 {
     /*
      * The regex pattern for validating semantic versioning (SemVer) format.

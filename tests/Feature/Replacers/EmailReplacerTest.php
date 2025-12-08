@@ -1,7 +1,7 @@
 <?php
 
 use App\Replacers\EmailReplacer;
-use App\Replacers\Exceptions\InvalidEmail;
+use App\Replacers\Exceptions\InvalidEmailException;
 
 it('replace email placeholder', function () {
     $replacer = EmailReplacer::make('john@doe.com');
@@ -34,7 +34,7 @@ test('cannot apply excluded modifiers', function (string $modifier) {
 
 it('throws exception for invalid email', function (string $invalidEmail) {
     expect(fn () => EmailReplacer::make($invalidEmail))
-        ->toThrow(InvalidEmail::class, "The email '$invalidEmail' is not a valid email address.");
+        ->toThrow(InvalidEmailException::class, "The email '$invalidEmail' is not a valid email address.");
 })->with([
     'invalid-email',
     'user@.com',
