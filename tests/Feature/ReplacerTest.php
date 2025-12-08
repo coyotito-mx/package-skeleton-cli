@@ -92,6 +92,17 @@ it('permit only specific modifiers', function () {
         ->replace('Hello, {{name|snake}}!')->toBe('Hello, john_doe!');
 });
 
+it('use only specified modifiers', function () {
+    $replacer = tap(Replacer::make('name', 'john doe'))
+        ->onlyWith(['emoji'])
+        ->addModifier('emoji', fn (\Illuminate\Support\Stringable $replacement): \Illuminate\Support\Stringable => $replacement->append(' 😊'));
+
+    expect($replacer)
+        ->replace('Hello, {{name|upper}}!')->toBe('Hello, John Doe!')
+        ->replace('Hello, {{name|emoji}}')->toBe('Hello, John Doe 😊')
+        ->replace('Hello, {{name|slug}}!')->toBe('Hello, John Doe!');
+});
+
 it('exclude modifiers', function () {
     $replacer = tap(Replacer::make('name', 'john doe'))
         ->excludeModifiers(['upper', 'lower']);

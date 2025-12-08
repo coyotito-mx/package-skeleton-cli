@@ -48,7 +48,7 @@ final class Replacer
      *
      * @var string[]
      */
-    protected array $onlyWith = [];
+    protected ?array $onlyWith = [];
 
     /**
      * The opening pattern for placeholders.
@@ -235,16 +235,27 @@ final class Replacer
      */
     public function getModifiers(array $modifiers = []): array
     {
-        $defaultModifiers = [...$this->getDefaultModifiers(), ...$this->modifiers];
+        $availableModifiers = collect($this->getDefaultModifiers())->merge($this->modifiers);
 
-        $modifiers = collect($modifiers)->mapWithKeys(fn (string $modifier) => [$modifier => $defaultModifiers[$modifier] ?? null]);
+        if ($this->onlyWith === null) {
+            $availableModifiers = collect();
+        } elseif ($this->onlyWith !== []) {
+            $allowed = array_flip($this->onlyWith);
+            $availableModifiers = $availableModifiers->intersectByKeys($allowed);
+        } elseif ($this->excludeModifiers !== []) {
+            $excluded = array_flip($this->excludeModifiers);
+            $availableModifiers = $availableModifiers->diffKeys($excluded);
+        }
 
-        return $modifiers
-            ->when(
-                $this->onlyWith,
-                fn (Collection $collection) => $collection->filter(fn (?Closure $modifier, string $name) => $modifier !== null && in_array($name, $this->onlyWith)),
-                fn (Collection $collection) => $collection->filter(fn (?Closure $modifier, string $name) => $modifier !== null && ! in_array($name, $this->excludeModifiers))
-            )->all();
+        $resolved = [];
+
+        foreach ($modifiers as $name) {
+            if (isset($availableModifiers[$name])) {
+                $resolved[$name] = $availableModifiers[$name];
+            }
+        }
+
+        return $resolved;
     }
 
     /**
@@ -267,8 +278,20 @@ final class Replacer
         return $this;
     }
 
-    public function onlyWith(array $modifiers): self
+    /**
+     * Filter modifiers to only allow specific ones.
+     *
+     * This will override any previously set excluded modifiers
+     *
+     * @param array|null $modifiers
+     * @return $this
+     */
+    public function onlyWith(?array $modifiers = []): self
     {
+        if (is_array($modifiers)) {
+            $modifiers = [...$modifiers, ...($this->modifiers ?? [])];
+        }
+
         $this->onlyWith = $modifiers;
 
         return $this;
