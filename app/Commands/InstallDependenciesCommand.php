@@ -2,12 +2,19 @@
 
 namespace App\Commands;
 
-use Illuminate\Console\Scheduling\Schedule;
+use App\Commands\Exceptions\InvalidToolException;
+use App\DependencyManagers\Composer;
+use App\DependencyManagers\DependencyManager;
+use App\DependencyManagers\Exceptions\DependencyInstallationFailException;
+use App\DependencyManagers\Exceptions\DependencyManagerNotInstalledException;
+use App\DependencyManagers\Exceptions\InvalidDependencyFormatException;
+use App\DependencyManagers\Npm;
+use Exception;
 use Illuminate\Support\Str;
 use LaravelZero\Framework\Commands\Command;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class IntallDependenciesCommand extends Command
+class InstallDependenciesCommand extends Command
 {
     /**
      * The name and signature of the console command.
@@ -31,7 +38,7 @@ class IntallDependenciesCommand extends Command
 
     public function __construct(protected Composer $composer, protected Npm $npm)
     {
-        //
+        parent::__construct();
     }
 
     /**
@@ -43,20 +50,27 @@ class IntallDependenciesCommand extends Command
             $tool = $this->getTool();
 
             $this->installDependencies(tool: $tool, dependencies: $this->getDependencies(), dev: $this->devMode());
-        } catch (DependendencyInstallationFailException $exception) {
-            $dependency = $exception->failDependency();
-
-            $this->error("[$dependency] fail to install");
+        } catch (DependencyInstallationFailException $exception) {
+            $this->error("Trying to install your dependencies failed.");
             $this->warn($exception->getMessage(), OutputInterface::VERBOSITY_DEBUG);
 
             return self::INVALID;
-        } catch (DependencyManagerNotInstallException) {
-            $this->warn("[{$this->option('tool')}] is not available in your system, please install it before continuing", OutputInterface::VERBOSITY_VERBOSE);
-            $this->error("Fail to install dependencies");
+        } catch (DependencyManagerNotInstalledException $exception) {
+            $this->warn($exception->getMessage().", please install it before continuing.", OutputInterface::VERBOSITY_VERBOSE);
+            $this->error("Fail to install dependencies.");
 
             return self::FAILURE;
-        } catch (NonValidToolException $exception) {
-            $this->warn("[$exception->tool] is not a valid dependency manager, please use Composer or NPM");
+        } catch (InvalidToolException $exception) {
+            $this->warn($exception->getMessage().'. Please use Composer or NPM.');
+
+            return self::FAILURE;
+        } catch (InvalidDependencyFormatException $exception) {
+            $this->warn("[$exception->dependency] has an invalid format, the correct format is $exception->validFormat.");
+
+            return self::INVALID;
+        } catch (Exception $exception) {
+            $this->error("An unexpected error occurred, please check the logs for more details.");
+            $this->warn($exception->getMessage(), OutputInterface::VERBOSITY_DEBUG);
 
             return self::FAILURE;
         }
@@ -69,15 +83,15 @@ class IntallDependenciesCommand extends Command
     /**
      * Get one of the available dependency manager
      *
-     * @throws NonInvalidToolException if the provided tool name is not a valid one
-     * @returns DependencyeManager The tool to manage dependencies
+     * @throws InvalidToolException if the provided tool name is not a valid one
+     * @returns DependencyManager The tool to manage dependencies
      */
     public function getTool(): DependencyManager
     {
-        return match ($this->option('tool')) {
-            'composer' => null,
-            'npm' => null,
-            default => throw new NonValidToolException()
+        return match ($tool = $this->option('tool')) {
+            'composer' => $this->composer,
+            'npm' => $this->npm,
+            default => throw new InvalidToolException("The provided tool [$tool] does not exist."),
         };
     }
 
@@ -87,14 +101,13 @@ class IntallDependenciesCommand extends Command
      * This method will try to install the project dependencies (`composer.json` or `package.json`), including the given one from the array.
      *
      * @throws DependencyInstallationFailException  if the one of the provided dependencies cannot be installed
-     * @throws DependencyManagerNotInstallException if the given tool is not installed
+     * @throws DependencyManagerNotInstalledException if the given tool is not installed
      */
     protected function installDependencies(DependencyManager $tool, array $dependencies = [], bool $dev = false): void
     {
-        tap(
-            $tool,
-            fn (DependencyManager $tool) => $tool->setInput($this->input)->setOutput($this->output)
-        )->add($dependencies, $dev)->install();
+        $this
+            ->configureTool($tool)
+            ->install($dependencies, $dev);
     }
 
     /**
@@ -123,5 +136,12 @@ class IntallDependenciesCommand extends Command
 
             $this->table(['Dependency'], array_map(fn (string $dep) => [$dep], $dependencies));
         }
+    }
+
+    protected function configureTool(DependencyManager $tool): DependencyManager
+    {
+        $tool->output = $this->getOutput();
+
+        return $tool;
     }
 }

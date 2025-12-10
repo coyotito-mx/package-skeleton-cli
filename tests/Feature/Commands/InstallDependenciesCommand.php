@@ -1,12 +1,43 @@
 <?php
 
-it('can run')->todo();
+use Illuminate\Process\PendingProcess;
+use Illuminate\Support\Facades\Process;
+
+it('can run', function () {
+    $process = Process::fake([
+        "'composer' '--version' *" => 'Composer version 2.1.3',
+        "'composer' 'install'",
+        "'npm' '--version' *" => '10.0.0',
+        "'npm' 'install' ",
+    ]);
+
+    artisan('install:dependencies')->assertSuccessful();
+    artisan('install:dependencies', ['--tool' => 'npm'])->assertSuccessful();
+
+    expect($process)
+        ->not->assertNothingRan()
+        ->assertRanTimes(fn (PendingProcess $process) => str_contains(implode(' ', $process->command), 'composer --version'))
+        ->assertRanTimes(fn (PendingProcess $process) => str_contains(implode(' ', $process->command), 'composer install'))
+        ->assertRanTimes(fn (PendingProcess $process) => str_contains(implode(' ', $process->command), 'npm --version'))
+        ->assertRanTimes(fn (PendingProcess $process) => str_contains(implode(' ', $process->command), 'npm install'), 2);
+});
 
 it('can dry run')->todo();
 
-it('can install composer dependencies')->todo();
+it('can install composer dependencies', function () {
+    $process = Process::fake([
+        "'composer' '--version' *",
+        "'composer' 'install'" => 'Installing dependencies',
+    ]);
 
-it('can install npm dependencies')->todo();
+    artisan('install:dependencies')->assertSuccessful();
+
+    expect($process)
+        ->not->assertNothingRan()
+        ->assertRanTimes(fn (PendingProcess $process) => str_contains(implode(' ', $process->command), 'composer install'));
+});
+
+it('can install npm dependencies');
 
 it('can install dev dependencies')->todo();
 
