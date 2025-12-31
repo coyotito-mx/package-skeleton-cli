@@ -16,8 +16,12 @@ it('can run', function () {
         ->shouldReceive('exists')
         ->andReturn(false);
 
-    artisan('install:dependencies')->assertSuccessful();
-    artisan('install:dependencies', ['--tool' => 'npm'])->assertSuccessful();
+    artisan('install:dependencies')
+        ->expectsOutputToContain("Composer successfully installed your project dependencies")
+        ->assertSuccessful();
+    artisan('install:dependencies', ['--tool' => 'npm'])
+        ->expectsOutputToContain("Npm successfully installed your project dependencies")
+        ->assertSuccessful();
 
     expect($process)
         ->not->assertNothingRan()
@@ -39,7 +43,9 @@ it('can install composer dependencies', function () {
         ->shouldReceive('exists')
         ->andReturn(false);
 
-    artisan('install:dependencies')->assertSuccessful();
+    artisan('install:dependencies')
+        ->expectsOutputToContain("Composer successfully installed your project dependencies")
+        ->assertSuccessful();
 
     expect($process)
         ->not->assertNothingRan()
@@ -56,7 +62,9 @@ it('can install composer dependencies with lock file present', function () {
         ->shouldReceive('exists')
         ->andReturnTrue();
 
-    artisan('install:dependencies')->assertSuccessful();
+    artisan('install:dependencies')
+        ->expectsOutputToContain("Composer successfully installed your project dependencies")
+        ->assertSuccessful();
 
     expect($process)
         ->not->assertNothingRan()
