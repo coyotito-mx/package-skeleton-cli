@@ -13,7 +13,7 @@ use RuntimeException;
 
 class Composer extends DependencyManager
 {
-    protected static string $dependencyPattern = '/^(?<name>[a-z0-9_.-]+\/[a-z0-9_.-]+)(:(?<version>[^\s]+))?$/i';
+    protected static string $dependencyPattern = '/^(?<name>[a-z0-9_.-]+\/[a-z0-9_.-]+)(?:\:(?<version>[^\s]+))$/i';
 
     public function add(array $dependencies, bool $dev = false): static
     {
@@ -80,7 +80,7 @@ class Composer extends DependencyManager
 
         $dependency = Str::of($dependency)->matchAllWithGroups(static::$dependencyPattern)->first();
 
-        return ['name' => Str::lower($dependency['name']), 'version' => $dependency['version'] ?? '*'];
+        return ['name' => Str::lower($dependency['name']), 'version' => $dependency['version']];
     }
 
     protected function getBinary(): string
