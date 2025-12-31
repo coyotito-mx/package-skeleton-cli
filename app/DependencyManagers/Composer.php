@@ -53,7 +53,9 @@ class Composer extends DependencyManager
         $this->ensureInstalled();
 
         try {
-            $process = $this->run('install');
+            $cmd = $this->hasLockFile() ? 'update' : 'install';
+
+            $process = $this->run($cmd);
         } catch (ProcessTimedOutException) {
             throw new RuntimeException('Installation timed out.');
         } catch (RuntimeException $exception) {
@@ -72,6 +74,11 @@ class Composer extends DependencyManager
         if (! Str::isMatch(static::$dependencyPattern, $dependency)) {
             throw new InvalidDependencyFormatException($dependency, '<vendor>/<package>[:<version>]');
         }
+    }
+
+    protected function hasLockFile(): bool
+    {
+        return File::exists($this->context.DIRECTORY_SEPARATOR.'composer.lock');
     }
 
     public function parseDependency(string $dependency): array

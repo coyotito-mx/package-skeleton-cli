@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Process\PendingProcess;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 
 it('can run', function () {
@@ -10,6 +11,10 @@ it('can run', function () {
         "'npm' '--version' *" => '10.0.0',
         "'npm' 'install' ",
     ]);
+
+    File::partialMock()
+        ->shouldReceive('exists')
+        ->andReturn(false);
 
     artisan('install:dependencies')->assertSuccessful();
     artisan('install:dependencies', ['--tool' => 'npm'])->assertSuccessful();
@@ -30,11 +35,32 @@ it('can install composer dependencies', function () {
         "'composer' 'install'" => 'Installing dependencies',
     ]);
 
+    File::partialMock()
+        ->shouldReceive('exists')
+        ->andReturn(false);
+
     artisan('install:dependencies')->assertSuccessful();
 
     expect($process)
         ->not->assertNothingRan()
         ->assertRanTimes(fn (PendingProcess $process) => str_contains(implode(' ', $process->command), 'composer install'));
+});
+
+it('can install composer dependencies with lock file present', function () {
+    $process = Process::fake([
+        "'composer' '--version' *",
+        "'composer' 'update'" => 'Installing dependencies',
+    ]);
+
+    File::partialMock()
+        ->shouldReceive('exists')
+        ->andReturnTrue();
+
+    artisan('install:dependencies')->assertSuccessful();
+
+    expect($process)
+        ->not->assertNothingRan()
+        ->assertRanTimes(fn (PendingProcess $process) => str_contains(implode(' ', $process->command), 'composer update'));
 });
 
 it('can install npm dependencies')->todo();
