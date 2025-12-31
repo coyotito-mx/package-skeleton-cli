@@ -37,7 +37,7 @@ it('can install composer dependencies', function () {
         ->assertRanTimes(fn (PendingProcess $process) => str_contains(implode(' ', $process->command), 'composer install'));
 });
 
-it('can install npm dependencies');
+it('can install npm dependencies')->todo();
 
 it('can install dev dependencies')->todo();
 
