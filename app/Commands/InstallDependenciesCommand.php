@@ -54,7 +54,7 @@ class InstallDependenciesCommand extends Command
             $this->error("Trying to install your dependencies failed.");
             $this->warn($exception->getMessage(), OutputInterface::VERBOSITY_DEBUG);
 
-            return self::INVALID;
+            return self::FAILURE;
         } catch (DependencyManagerNotInstalledException $exception) {
             $this->warn($exception->getMessage().", please install it before continuing.", OutputInterface::VERBOSITY_VERBOSE);
             $this->error("Fail to install dependencies.");
@@ -63,7 +63,7 @@ class InstallDependenciesCommand extends Command
         } catch (InvalidToolException $exception) {
             $this->warn($exception->getMessage().'. Please use Composer or NPM.');
 
-            return self::FAILURE;
+            return self::INVALID;
         } catch (InvalidDependencyFormatException $exception) {
             $this->warn("[$exception->dependency] has an invalid format, the correct format is $exception->validFormat.");
 
