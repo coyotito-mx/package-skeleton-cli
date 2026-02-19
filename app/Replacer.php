@@ -307,7 +307,9 @@ final class Replacer
     }
 
     /**
-     * Set the replacement normalizer closure.
+     * Set a custom normalizer for the replacement value.
+     *
+     * This is applied BEFORE any modifiers are processed.
      *
      * @param  ?Closure(Stringable $replacement): Stringable  $closure
      * @return $this
@@ -319,6 +321,11 @@ final class Replacer
         return $this;
     }
 
+    /**
+     * Match placeholders in the content and extract their modifiers.
+     *
+     * @param string $content The content to search for placeholders
+     */
     public function matchPlaceholders(string $content): array
     {
         $placeholder = self::wrapPlaceholder($this->placeholder);
@@ -333,11 +340,26 @@ final class Replacer
             })->toArray();
     }
 
+    /**
+     * Apply a final transformation to the replacement value before inserting it into the content.
+     *
+     * @param Stringable $replacement
+     * @return string
+     */
     protected function transformBeforeReplace(Stringable $replacement): string
     {
         return ($this->transformBeforeReplaceUsing ?? fn (Stringable $replacement) => (string) $replacement)($replacement);
     }
 
+    /**
+     * Set a custom transformer for the final replacement value.
+     *
+     * This is applied AFTER all modifiers have been processed,
+     * right before inserting into the content.
+     *
+     * @param  ?Closure(Stringable $replacement): string  $closure
+     * @return $this
+     */
     public function transformBeforeReplaceUsing(?Closure $closure = null): self
     {
         $this->transformBeforeReplaceUsing = $closure;
@@ -345,6 +367,12 @@ final class Replacer
         return $this;
     }
 
+    /**
+     * Wrap the placeholder with the appropriate regex patterns
+     *
+     * @param string $placeholder  The placeholder to wrap
+     * @return string  The wrapped placeholder
+     */
     public static function wrapPlaceholder(string $placeholder): string
     {
         return (string) Str::of($placeholder)->wrap('/'.self::$openPattern, self::$closePattern.'/');
