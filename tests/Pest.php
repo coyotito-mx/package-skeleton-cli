@@ -26,7 +26,6 @@ uses(Tests\TestCase::class)->in('Feature');
 |
 */
 
-
 /*
 |--------------------------------------------------------------------------
 | Functions
@@ -42,8 +41,8 @@ if (! function_exists('artisan')) {
     /**
      * Helper function to interact with the Artisan console for testing
      *
-     * @param string $command The command to execute
-     * @param array<string, mixed> $parameters Parameters to add to the command
+     * @param  string  $command  The command to execute
+     * @param  array<string, mixed>  $parameters  Parameters to add to the command
      */
     function artisan(string $command, array $parameters = []): PendingCommand
     {

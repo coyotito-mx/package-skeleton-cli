@@ -18,10 +18,10 @@ it('can run', function () {
         ->andReturn(false);
 
     artisan('install:dependencies')
-        ->expectsOutputToContain("Composer successfully installed your project dependencies")
+        ->expectsOutputToContain('Composer successfully installed your project dependencies')
         ->assertSuccessful();
     artisan('install:dependencies', ['--tool' => 'npm'])
-        ->expectsOutputToContain("Npm successfully installed your project dependencies")
+        ->expectsOutputToContain('Npm successfully installed your project dependencies')
         ->assertSuccessful();
 
     expect($process)
@@ -54,7 +54,7 @@ it('can install composer dependencies', function () {
         ->andReturn(false);
 
     artisan('install:dependencies')
-        ->expectsOutputToContain("Composer successfully installed your project dependencies")
+        ->expectsOutputToContain('Composer successfully installed your project dependencies')
         ->assertSuccessful();
 
     expect($process)
@@ -73,7 +73,7 @@ it('can install composer dependencies with lock file present', function () {
         ->andReturnTrue();
 
     artisan('install:dependencies')
-        ->expectsOutputToContain("Composer successfully installed your project dependencies")
+        ->expectsOutputToContain('Composer successfully installed your project dependencies')
         ->assertSuccessful();
 
     expect($process)

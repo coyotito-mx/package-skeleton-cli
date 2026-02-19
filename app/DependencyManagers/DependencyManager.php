@@ -20,9 +20,9 @@ abstract class DependencyManager
     /**
      * Constructor
      *
-     * @param string $context The context path where the dependency manager operates
-     * @param bool $tty Whether to use TTY for process output
-     * @param null|OutputInterface $output Optional output interface for process output, if null, TTY will be used if available
+     * @param  string  $context  The context path where the dependency manager operates
+     * @param  bool  $tty  Whether to use TTY for process output
+     * @param  null|OutputInterface  $output  Optional output interface for process output, if null, TTY will be used if available
      * @return void
      */
     public function __construct(public string $context, public bool $tty = true, public ?OutputInterface $output = null)
@@ -70,9 +70,8 @@ abstract class DependencyManager
     /**
      * Runs a command in the context of the dependency manager.
      *
-     * @param string|array<int, string> $command
-     * @param string[] $arguments
-     * @return ProcessResult
+     * @param  string|array<int, string>  $command
+     * @param  string[]  $arguments
      */
     protected function run(string|array $command = [], array $arguments = []): ProcessResult
     {
@@ -113,8 +112,8 @@ abstract class DependencyManager
     /**
      * Runs the installation command and throws a standard exception if it fails.
      *
-     * @param string|array<int, string> $command
-     * @param string[] $dependencies
+     * @param  string|array<int, string>  $command
+     * @param  string[]  $dependencies
      */
     protected function runInstallCommand(string|array $command = 'install', array $dependencies = []): ProcessResult
     {
@@ -170,7 +169,7 @@ abstract class DependencyManager
     /**
      * Writes an associative array to a JSON file with pretty print and unescaped slashes.
      *
-     * @param array<string, mixed> $content
+     * @param  array<string, mixed>  $content
      */
     protected function writeJsonFile(string $path, array $content): void
     {

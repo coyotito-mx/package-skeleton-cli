@@ -21,7 +21,7 @@ class InstallDependenciesCommand extends Command
      *
      * @var string
      */
-    protected $signature = <<<SIGNATURE
+    protected $signature = <<<'SIGNATURE'
         install:dependencies
         { dependency?* : Install dependency }
         { --tool=composer : Install dependencies using the specified tool (composer|npm) }
@@ -59,13 +59,13 @@ class InstallDependenciesCommand extends Command
 
             $this->installDependencies(tool: $tool, dependencies: $dependencies, dev: $this->devMode());
         } catch (DependencyInstallationFailException $exception) {
-            $this->error("Trying to install your dependencies failed.");
+            $this->error('Trying to install your dependencies failed.');
             $this->warn($exception->getMessage(), OutputInterface::VERBOSITY_DEBUG);
 
             return self::FAILURE;
         } catch (DependencyManagerNotInstalledException $exception) {
-            $this->warn($exception->getMessage().", please install it before continuing.", OutputInterface::VERBOSITY_VERBOSE);
-            $this->error("Fail to install dependencies.");
+            $this->warn($exception->getMessage().', please install it before continuing.', OutputInterface::VERBOSITY_VERBOSE);
+            $this->error('Fail to install dependencies.');
 
             return self::FAILURE;
         } catch (InvalidToolException $exception) {
@@ -77,7 +77,7 @@ class InstallDependenciesCommand extends Command
 
             return self::INVALID;
         } catch (Exception $exception) {
-            $this->error("An unexpected error occurred, please check the logs for more details.");
+            $this->error('An unexpected error occurred, please check the logs for more details.');
             $this->warn($exception->getMessage(), OutputInterface::VERBOSITY_DEBUG);
 
             return self::FAILURE;
@@ -92,6 +92,7 @@ class InstallDependenciesCommand extends Command
      * Get one of the available dependency manager
      *
      * @throws InvalidToolException if the provided tool name is not a valid one
+     *
      * @returns DependencyManager The tool to manage dependencies
      */
     public function getTool(): DependencyManager
@@ -108,7 +109,7 @@ class InstallDependenciesCommand extends Command
      *
      * This method will try to install the project dependencies (`composer.json` or `package.json`), including the given one from the array.
      *
-     * @throws DependencyInstallationFailException  if the one of the provided dependencies cannot be installed
+     * @throws DependencyInstallationFailException if the one of the provided dependencies cannot be installed
      * @throws DependencyManagerNotInstalledException if the given tool is not installed
      */
     protected function installDependencies(DependencyManager $tool, array $dependencies = [], bool $dev = false): void

@@ -7,7 +7,7 @@ it('replace placeholder', function (string $type) {
     $replacer = TypeReplacer::make($type);
 
     expect($replacer)
-        ->replace("type: {{type}}")->toBe("type: $type");
+        ->replace('type: {{type}}')->toBe("type: $type");
 })->with(InvalidPackageTypeException::$validTypes);
 
 it('replace placeholder with invalid type', function (string $type) {
@@ -18,7 +18,7 @@ it('replace placeholder with invalid type', function (string $type) {
     'none-standard',
     'Invalid Type',
     'vanilla',
-    'laravel'
+    'laravel',
 ]);
 
 test('cannot apply excluded modifier', function (string $modifier) {

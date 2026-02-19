@@ -72,7 +72,7 @@ class NamespaceReplacer extends Builder
                     $normalizerCallback = fn (Stringable $replacement) => $replacement->trim()->headline();
 
                     return static::unwrapNamespace($normalizerCallback)($replacement);
-            })
+                })
             ->transformBeforeReplaceUsing(fn (Stringable $replacement): string => (string) $replacement->replace(' ', ''));
 
         return parent::configure();

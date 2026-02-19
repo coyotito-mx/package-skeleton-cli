@@ -69,8 +69,8 @@ abstract class Builder
     /**
      * Setup the modifiers for the replacer
      *
-     * @param array<string, \Closure(Stringable $replacement): Stringable> $customModifiers
-     * @param string[] $modifiersToExclude
+     * @param  array<string, \Closure(Stringable $replacement): Stringable>  $customModifiers
+     * @param  string[]  $modifiersToExclude
      */
     final protected function setupModifiers(array $customModifiers = [], array $modifiersToExclude = []): void
     {
