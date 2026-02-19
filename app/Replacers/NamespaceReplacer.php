@@ -178,6 +178,6 @@ class NamespaceReplacer extends Builder
             ->matchAllWithGroups(static::$singleSeparatorPattern)
             ->first();
 
-        return $match['separator'] ?? null;
+        return $match?->get('separator') ?? null;
     }
 }
