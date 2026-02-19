@@ -145,6 +145,7 @@ class NamespaceReplacer extends Builder
      *
      *        slash: fn ($namespace) => str_replace('/', '\\', $namespace),
      *    ); // returns Stringable('CoyotitoPackageSkeleton') unchanged because no separator is found
+     *
      * </code>
      *
      * @param  string  $namespace  The namespace string
@@ -173,6 +174,10 @@ class NamespaceReplacer extends Builder
      */
     public static function identifySingleSeparator(string $namespace): ?string
     {
-        return Str::of($namespace)->matchAllWithGroups(static::$singleSeparatorPattern)->get(0, [])['separator'] ?? null;
+        $match = Str::of($namespace)
+            ->matchAllWithGroups(static::$singleSeparatorPattern)
+            ->first();
+
+        return $match['separator'] ?? null;
     }
 }
