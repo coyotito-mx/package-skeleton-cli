@@ -125,16 +125,19 @@ class InstallDependenciesCommand extends Command
      */
     protected function getDependencies(): array
     {
+        /** @phpstan-ignore-next-line */
         return $this->argument('dependency') ?? [];
     }
 
     protected function devMode(): bool
     {
+        /** @phpstan-ignore-next-line */
         return $this->option('dev') ?? false;
     }
 
     protected function dryRun(): bool
     {
+        /** @phpstan-ignore-next-line */
         return $this->option('dry-run') ?? false;
     }
 

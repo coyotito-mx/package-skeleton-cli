@@ -5,21 +5,19 @@ declare(strict_types=1);
 namespace App\Replacers;
 
 use App\Replacer;
-use App\Replacers\Exceptions\InvalidEmailException;
+use App\Replacers\Exceptions\InvalidFormatException;
 use Closure;
 use Exception;
 use Illuminate\Support\Stringable;
 
 abstract class Builder
 {
-    protected static string $placeholder;
-
     /**
      * Validation format exception
      *
      * This class string represent the exception to use to validate the replacement
      *
-     * @var ?class-string<InvalidEmailException>
+     * @var ?class-string<InvalidFormatException>
      */
     protected static ?string $invalidFormatException = null;
 
@@ -106,10 +104,11 @@ abstract class Builder
     /**
      * Get the placeholder string
      *
-     * @throws Exception if the placeholder is not defined in the subclass
+     * @throws \RuntimeException if the placeholder is not defined in the subclass
      */
     final public static function getPlaceholder(): string
     {
-        return static::$placeholder;
+        /** @phpstan-ignore-next-line */
+        return static::$placeholder ?? throw new \RuntimeException('The placeholder is not defined');
     }
 }

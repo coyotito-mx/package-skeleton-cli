@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Replacers;
 
 use App\Replacer;
+use App\Replacers\Exceptions\InvalidFormatException;
 use App\Replacers\Exceptions\InvalidYearException;
 use Override;
 
