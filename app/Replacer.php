@@ -286,16 +286,10 @@ final class Replacer
     /**
      * Filter modifiers to only allow specific ones.
      *
-     * This will override any previously set excluded modifiers
-     *
-     * @return $this
+     * if `null` will not apply any modifier, if is and
      */
-    public function onlyWith(?array $modifiers = []): self
+    public function only(?array $modifiers): self
     {
-        if (is_array($modifiers)) {
-            $modifiers = [...$modifiers, ...($this->modifiers ?? [])];
-        }
-
         $this->onlyWith = $modifiers;
 
         return $this;

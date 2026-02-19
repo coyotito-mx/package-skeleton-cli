@@ -16,7 +16,7 @@ class TypeReplacer extends Builder
     {
         $this->replacer
             ->normalizeReplacementUsing(fn (Stringable $replacement): Stringable => $replacement->slug())
-            ->onlyWith(null);
+            ->only(null);
 
         return parent::configure();
     }

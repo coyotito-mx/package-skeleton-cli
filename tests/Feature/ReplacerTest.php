@@ -164,12 +164,12 @@ it('register custom modifier', function () {
 });
 
 it('permit only specific modifiers', function (string $modifier, ?string $expected, bool $isIncluded) {
-    $replacer = Replacer::make('name', 'john doe')->onlyWith(null);
+    $replacer = Replacer::make('name', 'john doe')->only(null);
 
     if (! $isIncluded && is_null($expected)) {
         $expected = 'John Doe';
     } else {
-        $replacer->onlyWith([$modifier]);
+        $replacer->only([$modifier]);
     }
 
     expect($replacer)
@@ -229,7 +229,7 @@ it('permit only specific modifiers', function (string $modifier, ?string $expect
 
 it('use only specified modifiers', function () {
     $replacer = tap(Replacer::make('name', 'john doe'))
-        ->onlyWith(['emoji'])
+        ->only(['emoji'])
         ->addModifier('emoji', fn (\Illuminate\Support\Stringable $replacement): \Illuminate\Support\Stringable => $replacement->append(' 😊'));
 
     expect($replacer)
