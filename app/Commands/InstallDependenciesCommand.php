@@ -48,8 +48,16 @@ class InstallDependenciesCommand extends Command
     {
         try {
             $tool = $this->getTool();
+            $dependencies = $this->getDependencies();
 
-            $this->installDependencies(tool: $tool, dependencies: $this->getDependencies(), dev: $this->devMode());
+            if ($this->dryRun()) {
+                $tool->validateDependencies($dependencies);
+                $this->displayDryRunNotification();
+
+                return self::SUCCESS;
+            }
+
+            $this->installDependencies(tool: $tool, dependencies: $dependencies, dev: $this->devMode());
         } catch (DependencyInstallationFailException $exception) {
             $this->error("Trying to install your dependencies failed.");
             $this->warn($exception->getMessage(), OutputInterface::VERBOSITY_DEBUG);
@@ -125,6 +133,11 @@ class InstallDependenciesCommand extends Command
         return $this->option('dev') ?? false;
     }
 
+    protected function dryRun(): bool
+    {
+        return $this->option('dry-run') ?? false;
+    }
+
     protected function displaySuccessfulNotification(): void
     {
         $tool = Str::ucfirst($this->option('tool'));
@@ -143,5 +156,18 @@ class InstallDependenciesCommand extends Command
         $tool->output = $this->getOutput();
 
         return $tool;
+    }
+
+    protected function displayDryRunNotification(): void
+    {
+        $tool = Str::ucfirst($this->option('tool'));
+
+        $this->components->info("Dry run completed for $tool. No changes were applied.");
+
+        if (filled($dependencies = $this->getDependencies())) {
+            $this->components->info('The provided dependencies were validated:');
+
+            $this->table(['Dependency'], array_map(fn (string $dep) => [$dep], $dependencies));
+        }
     }
 }

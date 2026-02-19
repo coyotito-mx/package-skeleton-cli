@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\DependencyManagers;
 
-use App\DependencyManagers\Exceptions\DependencyInstallationFailException;
-use App\DependencyManagers\Exceptions\InvalidDependencyFormatException;
 use Illuminate\Process\Exceptions\ProcessTimedOutException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -13,83 +11,87 @@ use RuntimeException;
 
 class Composer extends DependencyManager
 {
-    protected static string $dependencyPattern = '/^(?<name>[a-z0-9_.-]+\/[a-z0-9_.-]+)(?:\:(?<version>[^\s]+))$/i';
+    protected static string $patternDependency = '/^(?<name>[a-z0-9_.-]+\/[a-z0-9_.-]+)(?:\:(?<version>[^\s]+))$/i';
 
+    /**
+     * {@inheritdoc}
+     */
     public function add(array $dependencies, bool $dev = false): static
     {
         if (blank($dependencies)) {
             return $this;
         }
 
-        $composerFile = $this->context.DIRECTORY_SEPARATOR.'composer.json';
+        $composerFile = $this->ensureProjectFileExists('composer.json');
+        $composer = $this->readJsonFile($composerFile);
 
-        if (! File::exists($composerFile)) {
-            throw new RuntimeException('composer.json does not exist');
-        }
-
-        $composer = File::json($composerFile, JSON_THROW_ON_ERROR);
+        $section = 'require'.($dev ? '-dev' : '');
+        $composer[$section] ??= [];
 
         foreach ($dependencies as $dependency) {
             ['name' => $pkg, 'version' => $version] = $this->parseDependency($dependency);
 
-            $composer['require'.($dev ? '-dev' : '')][$pkg] = $version;
+            $composer[$section][$pkg] = $version;
         }
 
-        File::put($composerFile, json_encode($composer, JSON_THROW_ON_ERROR|JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+        $this->writeJsonFile($composerFile, $composer);
 
         return $this;
     }
 
-    /*
-     * Install dependencies using Composer.
-     *
-     * @param array $dependencies List of dependencies to install in the format 'vendor/package:version'.
-     * @param bool $dev Whether to install as dev dependencies, and will only be applied when dependencies are provided.
+    /**
+     * {@inheritdoc}
      */
     public function install(array $dependencies = [], bool $dev = false): static
     {
         $this->add($dependencies, $dev);
 
-        $this->ensureInstalled();
-
         try {
-            $cmd = $this->hasLockFile() ? 'update' : 'install';
-
-            $process = $this->run($cmd);
+            $this->runInstallCommand(
+                command: $this->hasLockFile() ? 'update' : 'install',
+                dependencies: $dependencies
+            );
         } catch (ProcessTimedOutException) {
             throw new RuntimeException('Installation timed out.');
         } catch (RuntimeException $exception) {
             throw new RuntimeException('Installation failed: '.$exception->getMessage(), code: $exception->getCode(), previous: $exception);
         }
 
-        if (! $process->successful()) {
-            throw new DependencyInstallationFailException('Dependency installation failed', process: $process, dependencies: $dependencies);
-        }
-
         return $this;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function validateDependency(string $dependency): void
     {
-        if (! Str::isMatch(static::$dependencyPattern, $dependency)) {
-            throw new InvalidDependencyFormatException($dependency, '<vendor>/<package>[:<version>]');
-        }
+        $this->parseDependencyByPattern($dependency, static::$patternDependency, '<vendor>/<package>[:<version>]');
     }
 
+    /**
+     * Check if the project has a `composer.lock` file, which indicates that the dependencies have been installed at least once.
+     */
     protected function hasLockFile(): bool
     {
         return File::exists($this->context.DIRECTORY_SEPARATOR.'composer.lock');
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function parseDependency(string $dependency): array
     {
-        $this->validateDependency($dependency);
+        $parsed = $this->parseDependencyByPattern($dependency, static::$patternDependency, '<vendor>/<package>[:<version>]');
 
-        $dependency = Str::of($dependency)->matchAllWithGroups(static::$dependencyPattern)->first();
-
-        return ['name' => Str::lower($dependency['name']), 'version' => $dependency['version']];
+        return [
+            'name' => Str::lower($parsed['name']),
+            'version' => $parsed['version'],
+        ];
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function getBinary(): string
     {
         return 'composer';
