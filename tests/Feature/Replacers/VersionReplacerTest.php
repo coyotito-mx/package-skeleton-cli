@@ -19,7 +19,7 @@ it('throw exception when version is invalid', function (string $version) {
         'invalid-version',
         '1',
         '1.0',
-        'v1.0.0',
+        'v1.0.0', // Prefijo 'v' no es válido en SemVer estricto
     ]);
 
 it('replace major version', function () {
@@ -70,11 +70,19 @@ test('chaining multiple replacer will only use the first one', function () {
         ->toBe('Version: 5');
 });
 
-it('prefix with v', function () {
+it('adds v prefix to version', function () {
     $replacer = VersionReplacer::make('1.2.3');
 
     expect($replacer)
         ->replace('Version: {{version|prefix}}')
+        ->toBe('Version: v1.2.3');
+});
+
+it('prefix modifier is idempotent when applied multiple times', function () {
+    $replacer = VersionReplacer::make('1.2.3');
+
+    expect($replacer)
+        ->replace('Version: {{version|prefix,prefix}}')
         ->toBe('Version: v1.2.3');
 });
 
@@ -93,11 +101,3 @@ test('cannot apply excluded modifier', function (string $modifier) {
     'slug',
     'acronym',
 ]);
-
-it('cannot only be prefix once', function () {
-    $replacer = VersionReplacer::make('1.2.3');
-
-    expect($replacer)
-        ->replace('Version: {{version|prefix,prefix}}')
-        ->toBe('Version: v1.2.3');
-});
