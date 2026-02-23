@@ -18,6 +18,7 @@ use Illuminate\Support\Stringable;
  * - snake: Converts the replacement string to snake_case.
  * - kebab: Converts the replacement string to kebab-case.
  * - camel: Converts the replacement string to camelCase.
+ * - pascal: Converts the replacement string to PascalCase.
  * - slug: Converts the replacement string to a URL-friendly slug.
  * - acronym: Converts the replacement string to an acronym in uppercase (e.g. "The United Mexican States" -> "UMS"), using common English stop words.
  *
@@ -212,6 +213,7 @@ final class Replacer
             'snake' => fn (Stringable $replacement) => $replacement->snake(),
             'kebab' => fn (Stringable $replacement) => $replacement->kebab(),
             'camel' => fn (Stringable $replacement) => $replacement->camel(),
+            'pascal' => fn (Stringable $replacement) => $replacement->studly(),
             'slug' => fn (Stringable $replacement) => $replacement->slug(),
             'acronym' => function (Stringable $replacement): Stringable {
                 $acronym = $replacement
