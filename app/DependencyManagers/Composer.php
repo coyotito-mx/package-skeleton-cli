@@ -6,7 +6,6 @@ namespace App\DependencyManagers;
 
 use Illuminate\Process\Exceptions\ProcessTimedOutException;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
 use RuntimeException;
 
 class Composer extends DependencyManager
@@ -48,7 +47,7 @@ class Composer extends DependencyManager
 
         try {
             $this->runInstallCommand(
-                command: $this->hasLockFile() ? 'update' : 'install',
+                command: [$this->getBinary(), $this->hasLockFile() ? 'update' : 'install'],
                 dependencies: $dependencies
             );
         } catch (ProcessTimedOutException) {
@@ -61,14 +60,6 @@ class Composer extends DependencyManager
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function validateDependency(string $dependency): void
-    {
-        $this->parseDependencyByPattern($dependency, static::$patternDependency, '<vendor>/<package>[:<version>]');
-    }
-
-    /**
      * Check if the project has a `composer.lock` file, which indicates that the dependencies have been installed at least once.
      */
     protected function hasLockFile(): bool
@@ -77,20 +68,7 @@ class Composer extends DependencyManager
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function parseDependency(string $dependency): array
-    {
-        $parsed = $this->parseDependencyByPattern($dependency, static::$patternDependency, '<vendor>/<package>[:<version>]');
-
-        return [
-            'name' => Str::lower($parsed['name']),
-            'version' => $parsed['version'],
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
+     * Get the composer binary command.
      */
     protected function getBinary(): string
     {

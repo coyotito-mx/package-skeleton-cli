@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 use RuntimeException;
 use Symfony\Component\Console\Output\OutputInterface;
 
-abstract class DependencyManager
+abstract class DependencyManager implements Contracts\DependencyManagerContract
 {
     protected static string $patternDependency;
 
@@ -43,14 +43,25 @@ abstract class DependencyManager
     /**
      * Validates a single dependency.
      */
-    abstract public function validateDependency(string $dependency): void;
+    public function validateDependency(string $dependency): void
+    {
+        $this->parseDependencyByPattern($dependency, static::$patternDependency);
+    }
 
     /**
      * Parses a single dependency into its components.
      *
      * @return array{name: string, version: ?string}
      */
-    abstract public function parseDependency(string $dependency): array;
+    public function parseDependency(string $dependency): array
+    {
+        $parsed = $this->parseDependencyByPattern($dependency, static::$patternDependency);
+
+        return [
+            'name' => Str::lower($parsed['name']),
+            'version' => $parsed['version'],
+        ];
+    }
 
     public function validateDependencies(string|array $dependencies): void
     {
@@ -75,7 +86,7 @@ abstract class DependencyManager
      */
     protected function run(string|array $command = [], array $arguments = []): ProcessResult
     {
-        $command = array_filter([$this->getBinary(), ...Arr::wrap($command ?: null), ...$arguments]);
+        $command = array_filter([...Arr::wrap($command ?: null), ...$arguments]);
 
         $process = Process::path($this->context)->command($command);
 
@@ -180,10 +191,10 @@ abstract class DependencyManager
      *
      * @return array{name: string, version: ?string}
      */
-    protected function parseDependencyByPattern(string $dependency, string $pattern, string $validFormat): array
+    protected function parseDependencyByPattern(string $dependency, string $pattern): array
     {
         if (! Str::isMatch($pattern, $dependency)) {
-            throw new InvalidDependencyFormatException($dependency, $validFormat);
+            throw new InvalidDependencyFormatException($dependency, $pattern);
         }
 
         $parsed = Str::of($dependency)->matchAllWithGroups($pattern)->first() ?? collect();
@@ -193,9 +204,4 @@ abstract class DependencyManager
             'version' => $parsed->get('version'),
         ];
     }
-
-    /**
-     * Get the binary name or path for the dependency manager.
-     */
-    abstract protected function getBinary(): string;
 }
