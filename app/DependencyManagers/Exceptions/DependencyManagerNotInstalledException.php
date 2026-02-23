@@ -7,7 +7,7 @@ use RuntimeException;
 
 class DependencyManagerNotInstalledException extends RuntimeException
 {
-    public function __construct(protected(set) string $manager, protected(set) string $binary, protected(set) string $cause, protected(set) int $exitCode = -1)
+    public function __construct(protected(set) string $manager, protected(set) string $cause, protected(set) int $exitCode = -1)
     {
         $class = Str::of($this->manager)->classBasename()->ucfirst();
 

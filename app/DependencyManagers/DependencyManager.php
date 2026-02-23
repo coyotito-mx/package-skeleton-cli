@@ -102,7 +102,6 @@ abstract class DependencyManager
         if (! $result->successful()) {
             throw new DependencyManagerNotInstalledException(
                 manager: static::class,
-                binary: $this->getBinary(),
                 cause: $result->errorOutput(),
                 exitCode: $result->exitCode()
             );
