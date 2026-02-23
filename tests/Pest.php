@@ -37,6 +37,13 @@ uses(Tests\TestCase::class)->in('Feature');
 |
 */
 
+function ensureFolderExists(string $folder): void
+{
+    if (! file_exists($folder)) {
+        mkdir($folder, 0755, true);
+    }
+}
+
 if (! function_exists('artisan')) {
     /**
      * Helper function to interact with the Artisan console for testing

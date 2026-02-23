@@ -1,71 +1,136 @@
 <?php
 
+use App\Facades\Composer;
+use Illuminate\Support\Facades\Process;
+
+function setupTestDirectory(): string
+{
+    $function = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function'];
+
+    $name = sha1($function);
+
+    $path = base_path('tests'.DIRECTORY_SEPARATOR.'temp'.DIRECTORY_SEPARATOR.$name);
+
+    ensureFolderExists($path);
+
+    return $path;
+}
+
+afterAll(fn () => rmdir_recursive(base_path('tests'.DIRECTORY_SEPARATOR.'temp')));
+
 it('init package', function () {
-    artisan('init', ['vendor' => 'vendor', 'package' => 'acme', '--proceed' => true])
-        ->expectsOutputToContain('Package [Vendor\\Package] initialized successfully!')
-        ->assertSuccessful();
-})->todo();
+    Composer::fake();
 
-it('init package using namespace', function () {
-    artisan('init', ['namespace' => 'Vendor\\Acme', '--proceed' => true])
-        ->expectsOutputToContain('Package [Vendor\\Acme] initialized successfully!')
-        ->assertSuccessful();
-})->todo();
-
-it('install package composer dependencies', function () {
-    artisan('init', ['vendor' => 'vendor', 'package' => 'acme', '--proceed' => true])
-        ->expectsOutputToContain('Installing composer dependencies...')
-        ->expectsOutputToContain('Composer dependencies initialized successfully!')
-        ->expectsOutputToContain('Package [Vendor\\Acme] initialized successfully!')
-        ->assertSuccessful();
-})->todo();
-
-test('skip composer dependencies installation', function () {
-    artisan('init', ['vendor' => 'vendor', 'package' => 'acme', '--proceed' => true, '--no-install' => true])
-        ->doesntExpectOutputToContain('Installing composer dependencies...')
-        ->doesntExpectOutputToContain('Composer dependencies initialized successfully!')
-        ->expectsOutputToContain('Package [Vendor\\Acme] initialized successfully!')
-        ->assertSuccessful();
-})->todo();
-
-it('uses git user/email for author by default', function () {
-    artisan('init', ['vendor' => 'vendor', 'package' => 'acme', '--proceed' => true])
-        ->expectsOutputToContain('Using git user.name and user.email for author information.')
-        ->expectsOutputToContain('Package [Vendor\\Acme] initialized successfully!')
-        ->assertSuccessful();
-})->todo();
-
-it('display summary after package initialization', function () {
-    artisan('init', ['vendor' => 'vendor', 'package' => 'acme', '--description' => 'A new package', '--proceed' => true])
-        ->expectsTable(
-            ['Key', 'Value'],
-            [
-                ['Vendor', 'Vendor'],
-                ['Package', 'Package'],
-                ['Namespace', 'Vendor\\Acme'],
-                ['Description', 'A new package'],
-                ['Author', 'Your Name <'],
-                ['License', 'MIT'],
-            ],
+    artisan('init', [
+        'vendor'    => 'acme',
+        'package'   => 'package',
+        'author'    => 'John Doe',
+        'email'     => 'john@doe.com',
+        '--description' => 'A package description',
+        '--proceed' => true
+    ])
+        ->expectsPromptsIntro('Initializing package...')
+        ->expectsPromptsTable(
+            ['Vendor', 'Package', 'Namespace', 'Description', 'Author', 'Email'],
+            [['Acme', 'Package', 'Acme\\Package', 'A package description', 'John Doe', 'john@doe.com']]
         )
-        ->expectsOutputToContain('Package [Vendor\\Acme] initialized successfully!')
+        ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
+        ->expectsPromptsAlert('Installing composer dependencies...')
+        ->expectsPromptsOutro('Package [Acme\\Package] initialized successfully!')
         ->assertSuccessful();
-})->todo();
+});
 
 it('ask for confirmation before initializing package', function () {
-    artisan('init', ['vendor' => 'vendor', 'package' => 'acme', '--description' => 'A new package'])
-        ->expectsTable(
-            ['Key', 'Value'],
-            [
-                ['Vendor', 'Vendor'],
-                ['Package', 'Package'],
-                ['Namespace', 'Vendor\\Acme'],
-                ['Description', 'A new package'],
-                ['Author', 'Your Name <'],
-                ['License', 'MIT'],
-            ],
+    Composer::fake();
+
+    artisan('init', [
+        'vendor' => 'acme',
+        'package' => 'package',
+        'author' => 'John Doe',
+        'email' => 'john@doe.com',
+        '--description' => 'A package description',
+    ])
+
+        ->expectsPromptsTable(
+            ['Vendor', 'Package', 'Namespace', 'Description', 'Author', 'Email'],
+             [['Acme', 'Package', 'Acme\\Package', 'A package description', 'John Doe', 'john@doe.com']]
         )
-        ->expectsConfirmation('Do you want to proceed?', 'yes')
-        ->expectsOutputToContain('Package [Vendor\\Acme] initialized successfully!')
+        ->expectsConfirmation('Do you want to proceed with this configuration?', 'yes')
+        ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
+        ->expectsOutputToContain('Package [Acme\\Package] initialized successfully!')
         ->assertSuccessful();
-})->todo();
+});
+
+it('init package using namespace', function () {
+    Composer::fake();
+
+    artisan('init', [
+        'vendor'    => 'acme',
+        'package'   => 'package',
+        'author'    => 'John Doe',
+        'email'     => 'john@doe.com',
+        '--namespace' => 'Asciito\\Acme',
+        '--proceed' => true,
+    ])
+        ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
+        ->expectsPromptsOutro('Package [Asciito\\Acme] initialized successfully!')
+        ->assertSuccessful();
+});
+
+it('install package composer dependencies', function () {
+    $composer = Composer::fake();
+
+    artisan('init', [
+        'vendor' => 'acme',
+        'package' => 'package',
+        'author' => 'John Doe',
+        'email' => 'john@doe.com',
+        '--proceed' => true
+    ])
+        ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
+        ->expectsPromptsAlert('Installing composer dependencies...')
+        ->expectsPromptsOutro('Package [Acme\\Package] initialized successfully!')
+        ->assertSuccessful();
+
+    $composer->assertDependencyInstalled('pestphp/pest');
+});
+
+test('skip composer dependencies installation', function () {
+    $composer = Composer::fake();
+
+    artisan('init', [
+        'vendor' => 'acme',
+        'package' => 'package',
+        'author' => 'John Doe',
+        'email' => 'john@doe.com',
+        '--proceed' => true,
+        '--no-install' => true
+    ])
+        ->expectsPromptsWarning('Skip composer dependencies installation.')
+        ->expectsOutputToContain('Package [Acme\\Package] initialized successfully!')
+        ->assertSuccessful();
+
+    $composer->assertNothingInstalled();
+});
+
+it('uses git user/email for author by default', function () {
+    Composer::fake();
+
+    Process::fake([
+        'git config --list --global *' => Process::result(
+            json_encode([
+                'user.name' => 'Asciito',
+                'user.email' => 'hello@asciito.com'
+            ]),
+        ),
+    ]);
+
+    artisan('init', ['vendor' => 'acme', 'package' => 'package', '--proceed' => true])
+        ->expectsPromptsTable(
+            ['Vendor', 'Package', 'Namespace', 'Author', 'Email'],
+            [['Acme', 'Package', 'Acme\\Package', 'Asciito', 'hello@asciito.com']]
+        )
+        ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
+        ->expectsOutputToContain('Package [Acme\\Package] initialized successfully!')
+        ->assertSuccessful();
+});
