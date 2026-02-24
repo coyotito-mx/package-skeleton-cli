@@ -22,12 +22,12 @@ it('init package', function () {
     Composer::fake();
 
     artisan('init', [
-        'vendor'    => 'acme',
-        'package'   => 'package',
-        'author'    => 'John Doe',
-        'email'     => 'john@doe.com',
+        'vendor' => 'acme',
+        'package' => 'package',
+        'author' => 'John Doe',
+        'email' => 'john@doe.com',
         '--description' => 'A package description',
-        '--proceed' => true
+        '--proceed' => true,
     ])
         ->expectsPromptsIntro('Initializing package...')
         ->expectsPromptsTable(
@@ -53,7 +53,7 @@ it('ask for confirmation before initializing package', function () {
 
         ->expectsPromptsTable(
             ['Vendor', 'Package', 'Namespace', 'Description', 'Author', 'Email'],
-             [['Acme', 'Package', 'Acme\\Package', 'A package description', 'John Doe', 'john@doe.com']]
+            [['Acme', 'Package', 'Acme\\Package', 'A package description', 'John Doe', 'john@doe.com']]
         )
         ->expectsConfirmation('Do you want to proceed with this configuration?', 'yes')
         ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
@@ -65,10 +65,10 @@ it('init package using namespace', function () {
     Composer::fake();
 
     artisan('init', [
-        'vendor'    => 'acme',
-        'package'   => 'package',
-        'author'    => 'John Doe',
-        'email'     => 'john@doe.com',
+        'vendor' => 'acme',
+        'package' => 'package',
+        'author' => 'John Doe',
+        'email' => 'john@doe.com',
         '--namespace' => 'Asciito\\Acme',
         '--proceed' => true,
     ])
@@ -85,7 +85,7 @@ it('install package composer dependencies', function () {
         'package' => 'package',
         'author' => 'John Doe',
         'email' => 'john@doe.com',
-        '--proceed' => true
+        '--proceed' => true,
     ])
         ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
         ->expectsPromptsAlert('Installing composer dependencies...')
@@ -104,7 +104,7 @@ test('skip composer dependencies installation', function () {
         'author' => 'John Doe',
         'email' => 'john@doe.com',
         '--proceed' => true,
-        '--no-install' => true
+        '--no-install' => true,
     ])
         ->expectsPromptsWarning('Skip composer dependencies installation.')
         ->expectsOutputToContain('Package [Acme\\Package] initialized successfully!')
@@ -120,7 +120,7 @@ it('uses git user/email for author by default', function () {
         'git config --list --global *' => Process::result(
             json_encode([
                 'user.name' => 'Asciito',
-                'user.email' => 'hello@asciito.com'
+                'user.email' => 'hello@asciito.com',
             ]),
         ),
     ]);
