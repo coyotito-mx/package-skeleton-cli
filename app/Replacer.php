@@ -326,7 +326,7 @@ final class Replacer
     /**
      * Match placeholders in the content and extract their modifiers.
      *
-     * @param string $content The content to search for placeholders
+     * @param  string  $content  The content to search for placeholders
      */
     public function matchPlaceholders(string $content): array
     {
@@ -344,9 +344,6 @@ final class Replacer
 
     /**
      * Apply a final transformation to the replacement value before inserting it into the content.
-     *
-     * @param Stringable $replacement
-     * @return string
      */
     protected function transformBeforeReplace(Stringable $replacement): string
     {
@@ -372,8 +369,8 @@ final class Replacer
     /**
      * Wrap the placeholder with the appropriate regex patterns
      *
-     * @param string $placeholder  The placeholder to wrap
-     * @return string  The wrapped placeholder
+     * @param  string  $placeholder  The placeholder to wrap
+     * @return string The wrapped placeholder
      */
     public static function wrapPlaceholder(string $placeholder): string
     {

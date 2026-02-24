@@ -7,8 +7,8 @@ use Illuminate\Console\Concerns\PromptsForMissingInput as PromptsForMissingInput
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Sleep;
-use LaravelZero\Framework\Commands\Command;
 use Illuminate\Support\Str;
+use LaravelZero\Framework\Commands\Command;
 
 use function Laravel\Prompts\alert;
 use function Laravel\Prompts\clear;
@@ -18,8 +18,8 @@ use function Laravel\Prompts\intro;
 use function Laravel\Prompts\outro;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\table;
-use function Laravel\Prompts\warning;
 use function Laravel\Prompts\text;
+use function Laravel\Prompts\warning;
 
 class PackageCommand extends Command implements PromptsForMissingInput
 {
@@ -77,6 +77,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
         try {
             $this->replacePlaceholders($config);
 
+            /** @phpstan-ignore-next-line */
             $this->installDependencies(shouldSkip: $this->option('no-install') ?? false);
         } catch (\Exception $e) {
             error('An error occurred while initializing the package, please read the log for more details.');
@@ -97,7 +98,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
     public function displayConfiguration(array $config): void
     {
         $header = ['Vendor', 'Package', 'Namespace'];
-        $rows   = [[
+        $rows = [[
             $config['vendor'],
             $config['package'],
             $config['namespace'],
@@ -160,7 +161,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
     {
         $dependencies = [
             'phpunit' => ['phpunit/phpunit'],
-            'pest'    => ['pestphp/pest', 'pestphp/pest-plug'],
+            'pest' => ['pestphp/pest', 'pestphp/pest-plug'],
         ];
 
         return $dependencies[$testing] ?? throw new \Exception('Dependency not found for the selected testing framework.');
@@ -181,10 +182,10 @@ class PackageCommand extends Command implements PromptsForMissingInput
         if ($this->option('namespace')) {
             [$vendor, $package] = explode('\\', $this->option('namespace'));
 
-            return Str::studly($vendor) . '\\' . Str::studly($package);
+            return Str::studly($vendor).'\\'.Str::studly($package);
         }
 
-        return Str::studly($this->getVendor()) . '\\' . Str::studly($this->getPackage());
+        return Str::studly($this->getVendor()).'\\'.Str::studly($this->getPackage());
     }
 
     public function getPackageDescription(): ?string
@@ -245,7 +246,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
         $namespaceDefined = $this->option('namespace') !== null;
 
         $inputs = [
-            'vendor'  => function () use ($namespaceDefined): string {
+            'vendor' => function () use ($namespaceDefined): string {
                 if ($namespaceDefined) {
                     return explode('\\', $this->option('namespace'))[0];
                 }
@@ -267,7 +268,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
             $inputs = [
                 ...$inputs,
                 'author' => fn (): string => text('Enter the author name', 'John Doe'),
-                'email'  => fn (): string => text('Enter the author email', 'john@doe.com'),
+                'email' => fn (): string => text('Enter the author email', 'john@doe.com'),
             ];
         } else {
             ['author' => $author, 'email' => $email] = $information;
@@ -275,10 +276,9 @@ class PackageCommand extends Command implements PromptsForMissingInput
             $inputs = [
                 ...$inputs,
                 'author' => fn (): string => $author ?? text('Enter the author name', 'John Doe'),
-                'email'  => fn (): string => $email  ?? text('Enter the author email', 'john@doe.com'),
+                'email' => fn (): string => $email ?? text('Enter the author email', 'john@doe.com'),
             ];
         }
-
 
         return $inputs;
     }

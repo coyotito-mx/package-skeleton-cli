@@ -23,7 +23,7 @@ if (! function_exists('rmdir_recursive')) {
                 continue;
             }
 
-            $path = $dir . DIRECTORY_SEPARATOR . $file;
+            $path = $dir.DIRECTORY_SEPARATOR.$file;
 
             if (is_dir($path)) {
                 rmdir_recursive($path);

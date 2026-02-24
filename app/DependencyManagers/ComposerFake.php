@@ -2,8 +2,8 @@
 
 namespace App\DependencyManagers;
 
-use PHPUnit\Framework as PHPUnit;
 use App\DependencyManagers\Contracts\DependencyManagerContract;
+use PHPUnit\Framework as PHPUnit;
 
 class ComposerFake implements DependencyManagerContract
 {
@@ -58,7 +58,6 @@ class ComposerFake implements DependencyManagerContract
         foreach (array_keys($this->requiredDev) as $dependency) {
             $this->requiredDev[$dependency]['installed'] = true;
         }
-
 
         if ($dev) {
             foreach ($dependencies as $name => $version) {
