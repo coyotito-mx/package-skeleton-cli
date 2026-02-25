@@ -34,6 +34,8 @@ class Composer extends DependencyManager
             return $this;
         }
 
+        $this->validateDependencies($dependencies);
+
         $composerFile = $this->ensureProjectFileExists('composer.json');
         $composer = $this->readJsonFile($composerFile);
 
@@ -41,7 +43,13 @@ class Composer extends DependencyManager
         $composer[$section] ??= [];
 
         foreach ($dependencies as $dependency) {
-            ['name' => $pkg, 'version' => $version] = $this->parseDependency($dependency);
+            $parsed = $this->parseDependency($dependency);
+
+            if ($parsed === null) {
+                continue;
+            }
+
+            ['name' => $pkg, 'version' => $version] = $parsed;
 
             $composer[$section][$pkg] = $version;
         }
