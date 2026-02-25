@@ -1,15 +1,15 @@
 <?php
 
 use App\Composer;
-use Illuminate\Support\Facades\Process;
 use Illuminate\Process\PendingProcess;
+use Illuminate\Support\Facades\Process;
 
 it('runs composer require with dev flag', function () {
     $process = Process::fake([
         "'composer' 'require' 'pestphp/pest' '--dev'" => Process::result(),
     ]);
 
-    $composer = new Composer();
+    $composer = new Composer;
 
     $result = $composer->require('pestphp/pest', true);
 
@@ -24,7 +24,7 @@ it('runs composer require with all dependencies flag', function () {
         "'composer' 'require' 'laravel/framework' '--with-all-dependencies'" => Process::result(),
     ]);
 
-    $composer = new Composer();
+    $composer = new Composer;
 
     $result = $composer->require('laravel/framework', false, true);
 
@@ -39,7 +39,7 @@ it('runs composer require without flags', function () {
         "'composer' 'require' 'laravel/pint'" => Process::result(),
     ]);
 
-    $composer = new Composer();
+    $composer = new Composer;
 
     $result = $composer->require('laravel/pint');
 
@@ -54,7 +54,7 @@ it('runs composer require with multiple packages', function () {
         "'composer' 'require' 'laravel/pint' 'phpstan/phpstan'" => Process::result(),
     ]);
 
-    $composer = new Composer();
+    $composer = new Composer;
 
     $result = $composer->require(['laravel/pint', 'phpstan/phpstan']);
 
@@ -69,7 +69,7 @@ it('returns false when composer require fails', function () {
         "'composer' 'require' 'invalid/package'" => Process::result(exitCode: 1),
     ]);
 
-    $composer = new Composer();
+    $composer = new Composer;
 
     $result = $composer->require('invalid/package');
 
@@ -101,7 +101,7 @@ it('handles both dev and with-all-dependencies flags together', function () {
         "'composer' 'require' 'symfony/console' '--dev' '--with-all-dependencies'" => Process::result(),
     ]);
 
-    $composer = new Composer();
+    $composer = new Composer;
 
     $result = $composer->require('symfony/console', dev: true, withAllDependencies: true);
 
