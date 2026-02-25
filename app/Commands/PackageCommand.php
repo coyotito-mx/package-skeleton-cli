@@ -355,28 +355,46 @@ class PackageCommand extends Command
         $content = File::get($file);
         $filename = basename($file);
         $directory = dirname($file);
+        $newFilename = $filename;
 
         foreach ($this->replacers as $replacer => $callback) {
-            if (is_callable($callback)) {
-                $value = $callback();
+            ['value' => $value, 'skip' => $skip] = $this->resolveReplacerValue($callback);
 
-                if (is_null($value)) {
-                    continue;
-                }
-            } else {
-                $value = $callback;
+            if ($skip) {
+                continue;
             }
 
-            $content = $replacer::make($value)->replace($content);
-
-            $newFilename = $replacer::make($value)->replace($filename);
+            $replacerInstance = $replacer::make($value);
+            $content = $replacerInstance->replace($content);
+            $newFilename = $replacerInstance->replace($newFilename);
         }
 
-        if (isset($newFilename)) {
-            File::put($file, $content);
+        File::put($file, $content);
 
+        if ($newFilename !== $filename) {
             File::move($file, $directory.DIRECTORY_SEPARATOR.$newFilename);
         }
+    }
+
+    /**
+     * Resolve the value from a replacer callback or string.
+     *
+     * @return array{value: mixed, skip: bool}
+     */
+    private function resolveReplacerValue(mixed $callback): array
+    {
+        if (is_callable($callback)) {
+            $value = $callback();
+
+            // Skip if callback returns null
+            if (is_null($value)) {
+                return ['value' => null, 'skip' => true];
+            }
+
+            return ['value' => $value, 'skip' => false];
+        }
+
+        return ['value' => $callback, 'skip' => false];
     }
 
     /**
@@ -497,7 +515,7 @@ class PackageCommand extends Command
         $this->namespace = $this->argument('namespace') ?? $this->getNamespace();
         $this->packageDescription = $this->argument('description');
 
-        ['author' => $author, 'email' => $email] = $this->getAuthorInformation();
+        ['author' => $author, 'email' => $email] = $this->getAuthorInformation() ?? ['author' => null, 'email' => null];
 
         $this->author = $this->argument('author') ?? $author ?? text('Enter the author name', 'John Doe');
         $this->email = $this->argument('email') ?? $email ?? text('Enter the author email', 'john@doe.com');
