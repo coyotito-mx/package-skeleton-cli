@@ -21,7 +21,7 @@
         "larastan/larastan": "^v3.7.2",
         "laravel/pint": "v1.25.1",
         "mockery/mockery": "^1.6.12",
-        "pestphp/pest": "^v4.1.2",
+        "pestphp/pest": "^4.4",
         "phpstan/phpstan": "^2.1"
     },
     "autoload": {
