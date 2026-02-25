@@ -3,6 +3,7 @@
 use App\Facades\Composer;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Process;
+use PHPUnit\Framework as PHPUnit;
 
 use function Illuminate\Filesystem\join_paths;
 
@@ -17,6 +18,57 @@ function setupTestDirectory(): string
     ensureFolderExists($path);
 
     return $path;
+}
+
+function moveFixture(string|array $fixtureName, string $destinationPath): void
+{
+    if (is_array($fixtureName)) {
+        foreach ($fixtureName as $name) {
+            moveFixture($name, $destinationPath);
+        }
+
+        return;
+    }
+
+    $sourcePath = join_paths(__DIR__, '..', '..', 'Fixtures', 'before', $fixtureName);
+
+    copy($sourcePath, $destinationPath.DIRECTORY_SEPARATOR.str_replace('.stub', '', $fixtureName));
+}
+
+function assertFixtureEquals(string $fixtureName, string $actualPath): void
+{
+    $expectedPath = join_paths(__DIR__, '..', '..', 'Fixtures', 'after', $fixtureName);
+
+    if (! file_exists($expectedPath)) {
+        throw new InvalidArgumentException("Expected fixture file does not exist: {$expectedPath}");
+    }
+
+    if (! file_exists($actualPath)) {
+        throw new InvalidArgumentException("Actual file does not exist: {$actualPath}");
+    }
+
+    $expectedContent = file_get_contents($expectedPath);
+    $actualContent = file_get_contents($actualPath);
+
+    PHPUnit\Assert::assertSame($expectedContent, $actualContent, "Fixture content does not match actual content for: $actualPath");
+}
+
+function assertFixtureNotEquals(string $fixtureName, string $actualPath): void
+{
+    $expectedPath = join_paths(__DIR__, '..', '..', 'Fixtures', 'after', $fixtureName);
+
+    if (! file_exists($expectedPath)) {
+        throw new InvalidArgumentException("Expected fixture file does not exist: {$expectedPath}");
+    }
+
+    if (! file_exists($actualPath)) {
+        throw new InvalidArgumentException("Actual file does not exist: {$actualPath}");
+    }
+
+    $expectedContent = file_get_contents($expectedPath);
+    $actualContent = file_get_contents($actualPath);
+
+    PHPUnit\Assert::assertNotSame($expectedContent, $actualContent, "Fixture content should not match actual content for: $actualPath");
 }
 
 beforeAll(function () {

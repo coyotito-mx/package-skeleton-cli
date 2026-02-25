@@ -12,7 +12,6 @@
 */
 
 use Illuminate\Testing\PendingCommand;
-use PHPUnit\Framework as PHPUnit;
 
 uses(Tests\TestCase::class)->in('Feature');
 
@@ -56,55 +55,4 @@ if (! function_exists('artisan')) {
     {
         return test()->artisan($command, $parameters);
     }
-}
-
-function moveFixture(string|array $fixtureName, string $destinationPath): void
-{
-    if (is_array($fixtureName)) {
-        foreach ($fixtureName as $name) {
-            moveFixture($name, $destinationPath);
-        }
-
-        return;
-    }
-
-    $sourcePath = __DIR__.'/Fixtures/before'.DIRECTORY_SEPARATOR.$fixtureName;
-
-    copy($sourcePath, $destinationPath.DIRECTORY_SEPARATOR.str_replace('.stub', '', $fixtureName));
-}
-
-function assertFixtureEquals(string $fixtureName, string $actualPath): void
-{
-    $expectedPath = __DIR__.'/Fixtures/after'.DIRECTORY_SEPARATOR.$fixtureName;
-
-    if (! file_exists($expectedPath)) {
-        throw new InvalidArgumentException("Expected fixture file does not exist: {$expectedPath}");
-    }
-
-    if (! file_exists($actualPath)) {
-        throw new InvalidArgumentException("Actual file does not exist: {$actualPath}");
-    }
-
-    $expectedContent = file_get_contents($expectedPath);
-    $actualContent = file_get_contents($actualPath);
-
-    PHPUnit\Assert::assertSame($expectedContent, $actualContent, "Fixture content does not match actual content for: $actualPath");
-}
-
-function assertFixtureNotEquals(string $fixtureName, string $actualPath): void
-{
-    $expectedPath = __DIR__.'/Fixtures/after'.DIRECTORY_SEPARATOR.$fixtureName;
-
-    if (! file_exists($expectedPath)) {
-        throw new InvalidArgumentException("Expected fixture file does not exist: {$expectedPath}");
-    }
-
-    if (! file_exists($actualPath)) {
-        throw new InvalidArgumentException("Actual file does not exist: {$actualPath}");
-    }
-
-    $expectedContent = file_get_contents($expectedPath);
-    $actualContent = file_get_contents($actualPath);
-
-    PHPUnit\Assert::assertNotSame($expectedContent, $actualContent, "Fixture content should not match actual content for: $actualPath");
 }
