@@ -10,6 +10,11 @@ use RuntimeException;
 
 class Composer extends DependencyManager
 {
+    /**
+     * Composer dependency format: vendor/package[:version]
+     * - name: vendor/package (lowercase letters, numbers, dots, dashes, underscores)
+     * - version: optional, any non-whitespace characters
+     */
     protected static string $patternDependency = '/^(?<name>[a-z0-9_.-]+\/[a-z0-9_.-]+)(?:\:(?<version>[^\s]+))$/i';
 
     /**
