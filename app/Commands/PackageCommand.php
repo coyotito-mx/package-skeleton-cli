@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Sleep;
 use Illuminate\Support\Str;
 use LaravelZero\Framework\Commands\Command;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
 
 use function Laravel\Prompts\alert;
 use function Laravel\Prompts\clear;
@@ -52,7 +54,8 @@ class PackageCommand extends Command
                             { description? : The package description }
                             { --proceed : Accept the configuration and proceed without confirmation }
                             { --no-install : Skip installing composer dependencies }
-                            { --path= : The path to initialize the package in (defaults to current working directory) }';
+                            { --path= : The path to initialize the package in (defaults to current working directory) }
+                            { --exclude= : Comma-separated list (CSV-like) of paths to exclude when processing files }';
 
     /**
      * The console command description.
@@ -149,6 +152,7 @@ class PackageCommand extends Command
 
             $this->displayConfiguration();
             $this->displayFilesToProcess();
+            $this->displayExcludedPaths();
 
             if (! $this->option('proceed') && ! confirm('Do you want to proceed with this configuration?')) {
                 error('Package initialization cancelled.');
@@ -229,6 +233,12 @@ class PackageCommand extends Command
 
     protected function getExcludedPaths(): array
     {
+        if ($this->option('exclude')) {
+            $customExcludedPaths = array_map(trim(...), explode(',', $this->option('exclude')));
+
+            return array_merge($this->excludedPaths, $customExcludedPaths);
+        }
+
         return $this->excludedPaths;
     }
 
@@ -259,6 +269,19 @@ class PackageCommand extends Command
         $files = implode(PHP_EOL, $files);
 
         table(['Files to process'], [[$files]]);
+    }
+
+    protected function displayExcludedPaths(): void
+    {
+        $excludedPaths = $this->getExcludedPaths();
+
+        if (empty($excludedPaths)) {
+            return;
+        }
+
+        $excludedPaths = implode(PHP_EOL, $excludedPaths);
+
+        table(['Excluded Paths'], [[$excludedPaths]]);
     }
 
     /**
@@ -341,20 +364,32 @@ class PackageCommand extends Command
     protected function getFilesToProcess(): array
     {
         $rootFolder = $this->option('path') ?? getcwd();
-        $excludedPaths = $this->getExcludedPaths();
 
-        return collect(File::allFiles($rootFolder))
-            ->map(fn ($file): string => $file->getRealPath())
-            ->reject(static function (string $file) use ($excludedPaths): bool {
-                foreach ($excludedPaths as $path) {
-                    if (Str::contains($file, $path)) {
-                        return true;
-                    }
+        return collect($this->findFiles($rootFolder))
+            ->map(fn (SplFileInfo $file): string => $file->getRealPath())
+            ->values()
+            ->all();
+    }
+
+    private function findFiles(string $directory): array
+    {
+        $finder = Finder::create()
+            ->in($directory)
+            ->files()
+            ->ignoreDotFiles(true)
+            ->filter(function (SplFileInfo $file) {
+                $excludedPaths = $this->getExcludedPaths();
+
+                if (Str::contains($file->getRealPath(), $excludedPaths)) {
+                    return false;
                 }
 
-                return false;
+                return true;
             })
-            ->toArray();
+            ->sortByName()
+            ->getIterator();
+
+        return iterator_to_array($finder);
     }
 
     public function installDependencies(bool $shouldSkip = false): void

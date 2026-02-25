@@ -1,6 +1,7 @@
 <?php
 
 use App\Facades\Composer;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Process;
 
 use function Illuminate\Filesystem\join_paths;
@@ -32,7 +33,7 @@ it('init package', function () {
     Composer::fake();
     $testDirectory = setupTestDirectory();
 
-    moveFixture(['LICENSE.md.stub', 'composer.json.stub'], $testDirectory);
+    moveFixture(['LICENSE.md.stub', 'composer.json.stub', 'package.json.stub'], $testDirectory);
 
     artisan('init', [
         'vendor' => 'acme',
@@ -55,6 +56,7 @@ it('init package', function () {
 
     assertFixtureEquals('LICENSE.md.stub', join_paths($testDirectory, 'LICENSE.md'));
     assertFixtureEquals('composer.json.stub', join_paths($testDirectory, 'composer.json'));
+    assertFixtureEquals('package.json.stub', join_paths($testDirectory, 'package.json'));
 });
 
 it('proceed without confirmation', function () {
@@ -200,4 +202,44 @@ test('invalid namespace', function () {
         ->expectsQuestion('Enter the package name', 'package')
         ->expectsPromptsError('Invalid namespace provided')
         ->assertFailed();
+});
+
+it('excludes custom paths when processing files', function () {
+    $testDirectory = setupTestDirectory();
+
+    moveFixture(['composer.json.stub', 'package.json.stub'], $testDirectory);
+
+    artisan('init', [
+        'vendor' => 'acme',
+        'package' => 'package',
+        'author' => 'John Doe',
+        'email' => 'john@doe.com',
+        'description' => 'A package description',
+        '--proceed' => true,
+        '--no-install' => true,
+        '--path' => $testDirectory,
+        '--exclude' => 'composer.json,'.join_paths($testDirectory, 'package.json'),
+    ])
+        ->expectsPromptsTable(
+            ['Vendor', 'Package', 'Namespace', 'Description', 'Author', 'Email'],
+            [['Acme', 'Package', 'Acme\\Package', 'A package description', 'John Doe', 'john@doe.com']]
+        )
+        ->expectsPromptsTable(
+            ['Excluded Paths'],
+            [[
+                implode(PHP_EOL, [
+                    '.git',
+                    '.DS_Store',
+                    'vendor',
+                    'node_modules',
+                    'composer.json',
+                    join_paths($testDirectory, 'package.json'),
+                ]),
+            ]]
+        )
+        ->expectsOutputToContain('Package [Acme\\Package] initialized successfully!')
+        ->assertSuccessful();
+
+    assertFixtureNotEquals('composer.json.stub', join_paths($testDirectory, 'composer.json'));
+    assertFixtureNotEquals('package.json.stub', join_paths($testDirectory, 'package.json'));
 });

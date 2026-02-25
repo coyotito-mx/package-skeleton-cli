@@ -90,3 +90,21 @@ function assertFixtureEquals(string $fixtureName, string $actualPath): void
 
     PHPUnit\Assert::assertSame($expectedContent, $actualContent, "Fixture content does not match actual content for: $actualPath");
 }
+
+function assertFixtureNotEquals(string $fixtureName, string $actualPath): void
+{
+    $expectedPath = __DIR__.'/Fixtures/after'.DIRECTORY_SEPARATOR.$fixtureName;
+
+    if (! file_exists($expectedPath)) {
+        throw new InvalidArgumentException("Expected fixture file does not exist: {$expectedPath}");
+    }
+
+    if (! file_exists($actualPath)) {
+        throw new InvalidArgumentException("Actual file does not exist: {$actualPath}");
+    }
+
+    $expectedContent = file_get_contents($expectedPath);
+    $actualContent = file_get_contents($actualPath);
+
+    PHPUnit\Assert::assertNotSame($expectedContent, $actualContent, "Fixture content should not match actual content for: $actualPath");
+}
