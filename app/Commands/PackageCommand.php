@@ -98,6 +98,8 @@ class PackageCommand extends Command
 
     /**
      * Available testing frameworks and their corresponding composer dependencies.
+     *
+     * @var array<string, array{name: string, dependencies: string[]}>
      */
     protected array $testingFrameworks = [
         'phpunit' => [
