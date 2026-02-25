@@ -1,6 +1,7 @@
 <?php
 
 use App\DependencyManagers\Composer;
+use App\DependencyManagers\Exceptions\InvalidDependencyFormatException;
 use Illuminate\Process\PendingProcess;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
@@ -48,6 +49,20 @@ it('adds dev dependencies to composer.json', function () {
         expect($content['require-dev'])->toMatchArray([
             'pestphp/pest' => '3.0.0',
         ]);
+    } finally {
+        File::deleteDirectory($path);
+    }
+});
+
+it('throws when dependency format is invalid', function () {
+    $path = sys_get_temp_dir().DIRECTORY_SEPARATOR.'composer-'.uniqid();
+    createComposerProject($path);
+
+    $composer = new Composer($path, tty: false);
+
+    try {
+        expect(fn () => $composer->add(['Laravel/Pint:1.0.0']))
+            ->toThrow(InvalidDependencyFormatException::class);
     } finally {
         File::deleteDirectory($path);
     }
