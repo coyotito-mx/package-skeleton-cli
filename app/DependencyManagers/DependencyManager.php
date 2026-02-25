@@ -9,7 +9,6 @@ use Illuminate\Contracts\Process\ProcessResult;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
-use Illuminate\Support\Str;
 use RuntimeException;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -58,7 +57,7 @@ abstract class DependencyManager implements Contracts\DependencyManagerContract
     /**
      * Parses a single dependency into its components.
      *
-     * @return array{name: string, version: ?string}
+     * @return array{name: string, version?: string}|null
      */
     public function parseDependency(string $dependency): ?array
     {

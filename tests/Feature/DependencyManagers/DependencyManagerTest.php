@@ -3,10 +3,10 @@
 use App\DependencyManagers\DependencyManager;
 use App\DependencyManagers\Exceptions\DependencyInstallationFailException;
 use App\DependencyManagers\Exceptions\InvalidDependencyFormatException;
+use Illuminate\Contracts\Process\ProcessResult;
+use Illuminate\Process\PendingProcess;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
-use Illuminate\Process\PendingProcess;
-use Illuminate\Contracts\Process\ProcessResult;
 
 class DummyManager extends DependencyManager
 {

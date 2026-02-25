@@ -1,9 +1,9 @@
 <?php
 
 use App\DependencyManagers\Composer;
+use Illuminate\Process\PendingProcess;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
-use Illuminate\Process\PendingProcess;
 
 function createComposerProject(string $path): void
 {

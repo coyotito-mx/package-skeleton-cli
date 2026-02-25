@@ -51,7 +51,6 @@ class Composer extends DependencyManager
         return $this;
     }
 
-
     /**
      * {@inheritdoc}
      */
