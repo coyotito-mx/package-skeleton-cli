@@ -41,11 +41,18 @@ abstract class DependencyManager implements Contracts\DependencyManagerContract
     abstract public function install(array $dependencies = [], bool $dev = false): static;
 
     /**
+     * Returns a human-readable dependency format description.
+     */
+    abstract protected function getValidFormatDescription(): string;
+
+    /**
      * Validates a single dependency.
      */
     public function validateDependency(string $dependency): void
     {
-        $this->parseDependencyByPattern($dependency, static::$patternDependency);
+        if ($this->parseDependencyByPattern($dependency, static::$patternDependency) === null) {
+            throw new InvalidDependencyFormatException($dependency, $this->getValidFormatDescription());
+        }
     }
 
     /**
@@ -53,28 +60,15 @@ abstract class DependencyManager implements Contracts\DependencyManagerContract
      *
      * @return array{name: string, version: ?string}
      */
-    public function parseDependency(string $dependency): array
+    public function parseDependency(string $dependency): ?array
     {
-        $parsed = $this->parseDependencyByPattern($dependency, static::$patternDependency);
-
-        return [
-            'name' => Str::lower($parsed['name']),
-            'version' => $parsed['version'],
-        ];
+        return $this->parseDependencyByPattern($dependency, static::$patternDependency);
     }
 
-    public function validateDependencies(string|array $dependencies): void
+    public function validateDependencies(array $dependencies): void
     {
-        if (is_string($dependencies)) {
-            if (! Str::isMatch(static::$patternDependency, $dependencies)) {
-                throw new InvalidDependencyFormatException($dependencies, static::$patternDependency);
-            }
-
-            return;
-        }
-
         foreach ($dependencies as $dependency) {
-            $this->validateDependencies($dependency);
+            $this->validateDependency($dependency);
         }
     }
 
@@ -191,17 +185,18 @@ abstract class DependencyManager implements Contracts\DependencyManagerContract
      *
      * @return array{name: string, version: ?string}
      */
-    protected function parseDependencyByPattern(string $dependency, string $pattern): array
+    protected function parseDependencyByPattern(string $dependency, string $pattern): ?array
     {
-        if (! Str::isMatch($pattern, $dependency)) {
-            throw new InvalidDependencyFormatException($dependency, $pattern);
+        if (! preg_match($pattern, $dependency, $matches)) {
+            return null;
         }
 
-        $parsed = Str::of($dependency)->matchAllWithGroups($pattern)->first() ?? collect();
+        $parsed = array_filter(
+            $matches,
+            static fn (mixed $value, int|string $key) => is_string($key),
+            ARRAY_FILTER_USE_BOTH
+        );
 
-        return [
-            'name' => (string) $parsed->get('name'),
-            'version' => $parsed->get('version'),
-        ];
+        return $parsed;
     }
 }

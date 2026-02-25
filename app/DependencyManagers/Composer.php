@@ -15,6 +15,14 @@ class Composer extends DependencyManager
     /**
      * {@inheritdoc}
      */
+    protected function getValidFormatDescription(): string
+    {
+        return '<vendor>/<package>[:<version>]';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function add(array $dependencies, bool $dev = false): static
     {
         if (blank($dependencies)) {
