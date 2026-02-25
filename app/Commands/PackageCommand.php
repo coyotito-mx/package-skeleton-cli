@@ -203,13 +203,13 @@ class PackageCommand extends Command
 
     public function getNamespace(): string
     {
-        if ($this->namespace) {
-            InvalidNamespaceException::validate($this->namespace);
+        $namespace = $this->namespace
+            ? $this->namespace
+            : Str::studly($this->getVendor()).'\\'.Str::studly($this->getPackage());
 
-            return $this->namespace;
-        }
+        InvalidNamespaceException::validate($namespace);
 
-        return Str::studly($this->getVendor()).'\\'.Str::studly($this->getPackage());
+        return $namespace;
     }
 
     public function getPackageDescription(): ?string
