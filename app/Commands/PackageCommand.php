@@ -464,6 +464,7 @@ class PackageCommand extends Command
      * Get the list of Composer dependencies for the selected testing framework.
      *
      * @return string[]
+     *
      * @throws Exception If invalid testing framework selected.
      */
     protected function getTestingFrameworkDependencies(): array
