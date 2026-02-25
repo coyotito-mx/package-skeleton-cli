@@ -197,7 +197,7 @@ class PackageCommand extends Command
     /**
      * Get the package vendor name formatted in StudlyCase.
      */
-    protected function getVendor(): string
+    private function getVendor(): string
     {
         return Str::studly($this->vendor);
     }
@@ -205,7 +205,7 @@ class PackageCommand extends Command
     /**
      * Get the package name formatted in StudlyCase.
      */
-    protected function getPackage(): string
+    private function getPackage(): string
     {
         return Str::studly($this->package);
     }
@@ -215,7 +215,7 @@ class PackageCommand extends Command
      *
      * @throws InvalidNamespaceException
      */
-    protected function getNamespace(): string
+    private function getNamespace(): string
     {
         $namespace = $this->namespace
             ? $this->namespace
@@ -229,7 +229,7 @@ class PackageCommand extends Command
     /**
      * Get the package description with first letter capitalized, or null if not provided.
      */
-    protected function getPackageDescription(): ?string
+    private function getPackageDescription(): ?string
     {
         if ($this->packageDescription) {
             return Str::ucfirst($this->packageDescription);
@@ -241,7 +241,7 @@ class PackageCommand extends Command
     /**
      * Get the author name formatted in Title Case.
      */
-    protected function getAuthor(): string
+    private function getAuthor(): string
     {
         return Str::title($this->author);
     }
@@ -249,7 +249,7 @@ class PackageCommand extends Command
     /**
      * Get the author email in lowercase.
      */
-    protected function getEmail(): string
+    private function getEmail(): string
     {
         return Str::lower($this->email);
     }
@@ -259,7 +259,7 @@ class PackageCommand extends Command
      *
      * @return string[]
      */
-    protected function getExcludedPaths(): array
+    private function getExcludedPaths(): array
     {
         if ($this->option('exclude')) {
             $customExcludedPaths = array_map(trim(...), explode(',', $this->option('exclude')));
@@ -273,7 +273,7 @@ class PackageCommand extends Command
     /**
      * Display the package configuration table to the user.
      */
-    protected function displayConfiguration(): void
+    private function displayConfiguration(): void
     {
         $header = ['Vendor', 'Package', 'Namespace'];
         $rows = [[
@@ -296,7 +296,7 @@ class PackageCommand extends Command
     /**
      * Display the list of files that will be processed for placeholder replacement.
      */
-    protected function displayFilesToProcess(): void
+    private function displayFilesToProcess(): void
     {
         $files = $this->getFilesToProcess();
 
@@ -308,7 +308,7 @@ class PackageCommand extends Command
     /**
      * Display the list of excluded paths that will not be processed.
      */
-    protected function displayExcludedPaths(): void
+    private function displayExcludedPaths(): void
     {
         $excludedPaths = $this->getExcludedPaths();
 
@@ -324,7 +324,7 @@ class PackageCommand extends Command
     /**
      * Display the success message with the initialized package namespace.
      */
-    protected function displaySuccessMessage(): void
+    private function displaySuccessMessage(): void
     {
         outro("Package [{$this->getNamespace()}] initialized successfully!");
     }
@@ -332,7 +332,7 @@ class PackageCommand extends Command
     /**
      * Replace placeholders in the files to be processed.
      */
-    protected function replacePlaceholders(): void
+    private function replacePlaceholders(): void
     {
         $files = $this->getFilesToProcess();
 
@@ -350,7 +350,7 @@ class PackageCommand extends Command
      *
      * @param  string  $file  The path of the file to be processed.
      */
-    protected function pipeFileThroughReplacers(string $file): void
+    private function pipeFileThroughReplacers(string $file): void
     {
         $content = File::get($file);
         $filename = basename($file);
@@ -402,7 +402,7 @@ class PackageCommand extends Command
      *
      * @return string[]
      */
-    protected function getFilesToProcess(): array
+    private function getFilesToProcess(): array
     {
         return collect($this->findFiles($this->getPath()))
             ->map(fn (SplFileInfo $file): string => $file->getRealPath())
@@ -466,7 +466,7 @@ class PackageCommand extends Command
      *
      * @throws Exception If invalid testing framework selected.
      */
-    protected function getTestingFrameworkDependencies(): array
+    private function getTestingFrameworkDependencies(): array
     {
         $selected = $this->selectTestingFramework();
 
@@ -476,7 +476,7 @@ class PackageCommand extends Command
     /**
      * Prompt the user to select a testing framework.
      */
-    protected function selectTestingFramework(): string
+    private function selectTestingFramework(): string
     {
         $choices = collect($this->testingFrameworks)->mapWithKeys(fn ($framework, $key) => [$key => $framework['name']]);
 
@@ -488,7 +488,26 @@ class PackageCommand extends Command
      *
      * @return array{author: string|null, email: string|null}|null
      */
-    protected function getAuthorInformation(): ?array
+    private function getAuthorInformation(): ?array
+    {
+        $gitConfig = $this->fetchGitConfig();
+
+        if ($gitConfig === null) {
+            return null;
+        }
+
+        return [
+            'author' => $gitConfig['user.name'] ?? null,
+            'email' => $gitConfig['user.email'] ?? null,
+        ];
+    }
+
+    /**
+     * Fetch user's git global configuration.
+     *
+     * @return array<string, string>|null
+     */
+    private function fetchGitConfig(): ?array
     {
         // Attempt to get git user.name and user.email from global configuration, and transform it to JSON for easier parsing
         $result = Process::run("git config --list --global | jq -Rn '[inputs | split(\"=\") | { (.[0]): .[1] } ] | add'");
@@ -499,16 +518,13 @@ class PackageCommand extends Command
 
         $data = json_decode($result->output(), true);
 
-        return [
-            'author' => $data['user.name'] ?? null,
-            'email' => $data['user.email'] ?? null,
-        ];
+        return is_array($data) ? $data : null;
     }
 
     /**
      * Collect all required input from arguments or prompt the user.
      */
-    protected function collectInput(): void
+    private function collectInput(): void
     {
         $this->vendor = $this->argument('vendor') ?? text('Enter the package vendor name', 'acme');
         $this->package = $this->argument('package') ?? text('Enter the package name', 'blog');
@@ -524,7 +540,7 @@ class PackageCommand extends Command
     /**
      * Get the path where the package should be initialized.
      */
-    protected function getPath(): string
+    private function getPath(): string
     {
         return $this->option('path') ?? getcwd();
     }
