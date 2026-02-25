@@ -2,6 +2,7 @@
 
 namespace App\Commands;
 
+use App\Contracts\ComposerContract;
 use App\Facades\Composer;
 use App\Replacers\AuthorReplacer;
 use App\Replacers\Builder;
@@ -402,7 +403,10 @@ class PackageCommand extends Command
 
         alert('Installing composer dependencies...');
 
-        tap(Composer::getFacadeRoot(), fn ($composer) => $composer->context = $this->getPath())->install($dependencies);
+        tap(
+            Composer::getFacadeRoot(),
+            fn (ComposerContract $composer) => $composer->cwd = $this->getPath()
+        )->require($dependencies, true);
     }
 
     protected function getTestingFrameworkDependencies(): array

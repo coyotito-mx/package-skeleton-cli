@@ -2,7 +2,8 @@
 
 namespace App\Providers;
 
-use App\DependencyManagers\Composer;
+use App\Composer;
+use App\Contracts\ComposerContract;
 use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Stringable;
@@ -11,15 +12,16 @@ class AppServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        $this->app->singleton(Composer::class, function () {
-            return new Composer(getcwd());
-        });
-
-        $this->app->alias(Composer::class, 'composer');
+        //
     }
 
     public function register(): void
     {
+        $this->app->singleton(
+            ComposerContract::class,
+            fn ($app) => new Composer(app: $app),
+        );
+
         Stringable::macro('matchAllWithGroups', function (string $pattern): Collection {
             $result = preg_match_all($pattern, (string) $this, $matches, PREG_SET_ORDER);
 

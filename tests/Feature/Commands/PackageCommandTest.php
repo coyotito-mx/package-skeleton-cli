@@ -145,7 +145,7 @@ it('install package composer dependencies', function () {
         ->expectsPromptsOutro('Package [Acme\\Package] initialized successfully!')
         ->assertSuccessful();
 
-    $composer->assertDependencyInstalled('pestphp/pest');
+    $composer->assertPackageInstalled('pestphp/pest', true);
 });
 
 it('skip composer dependencies installation', function () {
@@ -179,7 +179,6 @@ it('ask for confirmation before initializing package', function () {
         '--no-install' => true,
         '--path' => setupTestDirectory(),
     ])
-
         ->expectsPromptsTable(
             ['Vendor', 'Package', 'Namespace', 'Description', 'Author', 'Email'],
             [['Acme', 'Package', 'Acme\\Package', 'A package description', 'John Doe', 'john@doe.com']]

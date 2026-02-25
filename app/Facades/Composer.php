@@ -1,22 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Facades;
 
+use App\ComposerTestable;
+use App\Contracts\ComposerContract;
 use Illuminate\Support\Facades\Facade;
 
 class Composer extends Facade
 {
-    public static function fake(): \App\DependencyManagers\ComposerFake
+    public static function fake(): ComposerTestable
     {
-        $fake = new \App\DependencyManagers\ComposerFake;
+        $instance = new ComposerTestable;
 
-        static::swap($fake);
+        static::swap($instance);
 
-        return $fake;
+        return $instance;
     }
 
-    protected static function getFacadeAccessor(): string
+    protected static function getFacadeAccessor()
     {
-        return 'composer';
+        return ComposerContract::class;
     }
 }
