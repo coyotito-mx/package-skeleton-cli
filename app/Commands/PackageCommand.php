@@ -121,16 +121,16 @@ class PackageCommand extends Command
             ->addReplacer(LicenseNameReplacer::class, fn () => 'MIT')
             ->addReplacer(LicenseDescriptionReplacer::class, fn () => 'This package is open-sourced software licensed under the MIT license.')
             ->addReplacer(VersionReplacer::class, fn () => '0.0.1')
-            ->addReplacer(YearReplacer::class, fn () => now()->format('Y'));
+            ->addReplacer(YearReplacer::class); // This will replace the year with the current year
     }
 
     /**
      * Add a replacer to the list of replacers.
      *
      * @param  class-string<Builder>  $replacer  The replacer class to be added.
-     * @param  string|callable  $value  A string or a callback that returns the value to be used for replacement when this replacer is applied.
+     * @param  string|callable|null  $value  A string, a callback, or null that returns the value to be used for replacement when this replacer is applied.
      */
-    protected function addReplacer(string $replacer, string|callable $value): self
+    protected function addReplacer(string $replacer, null|string|callable $value = null): self
     {
         $this->replacers[$replacer] = $value;
 
@@ -313,8 +313,14 @@ class PackageCommand extends Command
         $directory = dirname($file);
 
         foreach ($this->replacers as $replacer => $callback) {
-            if (! $value = $callback()) {
-                continue;
+            if (is_callable($callback)) {
+                $value = $callback();
+
+                if (is_null($value)) {
+                    continue;
+                }
+            } else {
+                $value = $callback;
             }
 
             $content = $replacer::make($value)->replace($content);

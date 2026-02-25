@@ -18,7 +18,15 @@ function setupTestDirectory(): string
     return $path;
 }
 
-afterAll(fn () => rmdir_recursive(base_path('tests'.DIRECTORY_SEPARATOR.'temp')));
+beforeAll(function () {
+    Carbon::setTestNow('2026-01-01');
+});
+
+afterAll(function () {
+    rmdir_recursive(base_path('tests'.DIRECTORY_SEPARATOR.'temp'));
+
+    Carbon::setTestNow();
+});
 
 it('init package', function () {
     Composer::fake();
