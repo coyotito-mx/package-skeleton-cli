@@ -322,25 +322,6 @@ class PackageCommand extends Command
     }
 
     /**
-     * Clear the collected input and start over.
-     */
-    protected function clear(): void
-    {
-        warning("Let's try again. Please provide the correct information.");
-
-        Sleep::for(2)->seconds();
-
-        clear();
-
-        $this->vendor = null;
-        $this->package = null;
-        $this->namespace = null;
-        $this->packageDescription = null;
-        $this->author = null;
-        $this->email = null;
-    }
-
-    /**
      * Display the success message with the initialized package namespace.
      */
     protected function displaySuccessMessage(): void
