@@ -3,5 +3,11 @@
     "rules": {
         "cast_spaces": true,
         "no_unneeded_braces": true
-    }
+    },
+    "exclude": [
+        "vendor",
+        "storage",
+        "bootstrap/cache",
+        "tests/Fixtures"
+    ]
 }
