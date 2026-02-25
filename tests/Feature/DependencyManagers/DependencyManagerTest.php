@@ -27,6 +27,11 @@ class DummyManager extends DependencyManager
         return '<name>[:<version>]';
     }
 
+    protected function getBinary(): string
+    {
+        return 'dummy';
+    }
+
     public function exposeEnsureProjectFileExists(string $filename): string
     {
         return $this->ensureProjectFileExists($filename);
@@ -84,7 +89,7 @@ it('ensures a project file exists', function () {
 
 it('runInstallCommand throws when install fails', function () {
     Process::fake([
-        "'--version' '--quiet'" => Process::result(output: '1.0.0', exitCode: 0),
+        "'dummy' '--version' '--quiet'" => Process::result(output: '1.0.0', exitCode: 0),
         "'install'" => Process::result(output: '', errorOutput: 'fail', exitCode: 1),
     ]);
 
@@ -96,7 +101,7 @@ it('runInstallCommand throws when install fails', function () {
 
 it('runInstallCommand succeeds when install passes', function () {
     $process = Process::fake([
-        "'--version' '--quiet'" => Process::result(output: '1.0.0', exitCode: 0),
+        "'dummy' '--version' '--quiet'" => Process::result(output: '1.0.0', exitCode: 0),
         "'install'" => Process::result(output: 'ok', exitCode: 0),
     ]);
 
@@ -105,6 +110,6 @@ it('runInstallCommand succeeds when install passes', function () {
     $manager->exposeRunInstallCommand('install', ['foo:1.0']);
 
     expect($process)
-        ->assertRanTimes(fn (PendingProcess $process) => $process->command === ['--version', '--quiet'])
+        ->assertRanTimes(fn (PendingProcess $process) => $process->command === ['dummy', '--version', '--quiet'])
         ->assertRanTimes(fn (PendingProcess $process) => $process->command === ['install']);
 });

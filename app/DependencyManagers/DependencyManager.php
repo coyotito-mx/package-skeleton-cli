@@ -45,6 +45,11 @@ abstract class DependencyManager implements Contracts\DependencyManagerContract
     abstract protected function getValidFormatDescription(): string;
 
     /**
+     * Returns the binary name for the dependency manager.
+     */
+    abstract protected function getBinary(): string;
+
+    /**
      * Validates a single dependency.
      */
     public function validateDependency(string $dependency): void
@@ -101,13 +106,14 @@ abstract class DependencyManager implements Contracts\DependencyManagerContract
 
     protected function ensureInstalled(): void
     {
-        $result = $this->run(arguments: ['--version', '--quiet']);
+        $result = $this->run(command: $this->getBinary(), arguments: ['--version', '--quiet']);
 
         if (! $result->successful()) {
             throw new DependencyManagerNotInstalledException(
                 manager: static::class,
                 cause: $result->errorOutput(),
-                exitCode: $result->exitCode()
+                exitCode: $result->exitCode(),
+                binary: $this->getBinary()
             );
         }
     }

@@ -59,7 +59,7 @@ it('uses update when lock file exists', function () {
     File::put($path.DIRECTORY_SEPARATOR.'composer.lock', '{}');
 
     $process = Process::fake([
-        "'--version' '--quiet'" => Process::result(output: 'Composer version 2.1.3', exitCode: 0),
+        "'composer' '--version' '--quiet'" => Process::result(output: 'Composer version 2.1.3', exitCode: 0),
         "'composer' 'update'" => Process::result(output: 'ok', exitCode: 0),
     ]);
 
@@ -69,7 +69,7 @@ it('uses update when lock file exists', function () {
         $composer->install();
 
         expect($process)
-            ->assertRanTimes(fn (PendingProcess $process) => $process->command === ['--version', '--quiet'])
+            ->assertRanTimes(fn (PendingProcess $process) => $process->command === ['composer', '--version', '--quiet'])
             ->assertRanTimes(fn (PendingProcess $process) => $process->command === ['composer', 'update']);
     } finally {
         File::deleteDirectory($path);
@@ -81,7 +81,7 @@ it('uses install when lock file is missing', function () {
     createComposerProject($path);
 
     $process = Process::fake([
-        "'--version' '--quiet'" => Process::result(output: 'Composer version 2.1.3', exitCode: 0),
+        "'composer' '--version' '--quiet'" => Process::result(output: 'Composer version 2.1.3', exitCode: 0),
         "'composer' 'install'" => Process::result(output: 'ok', exitCode: 0),
     ]);
 
@@ -91,7 +91,7 @@ it('uses install when lock file is missing', function () {
         $composer->install();
 
         expect($process)
-            ->assertRanTimes(fn (PendingProcess $process) => $process->command === ['--version', '--quiet'])
+            ->assertRanTimes(fn (PendingProcess $process) => $process->command === ['composer', '--version', '--quiet'])
             ->assertRanTimes(fn (PendingProcess $process) => $process->command === ['composer', 'install']);
     } finally {
         File::deleteDirectory($path);
