@@ -79,7 +79,7 @@ class PackageCommand extends Command
     /**
      * The list of replacers to be used for replacing placeholders in files.
      *
-     * @var array<class-string<Builder>, callable>
+     * @var array<class-string<Builder>, null|string|\Closure(): ?string>
      */
     protected array $replacers = [];
 
