@@ -192,16 +192,27 @@ class PackageCommand extends Command
         return self::SUCCESS;
     }
 
+    /**
+     * Get the package vendor name formatted in StudlyCase.
+     */
     public function getVendor(): string
     {
         return Str::studly($this->vendor);
     }
 
+    /**
+     * Get the package name formatted in StudlyCase.
+     */
     public function getPackage(): string
     {
         return Str::studly($this->package);
     }
 
+    /**
+     * Get the package namespace, either from user input or auto-generated from vendor/package.
+     *
+     * @throws InvalidNamespaceException
+     */
     public function getNamespace(): string
     {
         $namespace = $this->namespace
@@ -213,6 +224,9 @@ class PackageCommand extends Command
         return $namespace;
     }
 
+    /**
+     * Get the package description with first letter capitalized, or null if not provided.
+     */
     public function getPackageDescription(): ?string
     {
         if ($this->packageDescription) {
@@ -222,16 +236,27 @@ class PackageCommand extends Command
         return null;
     }
 
+    /**
+     * Get the author name formatted in Title Case.
+     */
     public function getAuthor(): string
     {
         return Str::title($this->author);
     }
 
+    /**
+     * Get the author email in lowercase.
+     */
     public function getEmail(): string
     {
         return Str::lower($this->email);
     }
 
+    /**
+     * Get all excluded paths, including user-defined ones from the --exclude option.
+     *
+     * @return string[]
+     */
     protected function getExcludedPaths(): array
     {
         if ($this->option('exclude')) {
@@ -243,6 +268,9 @@ class PackageCommand extends Command
         return $this->excludedPaths;
     }
 
+    /**
+     * Display the package configuration table to the user.
+     */
     public function displayConfiguration(): void
     {
         $header = ['Vendor', 'Package', 'Namespace'];
@@ -263,6 +291,9 @@ class PackageCommand extends Command
         table($header, $rows);
     }
 
+    /**
+     * Display the list of files that will be processed for placeholder replacement.
+     */
     public function displayFilesToProcess(): void
     {
         $files = $this->getFilesToProcess();
@@ -272,6 +303,9 @@ class PackageCommand extends Command
         table(['Files to process'], [[$files]]);
     }
 
+    /**
+     * Display the list of excluded paths that will not be processed.
+     */
     protected function displayExcludedPaths(): void
     {
         $excludedPaths = $this->getExcludedPaths();
@@ -304,6 +338,9 @@ class PackageCommand extends Command
         $this->email = null;
     }
 
+    /**
+     * Display the success message with the initialized package namespace.
+     */
     public function displaySuccessMessage(): void
     {
         outro("Package [{$this->getNamespace()}] initialized successfully!");
@@ -361,6 +398,8 @@ class PackageCommand extends Command
 
     /**
      * Get the list of files to be processed, excluding the ones in the excluded paths.
+     *
+     * @return string[]
      */
     protected function getFilesToProcess(): array
     {
@@ -370,6 +409,11 @@ class PackageCommand extends Command
             ->all();
     }
 
+    /**
+     * Find all files in the given directory, excluding paths defined in getExcludedPaths().
+     *
+     * @return SplFileInfo[]
+     */
     private function findFiles(string $directory): array
     {
         $finder = Finder::create()
@@ -409,6 +453,12 @@ class PackageCommand extends Command
         )->require($dependencies, true);
     }
 
+    /**
+     * Get the list of Composer dependencies for the selected testing framework.
+     *
+     * @return string[]
+     * @throws Exception If invalid testing framework selected.
+     */
     protected function getTestingFrameworkDependencies(): array
     {
         $selected = $this->selectTestingFramework();
@@ -416,6 +466,9 @@ class PackageCommand extends Command
         return $this->testingFrameworks[$selected]['dependencies'] ?? throw new Exception('Invalid testing framework selected.');
     }
 
+    /**
+     * Prompt the user to select a testing framework.
+     */
     public function selectTestingFramework(): string
     {
         $choices = collect($this->testingFrameworks)->mapWithKeys(fn ($framework, $key) => [$key => $framework['name']]);
@@ -423,6 +476,11 @@ class PackageCommand extends Command
         return select('Which testing framework do you want to use?', $choices->toArray(), default: 'pest');
     }
 
+    /**
+     * Get git user information from global configuration.
+     *
+     * @return array{author: string|null, email: string|null}|null
+     */
     public function getAuthorInformation(): ?array
     {
         // Attempt to get git user.name and user.email from global configuration, and transform it to JSON for easier parsing
@@ -440,6 +498,9 @@ class PackageCommand extends Command
         ];
     }
 
+    /**
+     * Collect all required input from arguments or prompt the user.
+     */
     public function collectInput(): void
     {
         $this->vendor = $this->argument('vendor') ?? text('Enter the package vendor name', 'acme');
@@ -453,6 +514,9 @@ class PackageCommand extends Command
         $this->email = $this->argument('email') ?? $email ?? text('Enter the author email', 'john@doe.com');
     }
 
+    /**
+     * Get the path where the package should be initialized.
+     */
     protected function getPath(): string
     {
         return $this->option('path') ?? getcwd();
