@@ -3,8 +3,21 @@
 namespace App\Commands;
 
 use App\Facades\Composer;
-use Illuminate\Console\Concerns\PromptsForMissingInput as PromptsForMissingInputConcern;
-use Illuminate\Contracts\Console\PromptsForMissingInput;
+use App\Replacers\AuthorReplacer;
+use App\Replacers\Builder;
+use App\Replacers\DescriptionReplacer;
+use App\Replacers\EmailReplacer;
+use App\Replacers\Exceptions\InvalidFormatException;
+use App\Replacers\Exceptions\InvalidNamespaceException;
+use App\Replacers\LicenseDescriptionReplacer;
+use App\Replacers\LicenseNameReplacer;
+use App\Replacers\NamespaceReplacer;
+use App\Replacers\PackageReplacer;
+use App\Replacers\VendorReplacer;
+use App\Replacers\VersionReplacer;
+use App\Replacers\YearReplacer;
+use Exception;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Sleep;
 use Illuminate\Support\Str;
@@ -14,31 +27,32 @@ use function Laravel\Prompts\alert;
 use function Laravel\Prompts\clear;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\error;
+use function Laravel\Prompts\info;
 use function Laravel\Prompts\intro;
 use function Laravel\Prompts\outro;
 use function Laravel\Prompts\select;
+use function Laravel\Prompts\spin;
 use function Laravel\Prompts\table;
 use function Laravel\Prompts\text;
 use function Laravel\Prompts\warning;
 
-class PackageCommand extends Command implements PromptsForMissingInput
+class PackageCommand extends Command
 {
-    use PromptsForMissingInputConcern;
-
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
     protected $signature = 'init
-                            { vendor : The name of the package vendor }
-                            { package : The name of the package }
-                            { author : The package author }
-                            { email : The package author email }
-                            { --namespace= : The package namespace (optional, defaults to <vendor>\<package>) }
-                            { --description= : The package description }
+                            { vendor? : The name of the package vendor }
+                            { package? : The name of the package }
+                            { author? : The package author }
+                            { email? : The package author email }
+                            { namespace? : The package namespace (optional, defaults to <vendor>\<package>) }
+                            { description? : The package description }
                             { --proceed : Accept the configuration and proceed without confirmation }
-                            { --no-install : Skip installing composer dependencies }';
+                            { --no-install : Skip installing composer dependencies }
+                            { --path= : The path to initialize the package in (defaults to current working directory) }';
 
     /**
      * The console command description.
@@ -47,6 +61,82 @@ class PackageCommand extends Command implements PromptsForMissingInput
      */
     protected $description = 'Initialize a new package structure';
 
+    protected ?string $vendor = null;
+
+    protected ?string $package = null;
+
+    protected ?string $namespace = null;
+
+    protected ?string $packageDescription = null;
+
+    protected ?string $author = null;
+
+    protected ?string $email = null;
+
+    /**
+     * The list of replacers to be used for replacing placeholders in files.
+     *
+     * @var array<class-string<Builder>, callable>
+     */
+    protected array $replacers = [];
+
+    /**
+     * Paths to exclude when processing files for placeholder replacement.
+     *
+     * @var string[]
+     */
+    protected array $excludedPaths = [
+        '.git',
+        '.DS_Store',
+        'vendor',
+        'node_modules',
+    ];
+
+    /**
+     * Available testing frameworks and their corresponding composer dependencies.
+     */
+    protected array $testingFrameworks = [
+        'phpunit' => [
+            'name' => 'PHPUnit',
+            'dependencies' => ['phpunit/phpunit'],
+        ],
+        'pest' => [
+            'name' => 'Pest',
+            'dependencies' => ['pestphp/pest'],
+        ],
+    ];
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function configure()
+    {
+        $this
+            ->addReplacer(VendorReplacer::class, fn () => $this->getVendor())
+            ->addReplacer(PackageReplacer::class, fn () => $this->getPackage())
+            ->addReplacer(NamespaceReplacer::class, fn () => $this->getNamespace())
+            ->addReplacer(DescriptionReplacer::class, fn () => $this->getPackageDescription())
+            ->addReplacer(AuthorReplacer::class, fn () => $this->getAuthor())
+            ->addReplacer(EmailReplacer::class, fn () => $this->getEmail())
+            ->addReplacer(LicenseNameReplacer::class, fn () => 'MIT')
+            ->addReplacer(LicenseDescriptionReplacer::class, fn () => 'This package is open-sourced software licensed under the MIT license.')
+            ->addReplacer(VersionReplacer::class, fn () => '0.0.1')
+            ->addReplacer(YearReplacer::class, fn () => now()->format('Y'));
+    }
+
+    /**
+     * Add a replacer to the list of replacers.
+     *
+     * @param  class-string<Builder>  $replacer  The replacer class to be added.
+     * @param  string|callable  $value  A string or a callback that returns the value to be used for replacement when this replacer is applied.
+     */
+    protected function addReplacer(string $replacer, string|callable $value): self
+    {
+        $this->replacers[$replacer] = $value;
+
+        return $this;
+    }
+
     /**
      * Execute the console command.
      */
@@ -54,37 +144,39 @@ class PackageCommand extends Command implements PromptsForMissingInput
     {
         intro('Initializing package...');
 
-        while (true) {
-            $config = $this->getConfiguration();
-
-            $this->displayConfiguration($config);
-
-            if ($this->option('proceed')) {
-                break;
-            }
-
-            if (confirm('Do you want to proceed with this configuration?')) {
-                break;
-            }
-
-            warning("Let's try again. Please provide the correct information.");
-
-            Sleep::for(2)->seconds();
-
-            clear();
-        }
-
         try {
-            $this->replacePlaceholders($config);
+            $this->collectInput();
+
+            $this->displayConfiguration();
+            $this->displayFilesToProcess();
+
+            if (! $this->option('proceed') && ! confirm('Do you want to proceed with this configuration?')) {
+                error('Package initialization cancelled.');
+
+                return self::FAILURE;
+            }
+
+            $this->replacePlaceholders();
 
             /** @phpstan-ignore-next-line */
             $this->installDependencies(shouldSkip: $this->option('no-install') ?? false);
-        } catch (\Exception $e) {
+        } catch (InvalidFormatException $e) {
+            error($e->getMessage());
+
+            return self::FAILURE;
+        } catch (Exception $e) {
             error('An error occurred while initializing the package, please read the log for more details.');
 
             logger()->error('Error initializing package', [
                 'exception' => $e->getMessage(),
-                'config' => $config,
+                'config' => [
+                    'vendor' => $this->vendor,
+                    'package' => $this->package,
+                    'namespace' => $this->namespace,
+                    'description' => $this->packageDescription,
+                    'author' => $this->author,
+                    'email' => $this->email,
+                ],
             ]);
 
             return self::FAILURE;
@@ -95,24 +187,97 @@ class PackageCommand extends Command implements PromptsForMissingInput
         return self::SUCCESS;
     }
 
-    public function displayConfiguration(array $config): void
+    public function getVendor(): string
+    {
+        return Str::studly($this->vendor);
+    }
+
+    public function getPackage(): string
+    {
+        return Str::studly($this->package);
+    }
+
+    public function getNamespace(): string
+    {
+        if ($this->namespace) {
+            InvalidNamespaceException::validate($this->namespace);
+
+            return $this->namespace;
+        }
+
+        return Str::studly($this->getVendor()).'\\'.Str::studly($this->getPackage());
+    }
+
+    public function getPackageDescription(): ?string
+    {
+        if ($this->packageDescription) {
+            return Str::ucfirst($this->packageDescription);
+        }
+
+        return null;
+    }
+
+    public function getAuthor(): string
+    {
+        return Str::title($this->author);
+    }
+
+    public function getEmail(): string
+    {
+        return Str::lower($this->email);
+    }
+
+    protected function getExcludedPaths(): array
+    {
+        return $this->excludedPaths;
+    }
+
+    public function displayConfiguration(): void
     {
         $header = ['Vendor', 'Package', 'Namespace'];
         $rows = [[
-            $config['vendor'],
-            $config['package'],
-            $config['namespace'],
+            $this->getVendor(),
+            $this->getPackage(),
+            $this->getNamespace(),
         ]];
 
-        if (isset($config['description'])) {
+        if ($description = $this->getPackageDescription()) {
             $header[] = 'Description';
-            $rows[0][] = $config['description'];
+            $rows[0][] = $description;
         }
 
         $header = [...$header, 'Author', 'Email'];
-        $rows[0] = [...$rows[0], $config['author'], $config['email']];
+        $rows[0] = [...$rows[0], $this->getAuthor(), $this->getEmail()];
 
         table($header, $rows);
+    }
+
+    public function displayFilesToProcess(): void
+    {
+        $files = $this->getFilesToProcess();
+
+        $files = implode(PHP_EOL, $files);
+
+        table(['Files to process'], [[$files]]);
+    }
+
+    /**
+     * Clear the collected input and start over.
+     */
+    protected function clear(): void
+    {
+        warning("Let's try again. Please provide the correct information.");
+
+        Sleep::for(2)->seconds();
+
+        clear();
+
+        $this->vendor = null;
+        $this->package = null;
+        $this->namespace = null;
+        $this->packageDescription = null;
+        $this->author = null;
+        $this->email = null;
     }
 
     public function displaySuccessMessage(): void
@@ -120,9 +285,70 @@ class PackageCommand extends Command implements PromptsForMissingInput
         outro("Package [{$this->getNamespace()}] initialized successfully!");
     }
 
-    public function replacePlaceholders(array $config): void
+    /**
+     * Replace placeholders in the files to be processed.
+     */
+    protected function replacePlaceholders(): void
     {
-        //
+        $files = $this->getFilesToProcess();
+
+        foreach ($files as $file) {
+            $filename = basename($file);
+
+            spin(fn () => $this->pipeFileThroughReplacers($file), "Processing file: $filename");
+        }
+
+        info('All files processed successfully!');
+    }
+
+    /**
+     * Pipe the given file through all the replacers to replace the placeholders with the actual values.
+     *
+     * @param  string  $file  The path of the file to be processed.
+     */
+    protected function pipeFileThroughReplacers(string $file): void
+    {
+        $content = File::get($file);
+        $filename = basename($file);
+        $directory = dirname($file);
+
+        foreach ($this->replacers as $replacer => $callback) {
+            if (! $value = $callback()) {
+                continue;
+            }
+
+            $content = $replacer::make($value)->replace($content);
+
+            $newFilename = $replacer::make($value)->replace($filename);
+        }
+
+        if (isset($newFilename)) {
+            File::put($file, $content);
+
+            File::move($file, $directory.DIRECTORY_SEPARATOR.$newFilename);
+        }
+    }
+
+    /**
+     * Get the list of files to be processed, excluding the ones in the excluded paths.
+     */
+    protected function getFilesToProcess(): array
+    {
+        $rootFolder = $this->option('path') ?? getcwd();
+        $excludedPaths = $this->getExcludedPaths();
+
+        return collect(File::allFiles($rootFolder))
+            ->map(fn ($file): string => $file->getRealPath())
+            ->reject(static function (string $file) use ($excludedPaths): bool {
+                foreach ($excludedPaths as $path) {
+                    if (Str::contains($file, $path)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            })
+            ->toArray();
     }
 
     public function installDependencies(bool $shouldSkip = false): void
@@ -133,78 +359,25 @@ class PackageCommand extends Command implements PromptsForMissingInput
             return;
         }
 
-        $testing = $this->askForTestingFramework();
-
-        $dependencies = $this->getDependencies($testing['identifier']);
+        $dependencies = $this->getTestingFrameworkDependencies();
 
         alert('Installing composer dependencies...');
 
-        Composer::install($dependencies);
+        Composer::install($dependencies, dev: true);
     }
 
-    public function askForTestingFramework(): array
+    protected function getTestingFrameworkDependencies(): array
     {
-        $choices = [
-            'phpunit' => 'PHPUnit',
-            'pest' => 'Pest',
-        ];
+        $selected = $this->selectTestingFramework();
 
-        $testing = select('Which testing framework do you want to use?', $choices, default: 'phpunit');
-
-        return [
-            'identifier' => $testing,
-            'name' => $choices[$testing],
-        ];
+        return $this->testingFrameworks[$selected]['dependencies'] ?? throw new Exception('Invalid testing framework selected.');
     }
 
-    protected function getDependencies(string $testing): array
+    public function selectTestingFramework(): string
     {
-        $dependencies = [
-            'phpunit' => ['phpunit/phpunit'],
-            'pest' => ['pestphp/pest', 'pestphp/pest-plug'],
-        ];
+        $choices = collect($this->testingFrameworks)->mapWithKeys(fn ($framework, $key) => [$key => $framework['name']]);
 
-        return $dependencies[$testing] ?? throw new \Exception('Dependency not found for the selected testing framework.');
-    }
-
-    public function getVendor(): string
-    {
-        return Str::studly($this->argument('vendor'));
-    }
-
-    public function getPackage(): string
-    {
-        return Str::studly($this->argument('package'));
-    }
-
-    public function getNamespace(): string
-    {
-        if ($this->option('namespace')) {
-            [$vendor, $package] = explode('\\', $this->option('namespace'));
-
-            return Str::studly($vendor).'\\'.Str::studly($package);
-        }
-
-        return Str::studly($this->getVendor()).'\\'.Str::studly($this->getPackage());
-    }
-
-    public function getPackageDescription(): ?string
-    {
-        if (! $this->option('description')) {
-            return null;
-        }
-
-        return Str::ucfirst($this->option('description'));
-    }
-
-    public function getAuthor(): string
-    {
-        return Str::title($this->argument('author'));
-    }
-
-    public function getEmail(): string
-    {
-        return Str::lower($this->argument('email'));
+        return select('Which testing framework do you want to use?', $choices->toArray(), default: 'pest');
     }
 
     public function getAuthorInformation(): ?array
@@ -224,62 +397,16 @@ class PackageCommand extends Command implements PromptsForMissingInput
         ];
     }
 
-    public function getConfiguration(): array
+    public function collectInput(): void
     {
-        $config = [
-            'vendor' => $this->getVendor(),
-            'package' => $this->getPackage(),
-            'namespace' => $this->getNamespace(),
-            'author' => $this->getAuthor(),
-            'email' => $this->getEmail(),
-        ];
+        $this->vendor = $this->argument('vendor') ?? text('Enter the package vendor name', 'acme');
+        $this->package = $this->argument('package') ?? text('Enter the package name', 'blog');
+        $this->namespace = $this->argument('namespace') ?? $this->getNamespace();
+        $this->packageDescription = $this->argument('description');
 
-        if ($description = $this->getPackageDescription()) {
-            $config['description'] = $description;
-        }
+        ['author' => $author, 'email' => $email] = $this->getAuthorInformation();
 
-        return $config;
-    }
-
-    protected function promptForMissingArgumentsUsing(): array
-    {
-        $namespaceDefined = $this->option('namespace') !== null;
-
-        $inputs = [
-            'vendor' => function () use ($namespaceDefined): string {
-                if ($namespaceDefined) {
-                    return explode('\\', $this->option('namespace'))[0];
-                }
-
-                return text('Enter the package vendor name', 'acme');
-            },
-            'package' => function () use ($namespaceDefined): string {
-                if ($namespaceDefined) {
-                    return explode('\\', $this->option('namespace'))[1];
-                }
-
-                return text('Enter the package name', 'blog');
-            },
-        ];
-
-        $information = $this->getAuthorInformation();
-
-        if (blank($information)) {
-            $inputs = [
-                ...$inputs,
-                'author' => fn (): string => text('Enter the author name', 'John Doe'),
-                'email' => fn (): string => text('Enter the author email', 'john@doe.com'),
-            ];
-        } else {
-            ['author' => $author, 'email' => $email] = $information;
-
-            $inputs = [
-                ...$inputs,
-                'author' => fn (): string => $author ?? text('Enter the author name', 'John Doe'),
-                'email' => fn (): string => $email ?? text('Enter the author email', 'john@doe.com'),
-            ];
-        }
-
-        return $inputs;
+        $this->author = $this->argument('author') ?? $author ?? text('Enter the author name', 'John Doe');
+        $this->email = $this->argument('email') ?? $email ?? text('Enter the author email', 'john@doe.com');
     }
 }
