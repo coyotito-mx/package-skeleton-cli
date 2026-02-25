@@ -20,14 +20,13 @@ use App\Replacers\YearReplacer;
 use Exception;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
-use Illuminate\Support\Sleep;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use LaravelZero\Framework\Commands\Command;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
 use function Laravel\Prompts\alert;
-use function Laravel\Prompts\clear;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
@@ -56,7 +55,7 @@ class PackageCommand extends Command
                             { --proceed : Accept the configuration and proceed without confirmation }
                             { --no-install : Skip installing composer dependencies }
                             { --path= : The path to initialize the package in (defaults to current working directory) }
-                            { --exclude= : Comma-separated list (CSV-like) of paths to exclude when processing files }';
+                            { --exclude=* : Paths to exclude when processing files }';
 
     /**
      * The console command description.
@@ -261,8 +260,10 @@ class PackageCommand extends Command
      */
     private function getExcludedPaths(): array
     {
-        if ($this->option('exclude')) {
-            $customExcludedPaths = array_map(trim(...), explode(',', $this->option('exclude')));
+        $paths = Arr::wrap($this->option('exclude'));
+
+        if (filled($paths)) {
+            $customExcludedPaths = array_map(fn (string $path) => trim($path), $paths);
 
             return array_merge($this->excludedPaths, $customExcludedPaths);
         }

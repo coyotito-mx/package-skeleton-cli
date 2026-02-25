@@ -269,7 +269,7 @@ it('excludes custom paths when processing files', function () {
         '--proceed' => true,
         '--no-install' => true,
         '--path' => $testDirectory,
-        '--exclude' => 'composer.json,'.join_paths($testDirectory, 'package.json'),
+        '--exclude' => ['composer.json', $excluded = join_paths($testDirectory, 'package.json')],
     ])
         ->expectsPromptsTable(
             ['Vendor', 'Package', 'Namespace', 'Description', 'Author', 'Email'],
@@ -284,7 +284,7 @@ it('excludes custom paths when processing files', function () {
                     'vendor',
                     'node_modules',
                     'composer.json',
-                    join_paths($testDirectory, 'package.json'),
+                    $excluded,
                 ]),
             ]]
         )
