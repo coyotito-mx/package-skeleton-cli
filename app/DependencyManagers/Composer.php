@@ -15,7 +15,7 @@ class Composer extends DependencyManager
      * - name: vendor/package (lowercase letters, numbers, dots, dashes, underscores)
      * - version: optional, any non-whitespace characters
      */
-    protected static string $patternDependency = '/^(?<name>[a-z0-9_.-]+\/[a-z0-9_.-]+)(?:\:(?<version>[^\s]+))$/i';
+    protected static string $patternDependency = '/^(?<name>[a-z0-9_.-]+\/[a-z0-9_.-]+)(?:\:(?<version>[^\s]+))$/';
 
     /**
      * {@inheritdoc}
@@ -50,6 +50,7 @@ class Composer extends DependencyManager
 
         return $this;
     }
+
 
     /**
      * {@inheritdoc}
