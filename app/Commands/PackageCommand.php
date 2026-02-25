@@ -197,7 +197,7 @@ class PackageCommand extends Command
     /**
      * Get the package vendor name formatted in StudlyCase.
      */
-    public function getVendor(): string
+    protected function getVendor(): string
     {
         return Str::studly($this->vendor);
     }
@@ -205,7 +205,7 @@ class PackageCommand extends Command
     /**
      * Get the package name formatted in StudlyCase.
      */
-    public function getPackage(): string
+    protected function getPackage(): string
     {
         return Str::studly($this->package);
     }
@@ -215,7 +215,7 @@ class PackageCommand extends Command
      *
      * @throws InvalidNamespaceException
      */
-    public function getNamespace(): string
+    protected function getNamespace(): string
     {
         $namespace = $this->namespace
             ? $this->namespace
@@ -229,7 +229,7 @@ class PackageCommand extends Command
     /**
      * Get the package description with first letter capitalized, or null if not provided.
      */
-    public function getPackageDescription(): ?string
+    protected function getPackageDescription(): ?string
     {
         if ($this->packageDescription) {
             return Str::ucfirst($this->packageDescription);
@@ -241,7 +241,7 @@ class PackageCommand extends Command
     /**
      * Get the author name formatted in Title Case.
      */
-    public function getAuthor(): string
+    protected function getAuthor(): string
     {
         return Str::title($this->author);
     }
@@ -249,7 +249,7 @@ class PackageCommand extends Command
     /**
      * Get the author email in lowercase.
      */
-    public function getEmail(): string
+    protected function getEmail(): string
     {
         return Str::lower($this->email);
     }
@@ -273,7 +273,7 @@ class PackageCommand extends Command
     /**
      * Display the package configuration table to the user.
      */
-    public function displayConfiguration(): void
+    protected function displayConfiguration(): void
     {
         $header = ['Vendor', 'Package', 'Namespace'];
         $rows = [[
@@ -296,7 +296,7 @@ class PackageCommand extends Command
     /**
      * Display the list of files that will be processed for placeholder replacement.
      */
-    public function displayFilesToProcess(): void
+    protected function displayFilesToProcess(): void
     {
         $files = $this->getFilesToProcess();
 
@@ -343,7 +343,7 @@ class PackageCommand extends Command
     /**
      * Display the success message with the initialized package namespace.
      */
-    public function displaySuccessMessage(): void
+    protected function displaySuccessMessage(): void
     {
         outro("Package [{$this->getNamespace()}] initialized successfully!");
     }
@@ -442,7 +442,7 @@ class PackageCommand extends Command
     /**
      * Install Composer dependencies for the selected testing framework.
      */
-    public function installDependencies(bool $shouldSkip = false): void
+    protected function installDependencies(bool $shouldSkip = false): void
     {
         if ($shouldSkip) {
             warning('Skip composer dependencies installation.');
@@ -477,7 +477,7 @@ class PackageCommand extends Command
     /**
      * Prompt the user to select a testing framework.
      */
-    public function selectTestingFramework(): string
+    protected function selectTestingFramework(): string
     {
         $choices = collect($this->testingFrameworks)->mapWithKeys(fn ($framework, $key) => [$key => $framework['name']]);
 
@@ -489,7 +489,7 @@ class PackageCommand extends Command
      *
      * @return array{author: string|null, email: string|null}|null
      */
-    public function getAuthorInformation(): ?array
+    protected function getAuthorInformation(): ?array
     {
         // Attempt to get git user.name and user.email from global configuration, and transform it to JSON for easier parsing
         $result = Process::run("git config --list --global | jq -Rn '[inputs | split(\"=\") | { (.[0]): .[1] } ] | add'");
@@ -509,7 +509,7 @@ class PackageCommand extends Command
     /**
      * Collect all required input from arguments or prompt the user.
      */
-    public function collectInput(): void
+    protected function collectInput(): void
     {
         $this->vendor = $this->argument('vendor') ?? text('Enter the package vendor name', 'acme');
         $this->package = $this->argument('package') ?? text('Enter the package name', 'blog');
