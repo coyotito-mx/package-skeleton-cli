@@ -11,6 +11,6 @@ class InvalidDependencyFormatException extends TypeError
 {
     public function __construct(protected(set) string $dependency, protected(set) string $validFormat)
     {
-        parent::__construct("The dependency [$dependency] has and invalid format");
+        parent::__construct("The dependency [$dependency] has an invalid format. Expected: $validFormat.");
     }
 }
