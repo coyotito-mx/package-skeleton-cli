@@ -363,9 +363,7 @@ class PackageCommand extends Command
      */
     protected function getFilesToProcess(): array
     {
-        $rootFolder = $this->option('path') ?? getcwd();
-
-        return collect($this->findFiles($rootFolder))
+        return collect($this->findFiles($this->getPath()))
             ->map(fn (SplFileInfo $file): string => $file->getRealPath())
             ->values()
             ->all();
@@ -404,7 +402,7 @@ class PackageCommand extends Command
 
         alert('Installing composer dependencies...');
 
-        Composer::install($dependencies, dev: true);
+        tap(Composer::getFacadeRoot(), fn ($composer) => $composer->context = $this->getPath())->install($dependencies);
     }
 
     protected function getTestingFrameworkDependencies(): array
@@ -449,5 +447,10 @@ class PackageCommand extends Command
 
         $this->author = $this->argument('author') ?? $author ?? text('Enter the author name', 'John Doe');
         $this->email = $this->argument('email') ?? $email ?? text('Enter the author email', 'john@doe.com');
+    }
+
+    protected function getPath(): string
+    {
+        return $this->option('path') ?? getcwd();
     }
 }
