@@ -420,21 +420,26 @@ class PackageCommand extends Command
             ->in($directory)
             ->files()
             ->ignoreDotFiles(true)
-            ->filter(function (SplFileInfo $file) {
-                $excludedPaths = $this->getExcludedPaths();
-
-                if (Str::contains($file->getRealPath(), $excludedPaths)) {
-                    return false;
-                }
-
-                return true;
-            })
+            ->filter(fn (SplFileInfo $file) => ! $this->shouldExcludeFile($file))
             ->sortByName()
             ->getIterator();
 
         return iterator_to_array($finder);
     }
 
+    /**
+     * Determine if a file should be excluded from processing based on excluded paths.
+     */
+    private function shouldExcludeFile(SplFileInfo $file): bool
+    {
+        $excludedPaths = $this->getExcludedPaths();
+
+        return Str::contains($file->getRealPath(), $excludedPaths);
+    }
+
+    /**
+     * Install Composer dependencies for the selected testing framework.
+     */
     public function installDependencies(bool $shouldSkip = false): void
     {
         if ($shouldSkip) {
