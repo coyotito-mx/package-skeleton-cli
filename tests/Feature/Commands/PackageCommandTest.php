@@ -91,9 +91,9 @@ it('init package', function () {
         'vendor' => 'acme',
         'package' => 'package',
         'namespace' => 'Acme\\Package',
-        'description' => 'A package description',
         'author' => 'John Doe',
         'email' => 'john@doe.com',
+        'description' => 'A package description',
         '--path' => $testDirectory,
     ])
         ->expectsPromptsIntro('Initializing package...')
@@ -118,9 +118,9 @@ it('init package using namespace', function () {
     artisan('init', [
         'vendor' => 'acme',
         'package' => 'package',
-        'description' => 'A package description',
         'author' => 'John Doe',
         'email' => 'john@doe.com',
+        'description' => 'A package description',
         '--path' => setupTestDirectory(),
     ])
         ->expectsQuestion('Enter the package namespace', 'Asciito\\Package')
@@ -138,9 +138,9 @@ it('proceed without confirmation', function () {
         'vendor' => 'acme',
         'package' => 'package',
         'namespace' => 'Acme\\Package',
-        'description' => 'A package description',
         'author' => 'John Doe',
         'email' => 'john@doe.com',
+        'description' => 'A package description',
         '--proceed' => true,
         '--path' => setupTestDirectory(),
     ])
@@ -158,9 +158,9 @@ it('install package composer dependencies', function () {
         'vendor' => 'acme',
         'package' => 'package',
         'namespace' => 'Acme\\Package',
-        'description' => 'A package description',
         'author' => 'John Doe',
         'email' => 'john@doe.com',
+        'description' => 'A package description',
         '--proceed' => true,
         '--path' => setupTestDirectory(),
     ])
@@ -179,9 +179,9 @@ it('skip composer dependencies installation', function () {
         'vendor' => 'acme',
         'package' => 'package',
         'namespace' => 'Acme\\Package',
-        'description' => 'A package description',
         'author' => 'John Doe',
         'email' => 'john@doe.com',
+        'description' => 'A package description',
         '--proceed' => true,
         '--no-install' => true,
         '--path' => setupTestDirectory(),
