@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Commands;
 
 use App\Contracts\ComposerContract;
@@ -105,7 +107,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
     /**
      * {@inheritdoc}
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->addReplacer(VendorReplacer::class, fn () => $this->getVendor())
@@ -212,9 +214,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
     }
 
     /**
-     * Get the package description with first letter capitalized, or null if not provided.
-     *
-     * @phpstan-ignore-next-line
+     * Get the package description, or null if not provided.
      */
     private function getPackageDescription(): ?string
     {
@@ -247,9 +247,12 @@ class PackageCommand extends Command implements PromptsForMissingInput
         $paths = Arr::wrap($this->option('exclude'));
 
         if (filled($paths)) {
-            $customExcludedPaths = array_map(fn (string $path) => trim($path), $paths);
+            $customExcludedPaths = array_values(array_filter(
+                array_map(fn (string $path) => trim($path), $paths),
+                fn (string $path) => $path !== ''
+            ));
 
-            return array_merge($this->excludedPaths, $customExcludedPaths);
+            return array_values(array_unique(array_merge($this->excludedPaths, $customExcludedPaths)));
         }
 
         return $this->excludedPaths;
@@ -524,6 +527,11 @@ class PackageCommand extends Command implements PromptsForMissingInput
         return $this->option('path') ?? getcwd();
     }
 
+    /**
+     * Define interactive prompts for missing required command arguments.
+     *
+     * @return array<string, \\Closure(): string|null>
+     */
     protected function promptForMissingArgumentsUsing(): array
     {
         $info = $this->fetchAuthorInformation();

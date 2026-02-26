@@ -35,9 +35,8 @@ class Composer implements Contracts\ComposerContract
     }
 
     /**
-     * Runs the provided command on the provided folder.
-     */
-    /**
+        * Runs the provided command in the current working directory.
+        *
      * @param  array<int, string>  $command
      */
     private function run(array $command): bool

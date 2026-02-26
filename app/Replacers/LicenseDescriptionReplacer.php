@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Replacers;
 
 /**
- * Replacer for `license-description` placeholders
+ * Replacer for `license-description` placeholders.
  *
  * @see \App\Replacer for supported modifiers.
  */

@@ -15,7 +15,7 @@ abstract class Builder
     /**
      * Validation format exception
      *
-     * This class string represent the exception to use to validate the replacement
+        * This class string represents the exception used to validate the replacement.
      *
      * @var ?class-string<InvalidFormatException>
      */
@@ -24,7 +24,7 @@ abstract class Builder
     /**
      * Constructor
      *
-     * @throws Exception if the namespace is invalid
+    * @throws Exception If the replacement format is invalid.
      */
     final public function __construct(protected string $replacement, protected Replacer $replacer)
     {
@@ -34,19 +34,19 @@ abstract class Builder
     }
 
     /**
-     * Create a new replacer instance
+    * Create a new replacer instance.
      *
-     * @return Replacer the replacer instance
+    * @return Replacer The configured replacer instance.
      *
-     * @throws Exception if the namespace is invalid
+    * @throws Exception If the replacement format is invalid.
      */
     public static function make(string $replacement): Replacer
     {
         return new static($replacement, Replacer::make(static::getPlaceholder(), $replacement))->build();
     }
 
-    /*
-     * Build the replacer instance
+    /**
+     * Build the replacer instance.
      */
     public function build(): Replacer
     {

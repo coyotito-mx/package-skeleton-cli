@@ -32,7 +32,7 @@ final class Replacer
     /**
      * The list of custom modifiers.
      *
-     * @var array <string, Closure>
+        * @var array<string, Closure(Stringable): Stringable>
      */
     protected array $modifiers = [];
 
@@ -67,6 +67,11 @@ final class Replacer
      */
     protected ?Closure $replacementNormalizer = null;
 
+    /**
+     * Final replacement transformer.
+     *
+     * @var ?Closure(Stringable): string
+     */
     protected ?Closure $transformBeforeReplaceUsing = null;
 
     /**
@@ -233,7 +238,8 @@ final class Replacer
     /**
      * Get the available modifiers.
      *
-     * @param  array  $modifiers  The modifiers to filter
+    * @param  list<string>  $modifiers  The modifiers to resolve
+    * @return array<string, Closure(Stringable): Stringable>
      */
     public function getModifiers(array $modifiers = []): array
     {
@@ -286,9 +292,13 @@ final class Replacer
     }
 
     /**
-     * Filter modifiers to only allow specific ones.
-     *
-     * if `null` will not apply any modifier, if is and
+    * Filter modifiers to only allow specific ones.
+    *
+    * If null is provided, no modifiers are allowed.
+    * If an empty array is provided, all default/custom modifiers are allowed
+    * except those explicitly excluded.
+    *
+    * @param  list<string>|null  $modifiers
      */
     public function only(?array $modifiers): self
     {
