@@ -82,17 +82,18 @@ afterAll(function () {
 });
 
 it('init package', function () {
-    Composer::fake();
     $testDirectory = setupTestDirectory();
 
+    Composer::fake();
     moveFixture(['LICENSE.md.stub', 'composer.json.stub', 'package.json.stub'], $testDirectory);
 
     artisan('init', [
         'vendor' => 'acme',
         'package' => 'package',
+        'namespace' => 'Acme\\Package',
+        'description' => 'A package description',
         'author' => 'John Doe',
         'email' => 'john@doe.com',
-        'description' => 'A package description',
         '--path' => $testDirectory,
     ])
         ->expectsPromptsIntro('Initializing package...')
@@ -111,12 +112,33 @@ it('init package', function () {
     assertFixtureEquals('package.json.stub', join_paths($testDirectory, 'package.json'));
 });
 
+it('init package using namespace', function () {
+    Composer::fake();
+
+    artisan('init', [
+        'vendor' => 'acme',
+        'package' => 'package',
+        'description' => 'A package description',
+        'author' => 'John Doe',
+        'email' => 'john@doe.com',
+        '--path' => setupTestDirectory(),
+    ])
+        ->expectsQuestion('Enter the package namespace', 'Asciito\\Package')
+        ->expectsConfirmation('Do you want to proceed with this configuration?', 'yes')
+        ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
+        ->expectsPromptsIntro('Initializing package...')
+        ->expectsPromptsOutro('Package [Asciito\\Package] initialized successfully!')
+        ->assertSuccessful();
+});
+
 it('proceed without confirmation', function () {
     Composer::fake();
 
     artisan('init', [
         'vendor' => 'acme',
         'package' => 'package',
+        'namespace' => 'Acme\\Package',
+        'description' => 'A package description',
         'author' => 'John Doe',
         'email' => 'john@doe.com',
         '--proceed' => true,
@@ -135,6 +157,8 @@ it('install package composer dependencies', function () {
     artisan('init', [
         'vendor' => 'acme',
         'package' => 'package',
+        'namespace' => 'Acme\\Package',
+        'description' => 'A package description',
         'author' => 'John Doe',
         'email' => 'john@doe.com',
         '--proceed' => true,
@@ -154,6 +178,8 @@ it('skip composer dependencies installation', function () {
     artisan('init', [
         'vendor' => 'acme',
         'package' => 'package',
+        'namespace' => 'Acme\\Package',
+        'description' => 'A package description',
         'author' => 'John Doe',
         'email' => 'john@doe.com',
         '--proceed' => true,
@@ -173,6 +199,7 @@ it('ask for confirmation before initializing package', function () {
     artisan('init', [
         'vendor' => 'acme',
         'package' => 'package',
+        'namespace' => 'Acme\\Package',
         'author' => 'John Doe',
         'email' => 'john@doe.com',
         'description' => 'A package description',
@@ -185,23 +212,6 @@ it('ask for confirmation before initializing package', function () {
         )
         ->expectsConfirmation('Do you want to proceed with this configuration?', 'yes')
         ->expectsOutputToContain('Package [Acme\\Package] initialized successfully!')
-        ->assertSuccessful();
-});
-
-it('init package using namespace', function () {
-    Composer::fake();
-
-    artisan('init', [
-        'vendor' => 'acme',
-        'package' => 'package',
-        'author' => 'John Doe',
-        'email' => 'john@doe.com',
-        'namespace' => 'Asciito\\Acme',
-        '--proceed' => true,
-        '--no-install' => true,
-        '--path' => setupTestDirectory(),
-    ])
-        ->expectsPromptsOutro('Package [Asciito\\Acme] initialized successfully!')
         ->assertSuccessful();
 });
 
@@ -211,12 +221,10 @@ it('uses git user/email for author by default', function () {
     $testDirectory = setupTestDirectory();
 
     Process::fake([
-        'git config --list --global *' => Process::result(
-            json_encode([
-                'user.name' => 'John Doe',
-                'user.email' => 'john@doe.com',
-            ]),
-        ),
+        'git config --list' => Process::result(<<<TXT
+        user.name=John Doe
+        user.email=john@doe.com
+        TXT),
     ]);
 
     moveFixture(['LICENSE.md.stub', 'composer-with_author.json.stub'], $testDirectory);
@@ -224,15 +232,16 @@ it('uses git user/email for author by default', function () {
     artisan('init', [
         'vendor' => 'acme',
         'package' => 'package',
+        'namespace' => 'Acme\\Package',
         'description' => 'A package description',
         '--no-install' => true,
+        '--proceed' => true,
         '--path' => $testDirectory,
     ])
         ->expectsPromptsTable(
             ['Vendor', 'Package', 'Namespace', 'Description', 'Author', 'Email'],
             [['Acme', 'Package', 'Acme\\Package', 'A package description', 'John Doe', 'john@doe.com']]
         )
-        ->expectsConfirmation('Do you want to proceed with this configuration?', 'yes')
         ->expectsOutputToContain('Package [Acme\\Package] initialized successfully!')
         ->assertSuccessful();
 
@@ -242,15 +251,16 @@ it('uses git user/email for author by default', function () {
 
 test('invalid namespace', function () {
     artisan('init', [
+        'vendor' => 'acme',
+        'package' => 'package',
         'author' => 'John Doe',
         'email' => 'john@doe.com',
         'namespace' => 'An\\Invalid Namespace',
+        'description' => 'A package description',
         '--no-install' => true,
         '--proceed' => true,
         '--path' => setupTestDirectory(),
     ])
-        ->expectsQuestion('Enter the package vendor name', 'acme')
-        ->expectsQuestion('Enter the package name', 'package')
         ->expectsPromptsError('Invalid namespace provided')
         ->assertFailed();
 });
@@ -263,6 +273,7 @@ it('excludes custom paths when processing files', function () {
     artisan('init', [
         'vendor' => 'acme',
         'package' => 'package',
+        'namespace' => 'Acme\\Package',
         'author' => 'John Doe',
         'email' => 'john@doe.com',
         'description' => 'A package description',

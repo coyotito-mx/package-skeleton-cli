@@ -18,6 +18,7 @@ use App\Replacers\VendorReplacer;
 use App\Replacers\VersionReplacer;
 use App\Replacers\YearReplacer;
 use Exception;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Arr;
@@ -36,9 +37,10 @@ use function Laravel\Prompts\select;
 use function Laravel\Prompts\spin;
 use function Laravel\Prompts\table;
 use function Laravel\Prompts\text;
+use function Laravel\Prompts\textarea;
 use function Laravel\Prompts\warning;
 
-class PackageCommand extends Command
+class PackageCommand extends Command implements PromptsForMissingInput
 {
     /**
      * The name and signature of the console command.
@@ -46,12 +48,12 @@ class PackageCommand extends Command
      * @var string
      */
     protected $signature = 'init
-                            { vendor? : The name of the package vendor }
-                            { package? : The name of the package }
-                            { author? : The package author }
-                            { email? : The package author email }
-                            { namespace? : The package namespace (optional, defaults to <vendor>\<package>) }
-                            { description? : The package description }
+                            { vendor : The name of the package vendor (prompted if not provided) }
+                            { package : The name of the package (prompted if not provided) }
+                            { namespace : The package namespace (auto-generated as Vendor\Package if not provided) }
+                            { author : The package author (prompted if not provided) }
+                            { email : The package author email (prompted if not provided) }
+                            { description : The package description (optional) }
                             { --proceed : Accept the configuration and proceed without confirmation }
                             { --no-install : Skip installing composer dependencies }
                             { --path= : The path to initialize the package in (defaults to current working directory) }
@@ -63,18 +65,6 @@ class PackageCommand extends Command
      * @var string
      */
     protected $description = 'Initialize a new package structure';
-
-    protected ?string $vendor = null;
-
-    protected ?string $package = null;
-
-    protected ?string $namespace = null;
-
-    protected ?string $packageDescription = null;
-
-    protected ?string $author = null;
-
-    protected ?string $email = null;
 
     /**
      * The list of replacers to be used for replacing placeholders in files.
@@ -150,8 +140,6 @@ class PackageCommand extends Command
         intro('Initializing package...');
 
         try {
-            $this->collectInput();
-
             $this->displayConfiguration();
             $this->displayFilesToProcess();
             $this->displayExcludedPaths();
@@ -169,19 +157,15 @@ class PackageCommand extends Command
         } catch (InvalidFormatException $e) {
             error($e->getMessage());
 
-            return self::FAILURE;
-        } catch (Exception $e) {
-            error('An error occurred while initializing the package, please read the log for more details.');
-
-            logger()->error('Error initializing package', [
-                'exception' => $e->getMessage(),
+            logger()->error('Invalid format exception occurred', [
+                'exception' => $e,
                 'config' => [
-                    'vendor' => $this->vendor,
-                    'package' => $this->package,
-                    'namespace' => $this->namespace,
-                    'description' => $this->packageDescription,
-                    'author' => $this->author,
-                    'email' => $this->email,
+                    'vendor' => $this->argument('vendor'),
+                    'package' => $this->argument('package'),
+                    'namespace' => $this->argument('namespace'),
+                    'description' => $this->argument('description'),
+                    'author' => $this->argument('author'),
+                    'email' => $this->argument('email'),
                 ],
             ]);
 
@@ -198,7 +182,7 @@ class PackageCommand extends Command
      */
     private function getVendor(): string
     {
-        return Str::studly($this->vendor);
+        return Str::studly($this->argument('vendor'));
     }
 
     /**
@@ -206,7 +190,7 @@ class PackageCommand extends Command
      */
     private function getPackage(): string
     {
-        return Str::studly($this->package);
+        return Str::studly($this->argument('package'));
     }
 
     /**
@@ -216,8 +200,8 @@ class PackageCommand extends Command
      */
     private function getNamespace(): string
     {
-        $namespace = $this->namespace
-            ? $this->namespace
+        $namespace = $this->argument('namespace')
+            ? $this->argument('namespace')
             : Str::studly($this->getVendor()).'\\'.Str::studly($this->getPackage());
 
         InvalidNamespaceException::validate($namespace);
@@ -230,11 +214,8 @@ class PackageCommand extends Command
      */
     private function getPackageDescription(): ?string
     {
-        if ($this->packageDescription) {
-            return Str::ucfirst($this->packageDescription);
-        }
-
-        return null;
+        /** @phpstan-ignore-next-line */
+        return $this->argument('description');
     }
 
     /**
@@ -242,7 +223,7 @@ class PackageCommand extends Command
      */
     private function getAuthor(): string
     {
-        return Str::title($this->author);
+        return Str::title($this->argument('author'));
     }
 
     /**
@@ -250,7 +231,7 @@ class PackageCommand extends Command
      */
     private function getEmail(): string
     {
-        return Str::lower($this->email);
+        return Str::lower($this->argument('email'));
     }
 
     /**
@@ -485,57 +466,39 @@ class PackageCommand extends Command
     }
 
     /**
-     * Get git user information from global configuration.
-     *
-     * @return array{author: string|null, email: string|null}|null
-     */
-    private function getAuthorInformation(): ?array
-    {
-        $gitConfig = $this->fetchGitConfig();
-
-        if ($gitConfig === null) {
-            return null;
-        }
-
-        return [
-            'author' => $gitConfig['user.name'] ?? null,
-            'email' => $gitConfig['user.email'] ?? null,
-        ];
-    }
-
-    /**
      * Fetch user's git global configuration.
      *
      * @return array<string, string>|null
      */
-    private function fetchGitConfig(): ?array
+    private function fetchAuthorInformation(): ?array
     {
-        // Attempt to get git user.name and user.email from global configuration, and transform it to JSON for easier parsing
-        $result = Process::run("git config --list --global | jq -Rn '[inputs | split(\"=\") | { (.[0]): .[1] } ] | add'");
+        $result = Process::run("git config --list");
 
-        if ($result->failed()) {
+        if ($result->failed() || ! $result->output()) {
             return null;
         }
 
-        $data = json_decode($result->output(), true);
+        $options = collect(explode(PHP_EOL, $result->output()))
+            ->mapWithKeys(function ($line) {
+                $parts = explode('=', $line, 2);
 
-        return is_array($data) ? $data : null;
-    }
+                if (count($parts) === 2) {
+                    return [trim($parts[0]) => trim($parts[1])];
+                }
 
-    /**
-     * Collect all required input from arguments or prompt the user.
-     */
-    private function collectInput(): void
-    {
-        $this->vendor = $this->argument('vendor') ?? text('Enter the package vendor name', 'acme');
-        $this->package = $this->argument('package') ?? text('Enter the package name', 'blog');
-        $this->namespace = $this->argument('namespace') ?? $this->getNamespace();
-        $this->packageDescription = $this->argument('description');
+                return [];
+            })
+            ->filter(filled(...));
 
-        ['author' => $author, 'email' => $email] = $this->getAuthorInformation() ?? ['author' => null, 'email' => null];
 
-        $this->author = $this->argument('author') ?? $author ?? text('Enter the author name', 'John Doe');
-        $this->email = $this->argument('email') ?? $email ?? text('Enter the author email', 'john@doe.com');
+        if ($options->isEmpty() || ! $options->has(['user.name', 'user.email'])) {
+            return null;
+        }
+
+        return [
+            'author' => $options->get('user.name'),
+            'email' => $options->get('user.email')
+        ];
     }
 
     /**
@@ -544,5 +507,19 @@ class PackageCommand extends Command
     private function getPath(): string
     {
         return $this->option('path') ?? getcwd();
+    }
+
+    protected function promptForMissingArgumentsUsing(): array
+    {
+        $info = $this->fetchAuthorInformation();
+
+        return [
+            'vendor' => fn (): string => text('Enter the package vendor name', 'Acme', required: true),
+            'package' => fn (): string => text('Enter the package name', 'Package', required: true),
+            'namespace' => fn (): ?string => text('Enter the package namespace', 'Vendor\\Package') ?: null,
+            'author' => fn (): string => $info['author'] ?? text('Enter the author name', 'John Doe', required: true),
+            'email' => fn (): string => $info['email'] ?? text('Enter the author\'s email', 'john@doe.com', required: true),
+            'description' => fn (): ?string => textarea('Enter the package description') ?: null,
+        ];
     }
 }
