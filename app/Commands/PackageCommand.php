@@ -213,6 +213,8 @@ class PackageCommand extends Command implements PromptsForMissingInput
 
     /**
      * Get the package description, or null if not provided.
+     *
+     * @phpstan-ignore-next-line
      */
     private function getPackageDescription(): ?string
     {
@@ -528,7 +530,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
     /**
      * Define interactive prompts for missing required command arguments.
      *
-     * @return array<string, \\Closure(): string|null>
+     * @return array<string, \Closure(): string|null>
      */
     #[\Override]
     protected function promptForMissingArgumentsUsing(): array
