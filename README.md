@@ -65,8 +65,10 @@ Or use prompts:
 
 ```bash
 skeleton init
-# Prompts: vendor, package, author, email (fetched from git config, if available), description, testing framework
+# Prompts: vendor, package, namespace (optional), author, email (fetched from git config, if available), description
 ```
+
+> Note: The testing framework prompt appears only when dependencies are installed (i.e., without `--no-install`).
 
 To skip confirmation:
 
@@ -217,12 +219,14 @@ If git config is not available, you'll be prompted interactively.
 
 ### Testing Framework Selection
 
-After initialization starts, you'll be prompted to choose your testing framework:
+When dependencies are enabled (without `--no-install`), you'll be prompted to choose your testing framework:
 
 - **Pest** (default) - Modern, elegant testing for PHP
 - **PHPUnit** - Industry-standard PHP testing framework
 
 The selected framework's dev dependencies will be automatically installed.
+
+If `--no-install` is used, this prompt is skipped and no testing framework dependencies are installed.
 
 ## Examples
 
