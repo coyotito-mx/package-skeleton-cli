@@ -345,10 +345,9 @@ final class Replacer
         return Str::matchAll($placeholder, $content)
             ->unique()
             ->mapWithKeys(function (string $modifiers) {
-                $placeholder = (string) Str::of($this->placeholder)->prepend('{{')->append($modifiers ? '|'.$modifiers : '', '}}');
-                $modifiersList = explode(',', $modifiers);
+                $wrapped = (string) Str::of($this->placeholder)->wrap('{{', $modifiers ? '|'.$modifiers.'}}' : '}}');
 
-                return [$placeholder => $modifiersList];
+                return [$wrapped => explode(',', $modifiers)];
             })->toArray();
     }
 
