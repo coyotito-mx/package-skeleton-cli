@@ -1,15 +1,15 @@
 # Package Skeleton CLI
 
-![example workflow](https://github.com/coyotito-mx/package-skeleton-cli/actions/workflows/tests.yml/badge.svg)
-![Release version](https://img.shields.io/github/v/release/coyotito-mx/package-skeleton-cli?label=Release%20Version&color=2cbe4e&labelColor=444d56)
-![MacOS ARM Only](https://shields.io/badge/MacOS--9cf?logo=Apple&style=social)
+![Example Workflow](https://github.com/coyotito-mx/package-skeleton-cli/actions/workflows/tests.yml/badge.svg)
+![Release Version](https://img.shields.io/github/v/release/coyotito-mx/package-skeleton-cli?label=Release%20Version&color=2cbe4e&labelColor=444d56)
+![macOS ARM only](https://shields.io/badge/MacOS--9cf?logo=Apple&style=social)
 
-The **Package Skeleton CLI** is a command-line interface that allows you to initialize a PHP package skeleton by replacing all the placeholders in the files with the values you provide.
+The **Package Skeleton CLI** is command-line interface that allows you to initialize a PHP package skeleton by replacing all the placeholders in the files with the values you provide.
 
 ## Installation
 
 > ⚠️
-> The CLI **only** works on **macOS** with ARM architecture currently.
+> The CLI currently works **only** on **macOS** with ARM architecture.
 
 ### Downloading the CLI
 
@@ -75,7 +75,7 @@ skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
   --proceed
 ```
 
-To skip composer dependencies installation:
+To skip Composer dependency installation:
 
 ```bash
 skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
@@ -115,7 +115,7 @@ skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
 
 - `upper` - Converts to UPPERCASE
 - `lower` - Converts to lowercase
-- `title` - Converts To Title Case
+- `title` - Converts to Title Case
 - `snake` - Converts to snake_case
 - `kebab` - Converts to kebab-case
 - `camel` - Converts to camelCase
@@ -130,7 +130,7 @@ skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
 > ```text
 > John Doe -> JOHN-DOE
 >
-> {{author|upper,slug}} → john-doe     (wrong)
+> {{author|upper,slug}} → john-doe     (incorrect)
 > {{author|slug,upper}} → JOHN-DOE     (correct)
 > ```
 
@@ -177,13 +177,13 @@ Options
       --path[=PATH]        The path to initialize the package in (defaults to current working directory)
       --exclude[=EXCLUDE]  Paths to exclude when processing files (multiple values allowed)
   -h, --help               Display help for the command
-      --silent             Do not output any message
+      --silent             Do not output any messages
   -q, --quiet              Only errors are displayed. All other output is suppressed
   -V, --version            Display this application version
       --ansi|--no-ansi     Force (or disable --no-ansi) ANSI output
   -n, --no-interaction     Do not ask any interactive question
       --env[=ENV]          The environment the command should run under
-  -v|vv|vvv, --verbose     Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
+  -v|vv|vvv, --verbose     Increase the verbosity of messages: 1 for normal output, 2 for more verbose output, and 3 for debug output
 ```
 
 ### Excluded Paths (Default)

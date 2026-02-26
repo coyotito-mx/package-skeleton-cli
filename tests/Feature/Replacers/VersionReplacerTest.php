@@ -3,7 +3,7 @@
 use App\Replacers\Exceptions\InvalidVersionException;
 use App\Replacers\VersionReplacer;
 
-it('relace version placeholder', function () {
+it('replace version placeholder', function () {
     $replacer = VersionReplacer::make('0.0.1');
 
     expect($replacer)
@@ -11,7 +11,7 @@ it('relace version placeholder', function () {
         ->toBe('The current version is 0.0.1.');
 });
 
-it('throw exception when version is invalid', function (string $version) {
+it('throws exception when version is invalid', function (string $version) {
     expect(fn () => VersionReplacer::make($version))
         ->toThrow(InvalidVersionException::class, "The version '$version' is not a valid semantic version.");
 })
@@ -19,7 +19,7 @@ it('throw exception when version is invalid', function (string $version) {
         'invalid-version',
         '1',
         '1.0',
-        'v1.0.0', // Prefijo 'v' no es válido en SemVer estricto
+        'v1.0.0', // "v" prefix is not valid in strict SemVer
     ]);
 
 it('replace major version', function () {
@@ -62,7 +62,7 @@ it('replace build metadata version', function () {
         ->toBe('Build metadata version: 20130313144700');
 });
 
-test('chaining multiple replacer will only use the first one', function () {
+test('chaining multiple replacers only uses the first one', function () {
     $replacer = VersionReplacer::make('2.5.3');
 
     expect($replacer)
