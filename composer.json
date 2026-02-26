@@ -40,8 +40,7 @@
     },
     "scripts": {
         "test": [
-            "@php artisan config:clear --ansi",
-            "@php artisan test"
+            "@php skeleton test --parallel"
         ],
         "lint": "@php phpstan analyse --memory-limit=1G",
         "style": "@php pint --test",
