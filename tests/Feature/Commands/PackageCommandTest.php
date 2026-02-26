@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Process;
 use PHPUnit\Framework as PHPUnit;
 
 use function Illuminate\Filesystem\join_paths;
+use function PHPUnit\Framework\assertFileDoesNotExist;
+use function PHPUnit\Framework\assertFileExists;
 
 function setupTestDirectory(): string
 {
@@ -125,10 +127,13 @@ it('init package using namespace', function () {
     ])
         ->expectsQuestion('Enter the package namespace', 'Asciito\\Package')
         ->expectsConfirmation('Do you want to proceed with this configuration?', 'yes')
+        ->expectsConfirmation('No LICENSE file found. Do you want to create one with the MIT license?', 'yes')
         ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
         ->expectsPromptsIntro('Initializing package...')
         ->expectsPromptsOutro('Package [Asciito\\Package] initialized successfully!')
         ->assertSuccessful();
+
+        assertFileExists(join_paths(setupTestDirectory(), 'LICENSE.md'));
 });
 
 it('proceed without confirmation', function () {
@@ -145,10 +150,36 @@ it('proceed without confirmation', function () {
         '--path' => setupTestDirectory(),
     ])
         ->expectsPromptsIntro('Initializing package...')
+        ->expectsConfirmation('No LICENSE file found. Do you want to create one with the MIT license?', 'yes')
         ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
         ->expectsPromptsAlert('Installing composer dependencies...')
         ->expectsPromptsOutro('Package [Acme\\Package] initialized successfully!')
         ->assertSuccessful();
+});
+
+it('skip license creation', function () {
+    $testDirectory = setupTestDirectory();
+
+    Composer::fake();
+
+    artisan('init', [
+        'vendor' => 'acme',
+        'package' => 'package',
+        'namespace' => 'Acme\\Package',
+        'author' => 'John Doe',
+        'email' => 'john@doe.com',
+        'description' => 'A package description',
+        '--proceed' => true,
+        '--skip-license' => true,
+        '--path' => $testDirectory,
+    ])
+        ->expectsPromptsIntro('Initializing package...')
+        ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
+        ->expectsPromptsAlert('Installing composer dependencies...')
+        ->expectsPromptsOutro('Package [Acme\\Package] initialized successfully!')
+        ->assertSuccessful();
+
+    assertFileDoesNotExist(join_paths($testDirectory, 'LICENSE.md'), 'License file should not be created');
 });
 
 it('install package composer dependencies', function () {
@@ -162,6 +193,7 @@ it('install package composer dependencies', function () {
         'email' => 'john@doe.com',
         'description' => 'A package description',
         '--proceed' => true,
+        '--skip-license' => true,
         '--path' => setupTestDirectory(),
     ])
         ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
@@ -184,6 +216,7 @@ it('skip composer dependencies installation', function () {
         'description' => 'A package description',
         '--proceed' => true,
         '--no-install' => true,
+        '--skip-license' => true,
         '--path' => setupTestDirectory(),
     ])
         ->expectsPromptsWarning('Skip composer dependencies installation.')
@@ -204,6 +237,7 @@ it('ask for confirmation before initializing package', function () {
         'email' => 'john@doe.com',
         'description' => 'A package description',
         '--no-install' => true,
+        '--skip-license' => true,
         '--path' => setupTestDirectory(),
     ])
         ->expectsPromptsTable(
@@ -268,7 +302,7 @@ test('invalid namespace', function () {
 it('excludes custom paths when processing files', function () {
     $testDirectory = setupTestDirectory();
 
-    moveFixture(['composer.json.stub', 'package.json.stub'], $testDirectory);
+    moveFixture(['composer.json.stub', 'package.json.stub', 'LICENSE.md.stub'], $testDirectory);
 
     artisan('init', [
         'vendor' => 'acme',
@@ -304,4 +338,5 @@ it('excludes custom paths when processing files', function () {
 
     assertFixtureNotEquals('composer.json.stub', join_paths($testDirectory, 'composer.json'));
     assertFixtureNotEquals('package.json.stub', join_paths($testDirectory, 'package.json'));
+    assertFixtureEquals('LICENSE.md.stub', join_paths($testDirectory, 'LICENSE.md'));
 });

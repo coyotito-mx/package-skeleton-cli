@@ -10,7 +10,6 @@ use App\Replacers\DescriptionReplacer;
 use App\Replacers\EmailReplacer;
 use App\Replacers\Exceptions\InvalidFormatException;
 use App\Replacers\Exceptions\InvalidNamespaceException;
-use App\Replacers\LicenseDescriptionReplacer;
 use App\Replacers\LicenseNameReplacer;
 use App\Replacers\NamespaceReplacer;
 use App\Replacers\PackageReplacer;
@@ -27,6 +26,7 @@ use LaravelZero\Framework\Commands\Command;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
+use function Illuminate\Filesystem\join_paths;
 use function Laravel\Prompts\alert;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\error;
@@ -57,6 +57,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
                             { --proceed : Accept the configuration and proceed without confirmation }
                             { --no-install : Skip installing composer dependencies }
                             { --path= : The path to initialize the package in (defaults to current working directory) }
+                            { --skip-license : Skip creating a LICENSE file if one does not exist }
                             { --exclude=* : Paths to exclude when processing files }';
 
     /**
@@ -114,7 +115,6 @@ class PackageCommand extends Command implements PromptsForMissingInput
             ->addReplacer(AuthorReplacer::class, fn () => $this->getAuthor())
             ->addReplacer(EmailReplacer::class, fn () => $this->getEmail())
             ->addReplacer(LicenseNameReplacer::class, fn () => 'MIT')
-            ->addReplacer(LicenseDescriptionReplacer::class, fn () => 'This package is open-sourced software licensed under the MIT license.')
             ->addReplacer(VersionReplacer::class, fn () => '0.0.1')
             ->addReplacer(YearReplacer::class); // This will replace the year with the current year
     }
@@ -149,6 +149,8 @@ class PackageCommand extends Command implements PromptsForMissingInput
 
                 return self::FAILURE;
             }
+
+            $this->ensureLicenseFileExists();
 
             $this->replacePlaceholders();
 
@@ -499,6 +501,19 @@ class PackageCommand extends Command implements PromptsForMissingInput
             'author' => $options->get('user.name'),
             'email' => $options->get('user.email'),
         ];
+    }
+
+    private function ensureLicenseFileExists(): void
+    {
+        $licensePath = join_paths($this->getPath(), 'LICENSE.md');
+
+        if ($this->option('skip-license') || File::exists($licensePath) || ! confirm('No LICENSE file found. Do you want to create one with the MIT license?', default: true)) {
+            return;
+        }
+
+        File::copy(join_paths(app()->basePath(), 'stubs', 'LICENSE.stub'), $licensePath);
+
+        info('LICENSE file created successfully!');
     }
 
     /**

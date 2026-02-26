@@ -82,6 +82,13 @@ skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
   --no-install
 ```
 
+To skip creating a LICENSE file when it does not exist:
+
+```bash
+skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
+  --skip-license
+```
+
 To exclude specific files/directories from processing:
 
 ```bash
@@ -101,7 +108,6 @@ skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
 - `author` - Package author name
 - `email` - Author's email address
 - `license` - License name (defaults to `MIT`)
-- `license-description` - License description text
 - `version` - Package version (defaults to `0.0.1`)
 - `year` - Current year
 
@@ -167,6 +173,7 @@ Arguments
 Options
       --proceed            Accept the configuration and proceed without confirmation
       --no-install         Skip installing composer dependencies
+      --skip-license       Skip creating a LICENSE file if one does not exist
       --path[=PATH]        The path to initialize the package in (defaults to current working directory)
       --exclude[=EXCLUDE]  Paths to exclude when processing files (multiple values allowed)
   -h, --help               Display help for the command
