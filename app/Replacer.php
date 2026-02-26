@@ -192,7 +192,7 @@ final class Replacer
 
             foreach ($this->getModifiers($modifiers) as $modifier) {
                 /** @var Stringable $replacement */
-                $replacement = $modifier(replacement: $replacement);
+                $replacement = $modifier($replacement);
             }
 
             $replacement = $this->transformBeforeReplace($replacement);
