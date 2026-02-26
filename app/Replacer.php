@@ -30,9 +30,16 @@ use Illuminate\Support\Stringable;
 final class Replacer
 {
     /**
+     * Cached default modifiers.
+     *
+     * @var array<string, Closure(Stringable): Stringable>
+     */
+    private static array $defaultModifiers = [];
+
+    /**
      * The list of custom modifiers.
      *
-        * @var array<string, Closure(Stringable): Stringable>
+     * @var array<string, Closure(Stringable): Stringable>
      */
     protected array $modifiers = [];
 
@@ -206,44 +213,46 @@ final class Replacer
     /**
      * Get the default modifiers.
      *
-     * @return array<string, Closure>
+     * @return array<string, Closure(Stringable): Stringable>
      */
-    protected function getDefaultModifiers(): array
+    protected static function getDefaultModifiers(): array
     {
-        return [
-            'ucfirst' => fn (Stringable $replacement) => $replacement->ucfirst(),
-            'upper' => fn (Stringable $replacement) => $replacement->upper(),
-            'lower' => fn (Stringable $replacement) => $replacement->lower(),
-            'title' => fn (Stringable $replacement) => $replacement->title(),
-            'snake' => fn (Stringable $replacement) => $replacement->snake(),
-            'kebab' => fn (Stringable $replacement) => $replacement->kebab(),
-            'camel' => fn (Stringable $replacement) => $replacement->camel(),
-            'pascal' => fn (Stringable $replacement) => $replacement->studly(),
-            'slug' => fn (Stringable $replacement) => $replacement->slug(),
-            'acronym' => function (Stringable $replacement): Stringable {
-                $acronym = $replacement
-                    ->headline()
-                    ->split('/\s/')
-                    ->filter(function (string $str): bool {
-                        return ! in_array(strtolower($str), self::$stopWords);
-                    })
-                    ->map(fn (string $acronym) => substr(ucfirst($acronym), 0, 1))
-                    ->join('');
+        if (! self::$defaultModifiers) {
+            self::$defaultModifiers = [
+                'ucfirst' => fn (Stringable $replacement) => $replacement->ucfirst(),
+                'upper' => fn (Stringable $replacement) => $replacement->upper(),
+                'lower' => fn (Stringable $replacement) => $replacement->lower(),
+                'title' => fn (Stringable $replacement) => $replacement->title(),
+                'snake' => fn (Stringable $replacement) => $replacement->snake(),
+                'kebab' => fn (Stringable $replacement) => $replacement->kebab(),
+                'camel' => fn (Stringable $replacement) => $replacement->camel(),
+                'pascal' => fn (Stringable $replacement) => $replacement->studly(),
+                'slug' => fn (Stringable $replacement) => $replacement->slug(),
+                'acronym' => function (Stringable $replacement): Stringable {
+                    $acronym = $replacement
+                        ->headline()
+                        ->split('/\s/')
+                        ->filter(fn (string $str): bool => ! in_array(strtolower($str), self::$stopWords))
+                        ->map(fn (string $acronym) => substr(ucfirst($acronym), 0, 1))
+                        ->join('');
 
-                return Str::of($acronym);
-            },
-        ];
+                    return Str::of($acronym);
+                },
+            ];
+        }
+
+        return self::$defaultModifiers;
     }
 
     /**
      * Get the available modifiers.
      *
-    * @param  list<string>  $modifiers  The modifiers to resolve
-    * @return array<string, Closure(Stringable): Stringable>
+     * @param  list<string>  $modifiers  The modifiers to resolve
+     * @return array<string, Closure(Stringable): Stringable>
      */
     public function getModifiers(array $modifiers = []): array
     {
-        $availableModifiers = collect($this->getDefaultModifiers())->merge($this->modifiers);
+        $availableModifiers = collect(static::getDefaultModifiers())->merge($this->modifiers);
 
         if ($this->onlyWith === null) {
             $availableModifiers = collect();
@@ -292,13 +301,13 @@ final class Replacer
     }
 
     /**
-    * Filter modifiers to only allow specific ones.
-    *
-    * If null is provided, no modifiers are allowed.
-    * If an empty array is provided, all default/custom modifiers are allowed
-    * except those explicitly excluded.
-    *
-    * @param  list<string>|null  $modifiers
+     * Filter modifiers to only allow specific ones.
+     *
+     * If null is provided, no modifiers are allowed.
+     * If an empty array is provided, all default/custom modifiers are allowed
+     * except those explicitly excluded.
+     *
+     * @param  list<string>|null  $modifiers
      */
     public function only(?array $modifiers): self
     {
