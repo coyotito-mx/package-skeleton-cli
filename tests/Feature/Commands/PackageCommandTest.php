@@ -221,7 +221,7 @@ it('uses git user/email for author by default', function () {
     $testDirectory = setupTestDirectory();
 
     Process::fake([
-        'git config --list' => Process::result(<<<TXT
+        'git config --list' => Process::result(<<<'TXT'
         user.name=John Doe
         user.email=john@doe.com
         TXT),

@@ -19,9 +19,9 @@ use App\Replacers\VersionReplacer;
 use App\Replacers\YearReplacer;
 use Exception;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use LaravelZero\Framework\Commands\Command;
 use Symfony\Component\Finder\Finder;
@@ -211,10 +211,11 @@ class PackageCommand extends Command implements PromptsForMissingInput
 
     /**
      * Get the package description with first letter capitalized, or null if not provided.
+     *
+     * @phpstan-ignore-next-line
      */
     private function getPackageDescription(): ?string
     {
-        /** @phpstan-ignore-next-line */
         return $this->argument('description');
     }
 
@@ -472,7 +473,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
      */
     private function fetchAuthorInformation(): ?array
     {
-        $result = Process::run("git config --list");
+        $result = Process::run('git config --list');
 
         if ($result->failed() || ! $result->output()) {
             return null;
@@ -490,14 +491,13 @@ class PackageCommand extends Command implements PromptsForMissingInput
             })
             ->filter(filled(...));
 
-
         if ($options->isEmpty() || ! $options->has(['user.name', 'user.email'])) {
             return null;
         }
 
         return [
             'author' => $options->get('user.name'),
-            'email' => $options->get('user.email')
+            'email' => $options->get('user.email'),
         ];
     }
 
