@@ -1,42 +1,43 @@
-name-template: 'v$RESOLVED_VERSION'
-tag-template: 'v$RESOLVED_VERSION'
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
 categories:
-  - title: '⚙️ Build'
-    label: 'build'
-  - title: '🔄 CI'
-    label: 'ci'
-  - title: '📂 Documentation'
-    label: 'documentation'
-  - title: '🚀 Features'
-    label: 'feature'
-  - title: '🐞 Bugfix'
-    label: 'bugfix'
-  - title: '🔥 Hotfix'
-    label: 'hotfix'
-  - title: '📊 Performance improvements'
-    label: 'performance'
-  - title: '⚒️ Refactor'
-    label: 'refactor'
-  - title: '💅 Style'
-    label: 'style'
-  - title: '✅ Tests'
-    label: 'tests'
+  - title: "⚙️ Build"
+    label: "build"
+  - title: "🔄 CI"
+    label: "ci"
+  - title: "📂 Documentation"
+    label: "documentation"
+  - title: "🚀 Features"
+    label: "feature"
+  - title: "🐞 Bugfix"
+    label: "bugfix"
+  - title: "🔥 Hotfix"
+    label: "hotfix"
+  - title: "📊 Performance improvements"
+    label: "performance"
+  - title: "⚒️ Refactor"
+    label: "refactor"
+  - title: "🔧 Chores"
+    label: "chore"
+  - title: "💅 Style"
+    label: "style"
+  - title: "✅ Tests"
+    label: "tests"
 exclude-labels:
-  - 'chore'
-  - 'release'
-  - 'changelog'
-change-template: '- $TITLE by @$AUTHOR in #$NUMBER'
+  - "release"
+  - "changelog"
+change-template: "- $TITLE by @$AUTHOR in #$NUMBER"
 change-title-escapes: '\<*_&' # You can add # and @ to disable mentions, and add ` to disable code blocks.
 version-resolver:
   major:
     labels:
-      - 'major'
+      - "major"
   minor:
     labels:
-      - 'minor'
+      - "minor"
   patch:
     labels:
-      - 'patch'
+      - "patch"
   default: patch
 template: |
   ## What's changed

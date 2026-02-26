@@ -1,11 +1,39 @@
-name: Lint
+name: Run lint and code style checks
 
 on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**/CHANGELOG.md"
   pull_request:
-    branches: [dev, 'hotfix/**']
+    branches: [dev, main]
+    paths-ignore:
+      - "**/CHANGELOG.md"
+
+permissions:
+  contents: write
 
 jobs:
   lint:
-    uses: coyotito-mx/.github/.github/workflows/coding-standards.yml@main
-    with:
-      fix: false
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+
+      - name: Run CI Checks
+        run: composer check

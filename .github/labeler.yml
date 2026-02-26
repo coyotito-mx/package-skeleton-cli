@@ -21,4 +21,4 @@ chore:
 tests:
   - head-branch: ['^test\/.+', '^tests\/.+']
 release:
-  - head-branch: ['dev']
+  - head-branch: ["^dev"]
