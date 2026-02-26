@@ -35,8 +35,8 @@ class Composer implements Contracts\ComposerContract
     }
 
     /**
-        * Runs the provided command in the current working directory.
-        *
+     * Runs the provided command in the current working directory.
+     *
      * @param  array<int, string>  $command
      */
     private function run(array $command): bool
@@ -49,7 +49,7 @@ class Composer implements Contracts\ComposerContract
 
         try {
             $output = $this->app?->make(OutputInterface::class);
-        } catch (Throwable $e) {
+        } catch (Throwable) {
             $output = null;
         }
 
@@ -58,7 +58,7 @@ class Composer implements Contracts\ComposerContract
 
             $result = $process->run(
                 $command,
-                function ($_, $line) use ($output) {
+                function ($_, $line) use ($output): void {
                     $output->write($line);
                 }
             );

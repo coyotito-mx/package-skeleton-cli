@@ -4,7 +4,7 @@ use App\Replacers\Exceptions\InvalidYearException;
 use App\Replacers\YearReplacer;
 use Illuminate\Support\Carbon;
 
-it('replace year placeholder', function () {
+it('replace year placeholder', function (): void {
     $replacer = YearReplacer::make('2023');
 
     expect($replacer->replace('{{year}}'))->toBe('2023')
@@ -12,7 +12,7 @@ it('replace year placeholder', function () {
         ->and($replacer->replace('Year: {{year}}'))->toBe('Year: 2023');
 });
 
-it('replace year with current year when no year is provided', function () {
+it('replace year with current year when no year is provided', function (): void {
     Carbon::setTestNow('2024-01-01');
 
     $replacer = YearReplacer::make();
@@ -21,7 +21,7 @@ it('replace year with current year when no year is provided', function () {
         ->and($replacer->replace('Year: {{year}}'))->toBe('Year: 2024');
 });
 
-it('throws an exception for invalid year', function (string $year) {
+it('throws an exception for invalid year', function (string $year): void {
     YearReplacer::make($year);
 })
     ->throws(InvalidYearException::class)
@@ -34,7 +34,7 @@ it('throws an exception for invalid year', function (string $year) {
         '20-20',
     ]);
 
-test('cannot apply excluded modifiers', function (string $modifier) {
+test('cannot apply excluded modifiers', function (string $modifier): void {
     $replacer = YearReplacer::make('1990');
 
     expect($replacer)

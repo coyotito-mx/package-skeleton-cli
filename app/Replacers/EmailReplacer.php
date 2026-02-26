@@ -21,6 +21,7 @@ class EmailReplacer extends Builder
 
     protected static ?string $invalidFormatException = InvalidEmailException::class;
 
+    #[\Override]
     protected function configure(): Replacer
     {
         $this->replacer
@@ -30,6 +31,7 @@ class EmailReplacer extends Builder
         return parent::configure();
     }
 
+    #[\Override]
     public function modifiers(): array
     {
         return [

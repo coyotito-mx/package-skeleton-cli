@@ -15,6 +15,7 @@ class AppServiceProvider extends ServiceProvider
         //
     }
 
+    #[\Override]
     public function register(): void
     {
         $this->app->singleton(

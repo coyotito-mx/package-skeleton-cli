@@ -2,21 +2,21 @@
 
 use App\Replacer;
 
-it('replace placeholder', function () {
+it('replace placeholder', function (): void {
     $replacer = Replacer::make('name', 'john doe');
 
     expect($replacer)
         ->replace('Hello, {{name}}!')->toBe('Hello, John Doe!');
 });
 
-it('cannot replace unknown placeholder', function () {
+it('cannot replace unknown placeholder', function (): void {
     $replacer = Replacer::make('name', 'john doe');
 
     expect($replacer)
         ->replace('Hello, {{username}}!')->toBe('Hello, {{username}}!');
 });
 
-it('replace placeholder with modifiers', function (string $modifier, string $expected) {
+it('replace placeholder with modifiers', function (string $modifier, string $expected): void {
     $replacer = Replacer::make('name', 'john doe');
 
     expect($replacer)
@@ -56,7 +56,7 @@ it('replace placeholder with modifiers', function (string $modifier, string $exp
     ],
 ]);
 
-it('replace placeholder with multiple modifiers', function (array $modifiers, string $expected) {
+it('replace placeholder with multiple modifiers', function (array $modifiers, string $expected): void {
     $replacer = Replacer::make('name', 'john doe');
 
     $modifiers = implode(',', $modifiers);
@@ -90,7 +90,7 @@ it('replace placeholder with multiple modifiers', function (array $modifiers, st
     ],
 ]);
 
-it('ignores duplicate modifiers after the first occurrence', function (array $modifiers, string $expected) {
+it('ignores duplicate modifiers after the first occurrence', function (array $modifiers, string $expected): void {
     $replacer = Replacer::make('name', 'john doe');
 
     $modifiers = implode(',', $modifiers);
@@ -128,7 +128,7 @@ it('ignores duplicate modifiers after the first occurrence', function (array $mo
     ],
 ]);
 
-it('cannot replace malformed placeholder', function (string $malformedPlaceholder) {
+it('cannot replace malformed placeholder', function (string $malformedPlaceholder): void {
     $replacer = Replacer::make('name', 'john doe');
 
     expect($replacer)
@@ -141,7 +141,7 @@ it('cannot replace malformed placeholder', function (string $malformedPlaceholde
     'spaces in braces' => '{{ name }}',
 ]);
 
-it('cannot replace placeholder with malformed modifiers', function (string $malformedModifiers) {
+it('cannot replace placeholder with malformed modifiers', function (string $malformedModifiers): void {
     $replacer = Replacer::make('name', 'john doe');
 
     expect($replacer)
@@ -155,7 +155,7 @@ it('cannot replace placeholder with malformed modifiers', function (string $malf
     'multiple commas' => '{{name|upper,,lower}}',
 ]);
 
-it('register custom modifier', function () {
+it('register custom modifier', function (): void {
     $replacer = tap(Replacer::make('name', 'john doe'))
         ->addModifier('reverse', fn (\Illuminate\Support\Stringable $replacement) => $replacement->reverse());
 
@@ -163,7 +163,7 @@ it('register custom modifier', function () {
         ->replace('Hello, {{name|reverse}}!')->toBe('Hello, eoD nhoJ!');
 });
 
-it('permit only specific modifiers', function (string $modifier, ?string $expected, bool $isIncluded) {
+it('permit only specific modifiers', function (string $modifier, ?string $expected, bool $isIncluded): void {
     $replacer = Replacer::make('name', 'john doe')->only(null);
 
     if (! $isIncluded && is_null($expected)) {
@@ -227,7 +227,7 @@ it('permit only specific modifiers', function (string $modifier, ?string $expect
     ],
 ]);
 
-it('use only specified modifiers', function () {
+it('use only specified modifiers', function (): void {
     $replacer = tap(Replacer::make('name', 'john doe'))
         ->only(['emoji'])
         ->addModifier('emoji', fn (\Illuminate\Support\Stringable $replacement): \Illuminate\Support\Stringable => $replacement->append(' 😊'));
@@ -238,7 +238,7 @@ it('use only specified modifiers', function () {
         ->replace('Hello, {{name|slug}}!')->toBe('Hello, John Doe!');
 });
 
-it('exclude modifiers', function () {
+it('exclude modifiers', function (): void {
     $replacer = tap(Replacer::make('name', 'john doe'))
         ->excludeModifiers(['upper', 'lower']);
 

@@ -3,21 +3,21 @@
 use App\Replacers\EmailReplacer;
 use App\Replacers\Exceptions\InvalidEmailException;
 
-it('replace email placeholder', function () {
+it('replace email placeholder', function (): void {
     $replacer = EmailReplacer::make('john@doe.com');
 
     expect($replacer)
         ->replace('Contact me at {{email}}')->toBe('Contact me at john@doe.com');
 });
 
-it('replace email placeholder with modifier', function () {
+it('replace email placeholder with modifier', function (): void {
     $replacer = EmailReplacer::make('jane@doe.com');
 
     expect($replacer)
         ->replace('Contact me at {{email|upper}}')->toBe('Contact me at JANE@DOE.COM');
 });
 
-test('cannot apply excluded modifiers', function (string $modifier) {
+test('cannot apply excluded modifiers', function (string $modifier): void {
     $replacer = EmailReplacer::make('john@doe.com');
 
     expect($replacer)
@@ -32,7 +32,7 @@ test('cannot apply excluded modifiers', function (string $modifier) {
     'acronym',
 ]);
 
-it('throws exception for invalid email', function (string $invalidEmail) {
+it('throws exception for invalid email', function (string $invalidEmail): void {
     expect(fn () => EmailReplacer::make($invalidEmail))
         ->toThrow(InvalidEmailException::class, "The email '$invalidEmail' is not a valid email address.");
 })->with([

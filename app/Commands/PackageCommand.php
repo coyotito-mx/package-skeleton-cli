@@ -204,9 +204,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
      */
     private function getNamespace(): string
     {
-        $namespace = $this->argument('namespace')
-            ? $this->argument('namespace')
-            : Str::studly($this->getVendor()).'\\'.Str::studly($this->getPackage());
+        $namespace = $this->argument('namespace') ?: Str::studly($this->getVendor()).'\\'.Str::studly($this->getPackage());
 
         InvalidNamespaceException::validate($namespace);
 
@@ -248,7 +246,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
 
         if (filled($paths)) {
             $customExcludedPaths = array_values(array_filter(
-                array_map(fn (string $path) => trim($path), $paths),
+                array_map(trim(...), $paths),
                 fn (string $path) => $path !== ''
             ));
 
@@ -532,6 +530,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
      *
      * @return array<string, \\Closure(): string|null>
      */
+    #[\Override]
     protected function promptForMissingArgumentsUsing(): array
     {
         $info = $this->fetchAuthorInformation();

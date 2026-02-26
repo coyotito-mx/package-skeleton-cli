@@ -73,17 +73,17 @@ function assertFixtureNotEquals(string $fixtureName, string $actualPath): void
     PHPUnit\Assert::assertNotSame($expectedContent, $actualContent, "Fixture content should not match actual content for: $actualPath");
 }
 
-beforeAll(function () {
+beforeAll(function (): void {
     Carbon::setTestNow('2026-01-01');
 });
 
-afterAll(function () {
+afterAll(function (): void {
     rmdir_recursive(base_path('tests'.DIRECTORY_SEPARATOR.'temp'));
 
     Carbon::setTestNow();
 });
 
-it('init package', function () {
+it('init package', function (): void {
     $testDirectory = setupTestDirectory();
 
     Composer::fake();
@@ -114,7 +114,7 @@ it('init package', function () {
     assertFixtureEquals('package.json.stub', join_paths($testDirectory, 'package.json'));
 });
 
-it('init package using namespace', function () {
+it('init package using namespace', function (): void {
     Composer::fake();
 
     artisan('init', [
@@ -133,10 +133,10 @@ it('init package using namespace', function () {
         ->expectsPromptsOutro('Package [Asciito\\Package] initialized successfully!')
         ->assertSuccessful();
 
-        assertFileExists(join_paths(setupTestDirectory(), 'LICENSE.md'));
+    assertFileExists(join_paths(setupTestDirectory(), 'LICENSE.md'));
 });
 
-it('proceed without confirmation', function () {
+it('proceed without confirmation', function (): void {
     Composer::fake();
 
     artisan('init', [
@@ -157,7 +157,7 @@ it('proceed without confirmation', function () {
         ->assertSuccessful();
 });
 
-it('skip license creation', function () {
+it('skip license creation', function (): void {
     $testDirectory = setupTestDirectory();
 
     Composer::fake();
@@ -182,7 +182,7 @@ it('skip license creation', function () {
     assertFileDoesNotExist(join_paths($testDirectory, 'LICENSE.md'), 'License file should not be created');
 });
 
-it('install package composer dependencies', function () {
+it('install package composer dependencies', function (): void {
     $composer = Composer::fake();
 
     artisan('init', [
@@ -204,7 +204,7 @@ it('install package composer dependencies', function () {
     $composer->assertPackageInstalled('pestphp/pest', true);
 });
 
-it('skip composer dependencies installation', function () {
+it('skip composer dependencies installation', function (): void {
     $composer = Composer::fake();
 
     artisan('init', [
@@ -226,7 +226,7 @@ it('skip composer dependencies installation', function () {
     $composer->assertNothingInstalled();
 });
 
-it('ask for confirmation before initializing package', function () {
+it('ask for confirmation before initializing package', function (): void {
     Composer::fake();
 
     artisan('init', [
@@ -249,7 +249,7 @@ it('ask for confirmation before initializing package', function () {
         ->assertSuccessful();
 });
 
-it('uses git user/email for author by default', function () {
+it('uses git user/email for author by default', function (): void {
     Composer::fake();
 
     $testDirectory = setupTestDirectory();
@@ -283,7 +283,7 @@ it('uses git user/email for author by default', function () {
     assertFixtureEquals('composer-with_author.json.stub', join_paths($testDirectory, 'composer-with_author.json'));
 });
 
-test('invalid namespace', function () {
+test('invalid namespace', function (): void {
     artisan('init', [
         'vendor' => 'acme',
         'package' => 'package',
@@ -299,7 +299,7 @@ test('invalid namespace', function () {
         ->assertFailed();
 });
 
-it('excludes custom paths when processing files', function () {
+it('excludes custom paths when processing files', function (): void {
     $testDirectory = setupTestDirectory();
 
     moveFixture(['composer.json.stub', 'package.json.stub', 'LICENSE.md.stub'], $testDirectory);

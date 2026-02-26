@@ -89,19 +89,15 @@ class NamespaceReplacer extends Builder
             'kebab' => static::unwrapNamespace(static fn (Stringable $replacement) => $replacement->kebab()),
             'slug' => static::unwrapNamespace(static fn (Stringable $replacement) => $replacement->slug()),
             'camel' => static::unwrapNamespace(static fn (Stringable $replacement) => $replacement->camel()),
-            'escape' => static function (Stringable $replacement): Stringable {
-                return static::handleNamespaceSeparator(
-                    (string) $replacement,
-                    fn (string $namespace) => str_replace('\\', '\\\\', $namespace),
-                );
-            },
-            'reverse' => static function (Stringable $replacement): Stringable {
-                return static::handleNamespaceSeparator(
-                    (string) $replacement,
-                    fn (string $namespace) => str_replace('\\', '/', $namespace),
-                    fn (string $namespace) => str_replace('/', '\\', $namespace)
-                );
-            },
+            'escape' => static fn (Stringable $replacement): Stringable => static::handleNamespaceSeparator(
+                (string) $replacement,
+                fn (string $namespace) => str_replace('\\', '\\\\', $namespace),
+            ),
+            'reverse' => static fn (Stringable $replacement): Stringable => static::handleNamespaceSeparator(
+                (string) $replacement,
+                fn (string $namespace) => str_replace('\\', '/', $namespace),
+                fn (string $namespace) => str_replace('/', '\\', $namespace)
+            ),
         ];
     }
 

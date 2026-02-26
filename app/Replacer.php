@@ -252,7 +252,7 @@ final class Replacer
      */
     public function getModifiers(array $modifiers = []): array
     {
-        $availableModifiers = collect(static::getDefaultModifiers())->merge($this->modifiers);
+        $availableModifiers = collect(self::getDefaultModifiers())->merge($this->modifiers);
 
         if ($this->onlyWith === null) {
             $availableModifiers = collect();

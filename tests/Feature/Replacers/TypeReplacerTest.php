@@ -3,14 +3,14 @@
 use App\Replacers\Exceptions\InvalidPackageTypeException;
 use App\Replacers\TypeReplacer;
 
-it('replace placeholder', function (string $type) {
+it('replace placeholder', function (string $type): void {
     $replacer = TypeReplacer::make($type);
 
     expect($replacer)
         ->replace('type: {{type}}')->toBe("type: $type");
 })->with(InvalidPackageTypeException::$validTypes);
 
-it('replace placeholder with invalid type', function (string $type) {
+it('replace placeholder with invalid type', function (string $type): void {
     $replacer = TypeReplacer::make($type);
 })->throws(InvalidPackageTypeException::class, 'Invalid package type provided')->with([
     'none',
@@ -21,7 +21,7 @@ it('replace placeholder with invalid type', function (string $type) {
     'laravel',
 ]);
 
-test('cannot apply excluded modifier', function (string $modifier) {
+test('cannot apply excluded modifier', function (string $modifier): void {
     $replacer = TypeReplacer::make('php-ext');
 
     expect($replacer)

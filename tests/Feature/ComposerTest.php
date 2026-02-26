@@ -4,7 +4,7 @@ use App\Composer;
 use Illuminate\Process\PendingProcess;
 use Illuminate\Support\Facades\Process;
 
-it('runs composer require with dev flag', function () {
+it('runs composer require with dev flag', function (): void {
     $process = Process::fake([
         "'composer' 'require' 'pestphp/pest' '--dev'" => Process::result(),
     ]);
@@ -19,7 +19,7 @@ it('runs composer require with dev flag', function () {
         ->assertRanTimes(fn (PendingProcess $process) => $process->command === ['composer', 'require', 'pestphp/pest', '--dev']);
 });
 
-it('runs composer require with all dependencies flag', function () {
+it('runs composer require with all dependencies flag', function (): void {
     $process = Process::fake([
         "'composer' 'require' 'laravel/framework' '--with-all-dependencies'" => Process::result(),
     ]);
@@ -34,7 +34,7 @@ it('runs composer require with all dependencies flag', function () {
         ->assertRanTimes(fn (PendingProcess $process) => $process->command === ['composer', 'require', 'laravel/framework', '--with-all-dependencies']);
 });
 
-it('runs composer require without flags', function () {
+it('runs composer require without flags', function (): void {
     $process = Process::fake([
         "'composer' 'require' 'laravel/pint'" => Process::result(),
     ]);
@@ -49,7 +49,7 @@ it('runs composer require without flags', function () {
         ->assertRanTimes(fn (PendingProcess $process) => $process->command === ['composer', 'require', 'laravel/pint']);
 });
 
-it('runs composer require with multiple packages', function () {
+it('runs composer require with multiple packages', function (): void {
     $process = Process::fake([
         "'composer' 'require' 'laravel/pint' 'phpstan/phpstan'" => Process::result(),
     ]);
@@ -64,7 +64,7 @@ it('runs composer require with multiple packages', function () {
         ->assertRanTimes(fn (PendingProcess $process) => $process->command === ['composer', 'require', 'laravel/pint', 'phpstan/phpstan']);
 });
 
-it('returns false when composer require fails', function () {
+it('returns false when composer require fails', function (): void {
     $process = Process::fake([
         "'composer' 'require' 'invalid/package'" => Process::result(exitCode: 1),
     ]);
@@ -79,7 +79,7 @@ it('returns false when composer require fails', function () {
         ->assertRanTimes(fn (PendingProcess $process) => $process->command === ['composer', 'require', 'invalid/package']);
 });
 
-it('uses custom working directory', function () {
+it('uses custom working directory', function (): void {
     $process = Process::fake([
         "'composer' 'require' 'laravel/pint'" => Process::result(),
     ]);
@@ -90,13 +90,11 @@ it('uses custom working directory', function () {
     $composer->require('laravel/pint');
 
     expect($process)
-        ->assertRanTimes(function (PendingProcess $process) use ($customPath) {
-            return $process->path === $customPath
-                && $process->command === ['composer', 'require', 'laravel/pint'];
-        });
+        ->assertRanTimes(fn (PendingProcess $process) => $process->path === $customPath
+            && $process->command === ['composer', 'require', 'laravel/pint']);
 });
 
-it('handles both dev and with-all-dependencies flags together', function () {
+it('handles both dev and with-all-dependencies flags together', function (): void {
     $process = Process::fake([
         "'composer' 'require' 'symfony/console' '--dev' '--with-all-dependencies'" => Process::result(),
     ]);

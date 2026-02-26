@@ -3,14 +3,14 @@
 use App\Replacers\Exceptions\InvalidNamespaceException;
 use App\Replacers\NamespaceReplacer;
 
-it('replace namespace placeholder', function () {
+it('replace namespace placeholder', function (): void {
     $replacer = NamespaceReplacer::make('Coyotito\\PackageSkeleton');
 
     expect($replacer)
         ->replace('Namespace: {{namespace}}')->toBe('Namespace: Coyotito\\PackageSkeleton');
 });
 
-it('throw and error on invalid namespace format', function (string $namespace) {
+it('throw and error on invalid namespace format', function (string $namespace): void {
     expect(fn () => NamespaceReplacer::make($namespace))
         ->toThrow(InvalidNamespaceException::class);
 })->with([
@@ -19,7 +19,7 @@ it('throw and error on invalid namespace format', function (string $namespace) {
     'single forward slash' => ['Coyotito/PackageSkeleton'],
 ]);
 
-it('replace namespace placeholder with modifiers', function (string $modifier, string $expected) {
+it('replace namespace placeholder with modifiers', function (string $modifier, string $expected): void {
     $replacer = NamespaceReplacer::make('Coyotito\\PackageSkeleton');
 
     expect($replacer)
@@ -36,14 +36,14 @@ it('replace namespace placeholder with modifiers', function (string $modifier, s
     'reverse' => ['reverse', 'Coyotito/PackageSkeleton'],
 ]);
 
-test('cannot apply excluded modifier', function () {
+test('cannot apply excluded modifier', function (): void {
     $replacer = NamespaceReplacer::make('Coyotito\\PackageSkeleton');
 
     expect($replacer)
         ->replace('Namespace Acronym: {{namespace|acronym}}')->toBe('Namespace Acronym: Coyotito\\PackageSkeleton');
 });
 
-it('replace namespace placeholder with multiple modifiers', function (array $modifiers, string $expected) {
+it('replace namespace placeholder with multiple modifiers', function (array $modifiers, string $expected): void {
     $replacer = NamespaceReplacer::make('Coyotito\\PackageSkeleton');
 
     $modifiersList = implode(',', $modifiers);

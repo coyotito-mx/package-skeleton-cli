@@ -24,6 +24,7 @@ class TypeReplacer extends Builder
     /**
      * Configure replacement behavior for package types.
      */
+    #[\Override]
     protected function configure(): Replacer
     {
         $this->replacer

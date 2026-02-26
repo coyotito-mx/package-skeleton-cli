@@ -13,6 +13,7 @@ class LicenseDescriptionReplacer extends Builder
 {
     protected static string $placeholder = 'license-description';
 
+    #[\Override]
     public function getExcludedModifiers(): array
     {
         return ['snake', 'kebab', 'camel', 'slug', 'acronym'];
