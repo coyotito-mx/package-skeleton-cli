@@ -28,14 +28,14 @@ function moveFixture(string|array $fixtureName, string $destinationPath): void
         return;
     }
 
-    $sourcePath = join_paths(__DIR__, '..', '..', 'Fixtures', 'before', $fixtureName);
+    $sourcePath = fixture_path('before'.DIRECTORY_SEPARATOR.$fixtureName);
 
     copy($sourcePath, $destinationPath.DIRECTORY_SEPARATOR.str_replace('.stub', '', $fixtureName));
 }
 
 function assertFixtureEquals(string $fixtureName, string $actualPath): void
 {
-    $expectedPath = join_paths(__DIR__, '..', '..', 'Fixtures', 'after', $fixtureName);
+    $expectedPath = fixture_path('after'.DIRECTORY_SEPARATOR.$fixtureName);
 
     if (! file_exists($expectedPath)) {
         throw new InvalidArgumentException("Expected fixture file does not exist: {$expectedPath}");
@@ -53,7 +53,7 @@ function assertFixtureEquals(string $fixtureName, string $actualPath): void
 
 function assertFixtureNotEquals(string $fixtureName, string $actualPath): void
 {
-    $expectedPath = join_paths(__DIR__, '..', '..', 'Fixtures', 'after', $fixtureName);
+    $expectedPath = fixture_path('after'.DIRECTORY_SEPARATOR.$fixtureName);
 
     if (! file_exists($expectedPath)) {
         throw new InvalidArgumentException("Expected fixture file does not exist: {$expectedPath}");

@@ -55,6 +55,11 @@ function temp_path(string $suffix = ''): string
     return $path;
 }
 
+function fixture_path(string $path): string
+{
+    return join_paths(base_path('fixtures'), $path);
+}
+
 if (! function_exists('artisan')) {
     /**
      * Helper function to interact with the Artisan console for testing
