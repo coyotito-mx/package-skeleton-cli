@@ -21,12 +21,10 @@ use App\Replacers\YearReplacer;
 use Exception;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
 use LaravelZero\Framework\Commands\Command;
-use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
 use function Illuminate\Filesystem\join_paths;
@@ -393,27 +391,11 @@ class PackageCommand extends Command implements PromptsForMissingInput
      */
     private function getFilesToProcess(): array
     {
-        return $this->findFiles($this->getPath())
+        return \App\Helpers\allFiles($this->getPath())
             ->filter(fn (SplFileInfo $file) => ! $this->shouldExcludeFile($file))
             ->map(fn (SplFileInfo $file): string => $file->getRealPath())
             ->values()
             ->all();
-    }
-
-    /**
-     * Find all files in the given directory, excluding paths defined in getExcludedPaths().
-     *
-     * @return Collection<SplFileInfo>
-     */
-    private function findFiles(string $directory): Collection
-    {
-        $iter = Finder::create()
-            ->in($directory)
-            ->files()
-            ->ignoreDotFiles(true)
-            ->getIterator();
-
-        return collect(iterator_to_array($iter));
     }
 
     /**

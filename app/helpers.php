@@ -2,6 +2,12 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Collection;
+use SplFileInfo;
+use Symfony\Component\Finder\Finder;
+
+use function Illuminate\Filesystem\join_paths;
+
 /**
  * Recursively delete a directory and its contents
  *
@@ -36,4 +42,37 @@ function rmdir_recursive(string $dir): void
     closedir($handler);
 
     rmdir($dir);
+}
+
+/**
+ * Get all the files in a directory recursively
+ *
+ * @param  string  $directory  The directory to search
+ * @param  bool  $ignoreDotFiles  Whether to ignore dotfiles (files starting with a dot)
+ * @return Collection<SplFileInfo>
+ */
+function allFiles(string $directory, bool $ignoreDotFiles = false): Collection
+{
+    $files = Finder::create()
+        ->in($directory)
+        ->ignoreDotFiles($ignoreDotFiles)
+        ->files();
+
+    return collect(iterator_to_array($files));
+}
+
+/**
+ * Get all the files and folders in a directory (non-recursively)
+ *
+ * @param  string  $directory  The directory to search
+ * @param  bool  $ignoreDotFiles  Whether to ignore dotfiles (files starting with a dot)
+ * @return Collection<SplFileInfo>
+ */
+function entries(string $directory, bool $ignoreDotFiles = false): Collection
+{
+    return collect([
+        ...(glob(join_paths($directory, '*')) ?: []),
+        ...($ignoreDotFiles ? [] : (glob(join_paths($directory, '.*')) ?: [])),
+    ])
+        ->map(fn (string $path) => new SplFileInfo($path));
 }
