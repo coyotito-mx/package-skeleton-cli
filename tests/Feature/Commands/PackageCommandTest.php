@@ -11,15 +11,11 @@ use function PHPUnit\Framework\assertFileExists;
 
 function setupTestDirectory(): string
 {
-    $function = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function'];
+    $testDirectory = temp_path('package-init-command-tests').DIRECTORY_SEPARATOR.uniqid();
 
-    $name = sha1($function);
+    ensureFolderExists($testDirectory);
 
-    $path = join_paths(base_path('tests'), 'temp', $name);
-
-    ensureFolderExists($path);
-
-    return $path;
+    return $testDirectory;
 }
 
 function moveFixture(string|array $fixtureName, string $destinationPath): void
@@ -78,7 +74,6 @@ beforeAll(function (): void {
 });
 
 afterAll(function (): void {
-    rmdir_recursive(base_path('tests'.DIRECTORY_SEPARATOR.'temp'));
 
     Carbon::setTestNow();
 });
@@ -116,6 +111,7 @@ it('init package', function (): void {
 
 it('init package using namespace', function (): void {
     Composer::fake();
+    $testDirectory = setupTestDirectory();
 
     artisan('init', [
         'vendor' => 'acme',
@@ -123,7 +119,7 @@ it('init package using namespace', function (): void {
         'author' => 'John Doe',
         'email' => 'john@doe.com',
         'description' => 'A package description',
-        '--path' => setupTestDirectory(),
+        '--path' => $testDirectory,
     ])
         ->expectsQuestion('Enter the package namespace', 'Asciito\\Package')
         ->expectsConfirmation('Do you want to proceed with this configuration?', 'yes')
@@ -133,7 +129,7 @@ it('init package using namespace', function (): void {
         ->expectsPromptsOutro('Package [Asciito\\Package] initialized successfully!')
         ->assertSuccessful();
 
-    assertFileExists(join_paths(setupTestDirectory(), 'LICENSE.md'));
+    assertFileExists(join_paths($testDirectory, 'LICENSE.md'));
 });
 
 it('proceed without confirmation', function (): void {

@@ -13,6 +13,8 @@
 
 use Illuminate\Testing\PendingCommand;
 
+use function Illuminate\Filesystem\join_paths;
+
 uses(Tests\TestCase::class)->in('Feature');
 
 /*
@@ -42,6 +44,15 @@ function ensureFolderExists(string $folder): void
     if (! file_exists($folder)) {
         mkdir($folder, 0755, true);
     }
+}
+
+function temp_path(string $suffix = ''): string
+{
+    $path = join_paths(base_path('tests'), 'temp', $suffix);
+
+    ensureFolderExists($path);
+
+    return $path;
 }
 
 if (! function_exists('artisan')) {
