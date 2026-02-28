@@ -20,7 +20,9 @@ use App\Replacers\VersionReplacer;
 use App\Replacers\YearReplacer;
 use Exception;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
+use Illuminate\Process\PendingProcess;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
@@ -56,6 +58,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
                             { author : The package author (prompted if not provided) }
                             { email : The package author email (prompted if not provided) }
                             { description : The package description (optional) }
+                            { --bootstrap= : Bootstrap a package skeleton (laravel|vanilla) }
                             { --proceed : Accept the configuration and proceed without confirmation }
                             { --no-install : Skip installing composer dependencies }
                             { --path= : The path to initialize the package in (defaults to current working directory) }
@@ -392,7 +395,8 @@ class PackageCommand extends Command implements PromptsForMissingInput
      */
     private function getFilesToProcess(): array
     {
-        return collect($this->findFiles($this->getPath()))
+        return $this->findFiles($this->getPath())
+            ->filter(fn (SplFileInfo $file) => ! $this->shouldExcludeFile($file))
             ->map(fn (SplFileInfo $file): string => $file->getRealPath())
             ->values()
             ->all();
@@ -401,19 +405,17 @@ class PackageCommand extends Command implements PromptsForMissingInput
     /**
      * Find all files in the given directory, excluding paths defined in getExcludedPaths().
      *
-     * @return SplFileInfo[]
+     * @return Collection<SplFileInfo>
      */
-    private function findFiles(string $directory): array
+    private function findFiles(string $directory): Collection
     {
-        $finder = Finder::create()
+        $iter = Finder::create()
             ->in($directory)
             ->files()
             ->ignoreDotFiles(true)
-            ->filter(fn (SplFileInfo $file) => ! $this->shouldExcludeFile($file))
-            ->sortByName()
             ->getIterator();
 
-        return iterator_to_array($finder);
+        return collect(iterator_to_array($iter));
     }
 
     /**
@@ -517,6 +519,22 @@ class PackageCommand extends Command implements PromptsForMissingInput
         File::copy(join_paths(app()->basePath(), 'stubs', 'LICENSE.stub'), $licensePath);
 
         info('LICENSE file created successfully!');
+    }
+
+    protected function shouldBootstrap(): bool
+    {
+        return $this->option('bootstrap') && ($this->findFiles($this->getPath())
+            ->filter(fn (SplFileInfo $file): bool => $file->getBasename() === config('app.name'))
+            ->isNotEmpty() || confirm('Bootstrap folder is not empty. Should we continue?'));
+    }
+
+    protected function makeProcess(string|array $command, string|array $arguments = [], ?string $cwd = null): PendingProcess
+    {
+        $command = Arr::wrap($command);
+        $arguments = Arr::wrap($arguments);
+
+        return Process::command(array_merge($command, $arguments))
+            ->when($cwd, fn (PendingProcess $process) => $process->path($cwd));
     }
 
     /**
