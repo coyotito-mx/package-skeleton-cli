@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Commands;
 
+use App\Commands\Concerns\InteractsWithBinaryRemoval;
 use App\Contracts\ComposerContract;
 use App\Downloaders\Exceptions\DownloaderException;
 use App\Downloaders\Exceptions\DownloadException;
@@ -48,6 +49,8 @@ use function Laravel\Prompts\warning;
 
 class PackageCommand extends Command implements PromptsForMissingInput
 {
+    use InteractsWithBinaryRemoval;
+
     /**
      * The name and signature of the console command.
      *
@@ -122,6 +125,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -206,7 +210,29 @@ class PackageCommand extends Command implements PromptsForMissingInput
 
         $this->displaySuccessMessage();
 
+        $this->promptForCliRemoval();
+
         return self::SUCCESS;
+    }
+
+    /**
+     * Prompt the user to confirm if they want to remove the CLI executable
+     */
+    protected function promptForCliRemoval(): void
+    {
+        if (! confirm('Do you want to remove this CLI now?', default: false)) {
+            return;
+        }
+
+        try {
+            if ($this->deleteBinary()) {
+                info('CLI executable removed successfully.');
+            } else {
+                warning('CLI executable could not be removed. Please remove it manually.');
+            }
+        } catch (\RuntimeException $e) {
+            warning($e->getMessage());
+        }
     }
 
     protected function bootstrapPackage(string $skeleton, bool $force = false): void

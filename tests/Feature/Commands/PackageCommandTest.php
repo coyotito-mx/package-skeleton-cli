@@ -107,6 +107,7 @@ it('init package', function (): void {
         ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
         ->expectsPromptsAlert('Installing composer dependencies...')
         ->expectsPromptsOutro('Package [Acme\\Package] initialized successfully!')
+        ->expectsConfirmation('Do you want to remove this CLI now?', 'no')
         ->assertSuccessful();
 
     assertFixtureEquals('LICENSE.md.stub', join_paths($testDirectory, 'LICENSE.md'));
@@ -132,6 +133,7 @@ it('init package using namespace', function (): void {
         ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
         ->expectsPromptsIntro('Initializing package...')
         ->expectsPromptsOutro('Package [Asciito\\Package] initialized successfully!')
+        ->expectsConfirmation('Do you want to remove this CLI now?', 'no')
         ->assertSuccessful();
 
     assertFileExists(join_paths($testDirectory, 'LICENSE.md'));
@@ -155,6 +157,7 @@ it('proceed without confirmation', function (): void {
         ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
         ->expectsPromptsAlert('Installing composer dependencies...')
         ->expectsPromptsOutro('Package [Acme\\Package] initialized successfully!')
+        ->expectsConfirmation('Do you want to remove this CLI now?', 'no')
         ->assertSuccessful();
 });
 
@@ -178,6 +181,7 @@ it('skip license creation', function (): void {
         ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
         ->expectsPromptsAlert('Installing composer dependencies...')
         ->expectsPromptsOutro('Package [Acme\\Package] initialized successfully!')
+        ->expectsConfirmation('Do you want to remove this CLI now?', 'no')
         ->assertSuccessful();
 
     assertFileDoesNotExist(join_paths($testDirectory, 'LICENSE.md'), 'License file should not be created');
@@ -200,6 +204,7 @@ it('install package composer dependencies', function (): void {
         ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
         ->expectsPromptsAlert('Installing composer dependencies...')
         ->expectsPromptsOutro('Package [Acme\\Package] initialized successfully!')
+        ->expectsConfirmation('Do you want to remove this CLI now?', 'no')
         ->assertSuccessful();
 
     $composer->assertPackageInstalled('pestphp/pest', true);
@@ -222,6 +227,7 @@ it('skip composer dependencies installation', function (): void {
     ])
         ->expectsPromptsWarning('Skip composer dependencies installation.')
         ->expectsOutputToContain('Package [Acme\\Package] initialized successfully!')
+        ->expectsConfirmation('Do you want to remove this CLI now?', 'no')
         ->assertSuccessful();
 
     $composer->assertNothingInstalled();
@@ -247,6 +253,7 @@ it('ask for confirmation before initializing package', function (): void {
         )
         ->expectsConfirmation('Do you want to proceed with this configuration?', 'yes')
         ->expectsOutputToContain('Package [Acme\\Package] initialized successfully!')
+        ->expectsConfirmation('Do you want to remove this CLI now?', 'no')
         ->assertSuccessful();
 });
 
@@ -278,6 +285,7 @@ it('uses git user/email for author by default', function (): void {
             [['Acme', 'Package', 'Acme\\Package', 'A package description', 'John Doe', 'john@doe.com']]
         )
         ->expectsOutputToContain('Package [Acme\\Package] initialized successfully!')
+        ->expectsConfirmation('Do you want to remove this CLI now?', 'no')
         ->assertSuccessful();
 
     assertFixtureEquals('LICENSE.md.stub', join_paths($testDirectory, 'LICENSE.md'));
@@ -335,6 +343,7 @@ it('excludes custom paths when processing files', function (): void {
             ]]
         )
         ->expectsOutputToContain('Package [Acme\\Package] initialized successfully!')
+        ->expectsConfirmation('Do you want to remove this CLI now?', 'no')
         ->assertSuccessful();
 
     assertFixtureNotEquals('composer.json.stub', join_paths($testDirectory, 'composer.json'));
@@ -384,6 +393,7 @@ it('bootstrap vanilla skeleton', function (): void {
             [['Acme', 'Package', 'Acme\\Package', 'A package description', 'John Doe', 'john@doe.com']]
         )
         ->expectsOutputToContain('Package [Acme\\Package] initialized successfully!')
+        ->expectsConfirmation('Do you want to remove this CLI now?', 'no')
         ->assertSuccessful();
 
     expect(File::files($testDirectory))
@@ -463,6 +473,7 @@ it('bootstraps existing directory when force flag is provided', function (): voi
         ->expectsPromptsAlert('Bootstrapping package using skeleton: vanilla...')
         ->expectsPromptsAlert('Proceeding with bootstrapping and overwriting existing files...')
         ->expectsOutputToContain('Package [Acme\\Package] initialized successfully!')
+        ->expectsConfirmation('Do you want to remove this CLI now?', 'no')
         ->assertSuccessful();
 
     expect(join_paths($testDirectory, 'composer.json'))->toBeFile();
