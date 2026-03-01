@@ -27,18 +27,6 @@ function invokeDownloaderMethod(PackageSkeletonDownloader $downloader, string $m
     )(...$arguments);
 }
 
-function createZipWithFile(string $zipPath, string $entry, string $contents): void
-{
-    $zip = new ZipArchive;
-
-    if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
-        throw new RuntimeException("Unable to create zip file at {$zipPath}");
-    }
-
-    $zip->addFromString($entry, $contents);
-    $zip->close();
-}
-
 it('resolves skeleton metadata for supported skeletons', function (string $skeleton, string $repository): void {
     $downloader = new PackageSkeletonDownloader;
 

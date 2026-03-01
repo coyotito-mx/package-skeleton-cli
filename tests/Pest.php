@@ -60,6 +60,31 @@ function fixture_path(string $path): string
     return join_paths(base_path('fixtures'), $path);
 }
 
+function createZipWithFile(string $zipPath, string|array $entries): void
+{
+    $zip = new ZipArchive;
+
+    if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+        throw new RuntimeException("Unable to create zip file at {$zipPath}");
+    }
+
+    if (is_array($entries)) {
+        foreach ($entries as $entry => $contents) {
+            if (is_int($entry)) {
+                $entry = $contents;
+
+                $contents = '';
+            }
+
+            $zip->addFromString($entry, $contents);
+        }
+    } else {
+        $zip->addFromString($entries, '');
+    }
+
+    $zip->close();
+}
+
 if (! function_exists('artisan')) {
     /**
      * Helper function to interact with the Artisan console for testing
