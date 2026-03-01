@@ -4,7 +4,7 @@
 ![Release Version](https://img.shields.io/github/v/release/coyotito-mx/package-skeleton-cli?label=Release%20Version&color=2cbe4e&labelColor=444d56)
 ![macOS ARM only](https://shields.io/badge/MacOS--9cf?logo=Apple&style=social)
 
-The **Package Skeleton CLI** is command-line interface that allows you to initialize a PHP package skeleton by replacing all the placeholders in the files with the values you provide.
+The **Package Skeleton CLI** is a command-line interface that allows you to initialize a PHP package skeleton by replacing placeholders in files with the values you provide.
 
 ## Installation
 
@@ -38,7 +38,7 @@ mv skeleton /usr/local/bin/
 ## Usage
 
 > ✅
-> The CLI initializes packages in the **current working directory** or a specified `--path`. You don't need bootstrap templates; just ensure you have files with the placeholders you want to replace.
+> The CLI initializes packages in the **current working directory** or a specified `--path`. You can initialize from existing files or bootstrap from a template using `--bootstrap`.
 
 The [placeholders](#placeholders-and-modifiers) must follow the format: `{{placeholder}}`. You can apply modifiers to format values before replacement:
 
@@ -97,6 +97,21 @@ To exclude specific files/directories from processing:
 skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
   --exclude="composer.json" \
   --exclude="package.json"
+```
+
+To bootstrap from a skeleton template (`vanilla` or `laravel`):
+
+```bash
+skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
+  --bootstrap=vanilla
+```
+
+To force bootstrapping into a non-empty directory:
+
+```bash
+skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
+  --bootstrap=laravel \
+  --force
 ```
 
 ### Placeholders and Modifiers
@@ -162,7 +177,7 @@ skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
 
 ```bash
 SYNOPSIS
-  php skeleton init [options] [--] <vendor> <package> <namespace> <author> <email> <description>
+  skeleton init [options] [--] <vendor> <package> <namespace> <author> <email> <description>
 
 Arguments
   vendor                   The name of the package vendor (prompted if not provided)
@@ -173,6 +188,8 @@ Arguments
   description              The package description (prompted if not provided)
 
 Options
+  --bootstrap[=BOOTSTRAP]  Initialize a new package from skeleton template (options: laravel, vanilla)
+  --force                  Force bootstrapping even if target directory is not empty (use with --bootstrap)
       --proceed            Accept the configuration and proceed without confirmation
       --no-install         Skip installing composer dependencies
       --skip-license       Skip creating a LICENSE file if one does not exist
@@ -228,6 +245,16 @@ The selected framework's dev dependencies will be automatically installed.
 
 If `--no-install` is used, this prompt is skipped and no testing framework dependencies are installed.
 
+### CLI Removal Prompt
+
+At the end of a successful `init` run, the CLI always asks:
+
+```text
+Do you want to remove this CLI now?
+```
+
+If you answer `yes`, the CLI removes the invoked executable file. If it cannot resolve or delete that executable, it shows a warning and continues.
+
 ## Examples
 
 ### Example 1: Initialize with all prompted values
@@ -251,6 +278,8 @@ Which testing framework do you want to use? [pest/phpunit]: pest
 ...
 
 Package [Acme\Blog] initialized successfully!
+
+Do you want to remove this CLI now?: No
 ```
 
 ### Example 2: Initialize with all arguments provided
