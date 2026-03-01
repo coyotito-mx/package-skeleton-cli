@@ -119,7 +119,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
     {
         $this->downloader = $app->make(PackageSkeletonDownloader::class);
 
-        return parent::__construct();
+        parent::__construct();
     }
 
     /**

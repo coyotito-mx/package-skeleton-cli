@@ -151,7 +151,7 @@ it('decompresses a valid zip into destination directory', function (): void {
     $zipPath = join_paths($directory, 'package-skeleton-main.zip');
 
     try {
-        createZipWithFile($zipPath, 'package-skeleton-main/README.md', 'ok');
+        createZipWithFile($zipPath, 'package-skeleton-main/README.md');
 
         invokeDownloaderMethod($downloader, 'decompress', $zipPath);
 
@@ -186,7 +186,7 @@ it('throws when zip cannot be extracted due to destination permissions', functio
     $zipPath = join_paths($directory, 'readonly-main.zip');
 
     try {
-        createZipWithFile($zipPath, 'readonly-main/README.md', 'ok');
+        createZipWithFile($zipPath, 'readonly-main/README.md');
 
         chmod($directory, 0555);
 
@@ -210,7 +210,7 @@ it('downloads and decompresses skeleton', function (): void {
             $outputPath = $command[array_search('-o', $command, true) + 1] ?? null;
 
             if (is_string($outputPath)) {
-                createZipWithFile($outputPath, 'package-skeleton-main/README.md', 'ok');
+                createZipWithFile($outputPath, 'package-skeleton-main/README.md');
             }
 
             return Process::result();
@@ -242,7 +242,7 @@ it('download throws exception when zip root folder does not match github naming 
             $outputPath = $command[array_search('-o', $command, true) + 1] ?? null;
 
             if (is_string($outputPath)) {
-                createZipWithFile($outputPath, 'unexpected-root/README.md', 'ok');
+                createZipWithFile($outputPath, 'unexpected-root/README.md');
             }
 
             return Process::result();

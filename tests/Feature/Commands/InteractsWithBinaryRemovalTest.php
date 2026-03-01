@@ -10,7 +10,7 @@ function makeCliRemovalProbe(
     ?\Closure $resolveRunningPharPath = null,
     ?\Closure $runningPharFromRuntime = null,
 ): object {
-    return new class($resolveExecutable, $isRunningFromPhar, $resolveRunningPharPath, $runningPharFromRuntime)
+    return new readonly class($resolveExecutable, $isRunningFromPhar, $resolveRunningPharPath, $runningPharFromRuntime)
     {
         use InteractsWithBinaryRemoval {
             resolveExecutablePathFromInvocation as private traitResolveExecutablePathFromInvocation;
@@ -20,10 +20,10 @@ function makeCliRemovalProbe(
         }
 
         public function __construct(
-            private readonly ?\Closure $resolveExecutable,
-            private readonly ?\Closure $isRunningFromPhar,
-            private readonly ?\Closure $resolveRunningPharPath,
-            private readonly ?\Closure $runningPharFromRuntime,
+            private ?\Closure $resolveExecutable,
+            private ?\Closure $isRunningFromPhar,
+            private ?\Closure $resolveRunningPharPath,
+            private ?\Closure $runningPharFromRuntime,
         ) {
             //
         }

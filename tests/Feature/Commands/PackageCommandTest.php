@@ -407,7 +407,7 @@ it('bootstrap vanilla skeleton', function (): void {
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 });
 
-it('cannot bootstrap skeleton with existing files', function () {
+it('cannot bootstrap skeleton with existing files', function (): void {
     $testDirectory = setupTestDirectory();
 
     File::put(join_paths($testDirectory, 'existing.txt'), 'This file already exists');
