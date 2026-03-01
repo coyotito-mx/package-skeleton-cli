@@ -1,7 +1,13 @@
 {
     "name": "asciito/skeleton",
     "description": "The skeleton CLI init/bootstrap a package",
-    "keywords": ["framework", "laravel", "laravel zero", "console", "cli"],
+    "keywords": [
+        "framework",
+        "laravel",
+        "laravel zero",
+        "console",
+        "cli"
+    ],
     "type": "project",
     "license": "MIT",
     "authors": [
@@ -40,8 +46,9 @@
     },
     "scripts": {
         "test": [
-            "@php skeleton test --parallel"
+            "@php vendor/bin/pest"
         ],
+        "test:ci": "@test --ci",
         "lint": "@php phpstan analyse --memory-limit=1G",
         "style": "@php pint --test",
         "style:fix": "@php pint",
@@ -70,5 +77,7 @@
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
-    "bin": ["skeleton"]
+    "bin": [
+        "skeleton"
+    ]
 }

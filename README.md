@@ -322,13 +322,13 @@ Check code standards with:
 
 ```bash
 composer lint         # Run PHPStan (level 5)
-composer style:test   # Check code formatting with Pint
+composer style        # Check code formatting with Pint
 ```
 
 Fix code formatting:
 
 ```bash
-composer style        # Auto-fix code formatting
+composer fix           # Auto-fix code formatting
 ```
 
 ## License
