@@ -182,10 +182,6 @@ final class PackageSkeletonDownloader
         foreach ($files as $file) {
             $path = $file->getPathname();
 
-            if (in_array(basename($path), ['.', '..'], true)) {
-                continue;
-            }
-
             if ($file->isFile() || $file->isLink()) {
                 unlink($path);
 
