@@ -25,8 +25,9 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
 use LaravelZero\Framework\Commands\Command;
-use Symfony\Component\Finder\SplFileInfo;
+use SplFileInfo;
 
+use function App\Helpers\entries;
 use function Illuminate\Filesystem\join_paths;
 use function Laravel\Prompts\alert;
 use function Laravel\Prompts\confirm;
