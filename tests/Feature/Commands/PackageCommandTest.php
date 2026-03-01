@@ -1,10 +1,14 @@
 <?php
 
 use App\Facades\Composer;
+use Illuminate\Process\FakeProcessResult;
+use Illuminate\Process\PendingProcess;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 use PHPUnit\Framework as PHPUnit;
 
+use function App\Helpers\rmdir_recursive;
 use function Illuminate\Filesystem\join_paths;
 use function PHPUnit\Framework\assertFileDoesNotExist;
 use function PHPUnit\Framework\assertFileExists;
@@ -74,6 +78,7 @@ beforeAll(function (): void {
 });
 
 afterAll(function (): void {
+    rmdir_recursive(temp_path('package-init-command-tests'));
 
     Carbon::setTestNow();
 });
@@ -335,4 +340,148 @@ it('excludes custom paths when processing files', function (): void {
     assertFixtureNotEquals('composer.json.stub', join_paths($testDirectory, 'composer.json'));
     assertFixtureNotEquals('package.json.stub', join_paths($testDirectory, 'package.json'));
     assertFixtureEquals('LICENSE.md.stub', join_paths($testDirectory, 'LICENSE.md'));
+});
+
+it('bootstrap vanilla skeleton', function (): void {
+    $testDirectory = setupTestDirectory();
+
+    Process::fake([
+        function (PendingProcess $process): FakeProcessResult {
+            $command = is_array($process->command) ? $process->command : [(string) $process->command];
+            $outputPath = $command[array_search('-o', $command, true) + 1] ?? null;
+
+            if (is_string($outputPath)) {
+                createZipWithFile($outputPath, [
+                    'package-skeleton-main/composer.json' => json_encode([
+                        'name' => '{{namespace|reverse,lower}}',
+                        'description' => '{{description}}',
+                    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES),
+                ]);
+            }
+
+            return Process::result();
+        },
+    ]);
+
+    artisan('init', [
+        'vendor' => 'acme',
+        'package' => 'package',
+        'namespace' => 'Acme\\Package',
+        'author' => 'John Doe',
+        'email' => 'john@doe.com',
+        'description' => 'A package description',
+        '--no-install' => true,
+        '--proceed' => true,
+        '--skip-license' => true,
+        '--path' => $testDirectory,
+        '--bootstrap' => 'vanilla',
+    ])
+        ->expectsPromptsAlert('Bootstrapping package using skeleton: vanilla...')
+        ->doesntExpectOutput('Proceeding with bootstrapping and overwriting existing files...')
+        ->doesntExpectOutput('Some files could not be moved during the bootstrapping process.')
+        ->expectsPromptsTable(
+            ['Vendor', 'Package', 'Namespace', 'Description', 'Author', 'Email'],
+            [['Acme', 'Package', 'Acme\\Package', 'A package description', 'John Doe', 'john@doe.com']]
+        )
+        ->expectsOutputToContain('Package [Acme\\Package] initialized successfully!')
+        ->assertSuccessful();
+
+    expect(File::files($testDirectory))
+        ->not->toBeEmpty()
+        ->and(join_paths($testDirectory, 'composer.json'))
+        ->toBeFile()
+        ->and(file_get_contents(join_paths($testDirectory, 'composer.json')))
+        ->toBe(json_encode([
+            'name' => 'acme/package',
+            'description' => 'A package description',
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+});
+
+it('cannot bootstrap skeleton with existing files', function () {
+    $testDirectory = setupTestDirectory();
+
+    File::put(join_paths($testDirectory, 'existing.txt'), 'This file already exists');
+
+    artisan('init', [
+        'vendor' => 'acme',
+        'package' => 'package',
+        'namespace' => 'Acme\\Package',
+        'author' => 'John Doe',
+        'email' => 'john@doe.com',
+        'description' => 'A package description',
+        '--bootstrap' => 'vanilla',
+        '--no-install' => true,
+        '--proceed' => true,
+        '--skip-license' => true,
+        '--path' => $testDirectory,
+    ])
+        ->expectsConfirmation('The target directory is not empty. Do you want to proceed and overwrite existing files?')
+        ->expectsPromptsAlert('Bootstrapping package using skeleton: vanilla...')
+        ->doesntExpectOutput('Proceeding with bootstrapping and overwriting existing files...')
+        ->doesntExpectOutput('Some files could not be moved during the bootstrapping process.')
+        ->expectsPromptsError('Package bootstrapping cancelled by user due to non-empty target directory.')
+        ->assertFailed();
+});
+
+it('bootstraps existing directory when force flag is provided', function (): void {
+    $testDirectory = setupTestDirectory();
+
+    File::put(join_paths($testDirectory, 'existing.txt'), 'This file already exists');
+
+    Process::fake([
+        function (PendingProcess $process): FakeProcessResult {
+            $command = is_array($process->command) ? $process->command : [(string) $process->command];
+            $outputPath = $command[array_search('-o', $command, true) + 1] ?? null;
+
+            if (is_string($outputPath)) {
+                createZipWithFile($outputPath, [
+                    'package-skeleton-main/composer.json' => json_encode([
+                        'name' => '{{namespace|reverse,lower}}',
+                        'description' => '{{description}}',
+                    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES),
+                ]);
+            }
+
+            return Process::result();
+        },
+    ]);
+
+    artisan('init', [
+        'vendor' => 'acme',
+        'package' => 'package',
+        'namespace' => 'Acme\\Package',
+        'author' => 'John Doe',
+        'email' => 'john@doe.com',
+        'description' => 'A package description',
+        '--bootstrap' => 'vanilla',
+        '--force' => true,
+        '--no-install' => true,
+        '--proceed' => true,
+        '--skip-license' => true,
+        '--path' => $testDirectory,
+    ])
+        ->expectsPromptsAlert('Bootstrapping package using skeleton: vanilla...')
+        ->expectsPromptsAlert('Proceeding with bootstrapping and overwriting existing files...')
+        ->expectsOutputToContain('Package [Acme\\Package] initialized successfully!')
+        ->assertSuccessful();
+
+    expect(join_paths($testDirectory, 'composer.json'))->toBeFile();
+});
+
+it('fails when bootstrap skeleton type is unsupported', function (): void {
+    artisan('init', [
+        'vendor' => 'acme',
+        'package' => 'package',
+        'namespace' => 'Acme\\Package',
+        'author' => 'John Doe',
+        'email' => 'john@doe.com',
+        'description' => 'A package description',
+        '--bootstrap' => 'unknown',
+        '--no-install' => true,
+        '--proceed' => true,
+        '--skip-license' => true,
+        '--path' => setupTestDirectory(),
+    ])
+        ->expectsPromptsError('Unsupported skeleton type: unknown')
+        ->assertFailed();
 });

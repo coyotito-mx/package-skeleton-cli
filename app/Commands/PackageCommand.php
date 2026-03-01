@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Commands;
 
 use App\Contracts\ComposerContract;
+use App\Downloaders\Exceptions\DownloaderException;
+use App\Downloaders\Exceptions\DownloadException;
+use App\Downloaders\PackageSkeletonDownloader;
 use App\Facades\Composer;
 use App\Replacers\AuthorReplacer;
 use App\Replacers\Builder;
@@ -20,6 +23,7 @@ use App\Replacers\VersionReplacer;
 use App\Replacers\YearReplacer;
 use Exception;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
@@ -56,6 +60,8 @@ class PackageCommand extends Command implements PromptsForMissingInput
                             { author : The package author (prompted if not provided) }
                             { email : The package author email (prompted if not provided) }
                             { description : The package description (optional) }
+                            { --bootstrap= : Initialize a new package (options: laravel, vanilla) }
+                            { --force : Force bootstrapping even if the target directory is not empty (use with --bootstrap) }
                             { --proceed : Accept the configuration and proceed without confirmation }
                             { --no-install : Skip installing composer dependencies }
                             { --path= : The path to initialize the package in (defaults to current working directory) }
@@ -68,6 +74,8 @@ class PackageCommand extends Command implements PromptsForMissingInput
      * @var string
      */
     protected $description = 'Initialize a new package structure';
+
+    protected PackageSkeletonDownloader $downloader;
 
     /**
      * The list of replacers to be used for replacing placeholders in files.
@@ -103,6 +111,13 @@ class PackageCommand extends Command implements PromptsForMissingInput
             'dependencies' => ['pestphp/pest'],
         ],
     ];
+
+    public function __construct(Application $app)
+    {
+        $this->downloader = $app->make(PackageSkeletonDownloader::class);
+
+        return parent::__construct();
+    }
 
     /**
      * {@inheritdoc}
@@ -142,6 +157,10 @@ class PackageCommand extends Command implements PromptsForMissingInput
         intro('Initializing package...');
 
         try {
+            if ($skeleton = $this->option('bootstrap')) {
+                $this->bootstrapPackage($skeleton, $this->option('force'));
+            }
+
             $this->displayConfiguration();
             $this->displayFilesToProcess();
             $this->displayExcludedPaths();
@@ -174,11 +193,56 @@ class PackageCommand extends Command implements PromptsForMissingInput
             ]);
 
             return self::FAILURE;
+        } catch (DownloaderException $e) {
+            error($e->getMessage());
+
+            logger()->error('Downloader exception occurred', [
+                'exception' => $e,
+                'skeleton' => $this->option('bootstrap'),
+            ]);
+
+            return self::FAILURE;
         }
 
         $this->displaySuccessMessage();
 
         return self::SUCCESS;
+    }
+
+    protected function bootstrapPackage(string $skeleton, bool $force = false): void
+    {
+        $skeleton = Str::lower($skeleton);
+
+        alert("Bootstrapping package using skeleton: {$skeleton}...");
+
+        if (! File::isEmptyDirectory($this->getPath())) {
+            if (! $force && ! confirm('The target directory is not empty. Do you want to proceed and overwrite existing files?', false)) {
+                throw new DownloaderException('Package bootstrapping cancelled by user due to non-empty target directory.');
+            }
+
+            alert('Proceeding with bootstrapping and overwriting existing files...');
+        }
+
+        $destination = $this->getPath();
+
+        $moved = entries($this->downloader->download($skeleton))
+            ->filter(static function (SplFileInfo $entry) use ($destination): bool {
+                $newPath = join_paths($destination, $entry->getFilename());
+
+                if ($entry->isDir()) {
+                    return ! File::moveDirectory($entry->getRealPath(), $newPath, true);
+                } else {
+                    if (File::exists($newPath)) {
+                        File::delete($newPath);
+                    }
+
+                    return ! File::move($entry->getRealPath(), $newPath);
+                }
+            });
+
+        if ($moved->isNotEmpty()) {
+            throw new DownloadException('Some files could not be moved during the bootstrapping process.');
+        }
     }
 
     /**
