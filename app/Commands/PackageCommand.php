@@ -156,8 +156,10 @@ class PackageCommand extends Command implements PromptsForMissingInput
                 $this->bootstrapPackage($skeleton, $this->option('force'));
             }
 
+            $files = $this->getFilesToProcess();
+
             $this->displayConfiguration();
-            $this->displayFilesToProcess();
+            $this->displayFilesToProcess($files);
             $this->displayExcludedPaths();
 
             if (! $this->option('proceed') && ! confirm('Do you want to proceed with this configuration?')) {
@@ -168,7 +170,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
 
             $this->ensureLicenseFileExists();
 
-            $this->replacePlaceholdersInFiles($this->getFilesToProcess());
+            $this->replacePlaceholdersInFiles($files);
 
             /** @phpstan-ignore-next-line */
             $this->installDependencies(shouldSkip: $this->option('no-install') ?? false);
@@ -364,14 +366,14 @@ class PackageCommand extends Command implements PromptsForMissingInput
 
     /**
      * Display the list of files that will be processed for placeholder replacement.
+     *
+     * @param  SplFileInfo[]  $files  The list of files to be processed.
      */
-    private function displayFilesToProcess(): void
+    private function displayFilesToProcess(array $files): void
     {
-        $files = $this->getFilesToProcess();
+        $listOfFiles = implode(PHP_EOL, $files);
 
-        $files = implode(PHP_EOL, $files);
-
-        table(['Files to process'], [[$files]]);
+        table(['Files to process'], [[$listOfFiles]]);
     }
 
     /**
