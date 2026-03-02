@@ -368,7 +368,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
     /**
      * Get the list of files to be processed, excluding the ones in the excluded paths.
      *
-     * @return string[]
+     * @return SplFileInfo[]
      */
     private function getFilesToProcess(): array
     {

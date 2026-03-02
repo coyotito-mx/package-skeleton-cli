@@ -11,14 +11,14 @@ trait InteractsWithReplacers
     /**
      * The list of replacers to be used for replacing placeholders in files.
      *
-     * @var array<class-string<Builder>, null|string|\Closure(): ?string>
+     * @var array<class-string<\App\Replacers\Builder>, null|string|\Closure(): ?string>
      */
     protected array $replacers = [];
 
     /**
      * Add a replacer to the list of replacers.
      *
-     * @param  class-string<Builder>  $replacer  The replacer class to be added.
+     * @param  class-string<\App\Replacers\Builder>  $replacer  The replacer class to be added.
      * @param  null|string|Closure  $value  A string, a callback, or null that returns the value to be used for replacement when this replacer is applied.
      */
     protected function addReplacer(string $replacer, null|string|Closure $value = null): self
@@ -47,7 +47,7 @@ trait InteractsWithReplacers
      */
     private function pipeFileThroughReplacers(SplFileInfo $file): void
     {
-        $content = File::get($file);
+        $content = File::get($file->getRealPath());
         $directory = dirname($file->getRealPath());
         $newFilename = $file->getFilename();
 
@@ -63,10 +63,10 @@ trait InteractsWithReplacers
             $newFilename = $replacerInstance->replace($newFilename);
         }
 
-        File::put($file, $content);
+        File::put($file->getRealPath(), $content);
 
         if ($newFilename !== $file->getFilename()) {
-            File::move($file, $directory.DIRECTORY_SEPARATOR.$newFilename);
+            File::move($file->getRealPath(), $directory.DIRECTORY_SEPARATOR.$newFilename);
         }
     }
 
