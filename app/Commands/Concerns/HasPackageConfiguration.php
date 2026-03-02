@@ -78,7 +78,7 @@ trait HasPackageConfiguration
      * @param  int-mask-of<InputArgument::*>|null  $mode  The argument mode: a bit mask of self::REQUIRED, self::OPTIONAL and self::IS_ARRAY
      * @param  string  $description  A description text
      * @param  string|bool|int|float|array|null  $default  The default value (for self::OPTIONAL mode only)
-     * @param  array|\Closure(CompletionInput,CompletionSuggestions):list<string|Suggestion>  $suggestedValues  The values used for input completion
+     * @param  array|\Closure(\Symfony\Component\Console\Completion\CompletionInput, \Symfony\Component\Console\Completion\CompletionSuggestions):list<string|\Symfony\Component\Console\Completion\Suggestion>  $suggestedValues  The values used for input completion
      */
     protected function addCommandArgument(string $name, ?int $mode = null, string $description = '', $default = null, array|\Closure $suggestedValues = []): void
     {
@@ -111,9 +111,7 @@ trait HasPackageConfiguration
      * @param  int-mask-of<InputOption::*>|null  $mode  The option mode: One of the VALUE_* constants
      * @param  string  $description  A description text
      * @param  string|bool|int|float|array|null  $default  The default value (must be null for self::VALUE_NONE)
-     * @param  array|\Closure(CompletionInput,CompletionSuggestions):list<string|Suggestion>  $suggestedValues  The values used for input completion
-     *
-     * @throws InvalidArgumentException If option mode is invalid or incompatible
+     * @param  array|\Closure(\Symfony\Component\Console\Completion\CompletionInput,\Symfony\Component\Console\Completion\CompletionSuggestions):list<string|\Symfony\Component\Console\Completion\Suggestion>  $suggestedValues  The values used for input completion
      */
     protected function addCommandOption(string $name, null|string|array $shortcut = null, ?int $mode = null, string $description = '', $default = null, array|\Closure $suggestedValues = []): void
     {
