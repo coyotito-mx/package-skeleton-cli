@@ -6,6 +6,7 @@ namespace App\Commands;
 
 use App\Commands\Concerns\InteractsWithBinaryRemoval;
 use App\Commands\Concerns\InteractsWithTestingFramework;
+use App\Concerns\InteractsWithProcess;
 use App\Downloaders\Exceptions\DownloaderException;
 use App\Downloaders\Exceptions\DownloadException;
 use App\Downloaders\PackageSkeletonDownloader;
@@ -24,7 +25,6 @@ use App\Replacers\YearReplacer;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
 use LaravelZero\Framework\Commands\Command;
 use SplFileInfo;
@@ -46,6 +46,7 @@ use function Laravel\Prompts\warning;
 class PackageCommand extends Command implements PromptsForMissingInput
 {
     use InteractsWithBinaryRemoval;
+    use InteractsWithProcess;
     use InteractsWithReplacers;
     use InteractsWithTestingFramework;
 
@@ -414,7 +415,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
      */
     private function fetchAuthorInformation(): ?array
     {
-        $result = Process::run('git config --list');
+        $result = $this->makeProcess(['git', 'config'], '--list')->run();
 
         if ($result->failed() || ! $result->output()) {
             return null;
