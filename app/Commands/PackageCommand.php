@@ -4,24 +4,14 @@ declare(strict_types=1);
 
 namespace App\Commands;
 
+use App\Commands\Concerns\HasPackageConfiguration;
 use App\Commands\Concerns\InteractsWithBinaryRemoval;
 use App\Commands\Concerns\InteractsWithTestingFramework;
 use App\Concerns\InteractsWithProcess;
 use App\Downloaders\Exceptions\DownloaderException;
 use App\Downloaders\Exceptions\DownloadException;
 use App\Downloaders\PackageSkeletonDownloader;
-use App\Replacers\AuthorReplacer;
-use App\Replacers\Concerns\InteractsWithReplacers;
-use App\Replacers\DescriptionReplacer;
-use App\Replacers\EmailReplacer;
 use App\Replacers\Exceptions\InvalidFormatException;
-use App\Replacers\Exceptions\InvalidNamespaceException;
-use App\Replacers\LicenseNameReplacer;
-use App\Replacers\NamespaceReplacer;
-use App\Replacers\PackageReplacer;
-use App\Replacers\VendorReplacer;
-use App\Replacers\VersionReplacer;
-use App\Replacers\YearReplacer;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
@@ -39,15 +29,13 @@ use function Laravel\Prompts\intro;
 use function Laravel\Prompts\outro;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\table;
-use function Laravel\Prompts\text;
-use function Laravel\Prompts\textarea;
 use function Laravel\Prompts\warning;
 
 class PackageCommand extends Command implements PromptsForMissingInput
 {
+    use HasPackageConfiguration;
     use InteractsWithBinaryRemoval;
     use InteractsWithProcess;
-    use InteractsWithReplacers;
     use InteractsWithTestingFramework;
 
     /**
@@ -55,20 +43,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
      *
      * @var string
      */
-    protected $signature = 'init
-                            { vendor : The name of the package vendor (prompted if not provided) }
-                            { package : The name of the package (prompted if not provided) }
-                            { namespace : The package namespace (auto-generated as Vendor\Package if not provided) }
-                            { author : The package author (prompted if not provided) }
-                            { email : The package author email (prompted if not provided) }
-                            { description : The package description (optional) }
-                            { --bootstrap= : Initialize a new package (options: laravel, vanilla) }
-                            { --force : Force bootstrapping even if the target directory is not empty (use with --bootstrap) }
-                            { --proceed : Accept the configuration and proceed without confirmation }
-                            { --no-install : Skip installing composer dependencies }
-                            { --path= : The path to initialize the package in (defaults to current working directory) }
-                            { --skip-license : Skip creating a LICENSE file if one does not exist }
-                            { --exclude=* : Paths to exclude when processing files }';
+    protected $signature = 'init';
 
     /**
      * The console command description.
@@ -92,21 +67,6 @@ class PackageCommand extends Command implements PromptsForMissingInput
     public function __construct(protected PackageSkeletonDownloader $downloader)
     {
         parent::__construct();
-    }
-
-    #[\Override]
-    protected function configure(): void
-    {
-        $this
-            ->addReplacer(VendorReplacer::class, fn () => $this->getVendor())
-            ->addReplacer(PackageReplacer::class, fn () => $this->getPackage())
-            ->addReplacer(NamespaceReplacer::class, fn () => $this->getNamespace())
-            ->addReplacer(DescriptionReplacer::class, fn () => $this->getPackageDescription())
-            ->addReplacer(AuthorReplacer::class, fn () => $this->getAuthor())
-            ->addReplacer(EmailReplacer::class, fn () => $this->getEmail())
-            ->addReplacer(LicenseNameReplacer::class, fn () => 'MIT')
-            ->addReplacer(VersionReplacer::class, fn () => '0.0.1')
-            ->addReplacer(YearReplacer::class); // This will replace the year with the current year
     }
 
     /**
@@ -227,62 +187,6 @@ class PackageCommand extends Command implements PromptsForMissingInput
         if ($moved->isNotEmpty()) {
             throw new DownloadException('Some files could not be moved during the bootstrapping process.');
         }
-    }
-
-    /**
-     * Get the package vendor name formatted in StudlyCase.
-     */
-    private function getVendor(): string
-    {
-        return Str::studly($this->argument('vendor'));
-    }
-
-    /**
-     * Get the package name formatted in StudlyCase.
-     */
-    private function getPackage(): string
-    {
-        return Str::studly($this->argument('package'));
-    }
-
-    /**
-     * Get the package namespace, either from user input or auto-generated from vendor/package.
-     *
-     * @throws InvalidNamespaceException
-     */
-    private function getNamespace(): string
-    {
-        $namespace = $this->argument('namespace') ?: Str::studly($this->getVendor()).'\\'.Str::studly($this->getPackage());
-
-        InvalidNamespaceException::validate($namespace);
-
-        return $namespace;
-    }
-
-    /**
-     * Get the package description, or null if not provided.
-     *
-     * @phpstan-ignore-next-line
-     */
-    private function getPackageDescription(): ?string
-    {
-        return $this->argument('description');
-    }
-
-    /**
-     * Get the author name formatted in Title Case.
-     */
-    private function getAuthor(): string
-    {
-        return Str::title($this->argument('author'));
-    }
-
-    /**
-     * Get the author email in lowercase.
-     */
-    private function getEmail(): string
-    {
-        return Str::lower($this->argument('email'));
     }
 
     /**
@@ -408,41 +312,6 @@ class PackageCommand extends Command implements PromptsForMissingInput
         $dependency->install();
     }
 
-    /**
-     * Fetch user's git global configuration.
-     *
-     * @return array<string, string>|null
-     */
-    private function fetchAuthorInformation(): ?array
-    {
-        $result = $this->makeProcess(['git', 'config'], '--list')->run();
-
-        if ($result->failed() || ! $result->output()) {
-            return null;
-        }
-
-        $options = collect(explode(PHP_EOL, $result->output()))
-            ->mapWithKeys(function ($line) {
-                $parts = explode('=', $line, 2);
-
-                if (count($parts) === 2) {
-                    return [trim($parts[0]) => trim($parts[1])];
-                }
-
-                return [];
-            })
-            ->filter(filled(...));
-
-        if ($options->isEmpty() || ! $options->has(['user.name', 'user.email'])) {
-            return null;
-        }
-
-        return [
-            'author' => $options->get('user.name'),
-            'email' => $options->get('user.email'),
-        ];
-    }
-
     private function ensureLicenseFileExists(): void
     {
         $licensePath = join_paths($this->getPath(), 'LICENSE.md');
@@ -462,25 +331,5 @@ class PackageCommand extends Command implements PromptsForMissingInput
     private function getPath(): string
     {
         return $this->option('path') ?? getcwd();
-    }
-
-    /**
-     * Define interactive prompts for missing required command arguments.
-     *
-     * @return array<string, \Closure(): string|null>
-     */
-    #[\Override]
-    protected function promptForMissingArgumentsUsing(): array
-    {
-        $info = $this->fetchAuthorInformation();
-
-        return [
-            'vendor' => fn (): string => text('Enter the package vendor name', 'Acme', required: true),
-            'package' => fn (): string => text('Enter the package name', 'Package', required: true),
-            'namespace' => fn (): ?string => text('Enter the package namespace', 'Vendor\\Package', hint: 'Optional, leave empty to auto-generate') ?: null,
-            'author' => fn (): string => $info['author'] ?? text('Enter the author name', 'John Doe', required: true),
-            'email' => fn (): string => $info['email'] ?? text('Enter the author\'s email', 'john@doe.com', required: true),
-            'description' => fn (): ?string => textarea('Enter the package description') ?: null,
-        ];
     }
 }
