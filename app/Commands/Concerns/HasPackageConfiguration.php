@@ -21,21 +21,6 @@ use Symfony\Component\Console\Input\InputOption;
 
 use function Laravel\Prompts\text;
 
-/**
-    { vendor : The name of the package vendor (prompted if not provided) }
-    { package : The name of the package (prompted if not provided) }
-    { namespace : The package namespace (auto-generated as Vendor\Package if not provided) }
-    { author : The package author (prompted if not provided) }
-    { email : The package author email (prompted if not provided) }
-    { description : The package description (optional) }
-    { --bootstrap= : Initialize a new package (options: laravel, vanilla) }
-    { --force : Force bootstrapping even if the target directory is not empty (use with --bootstrap) }
-    { --proceed : Accept the configuration and proceed without confirmation }
-    { --no-install : Skip installing composer dependencies }
-    { --path= : The path to initialize the package in (defaults to current working directory) }
-    { --skip-license : Skip creating a LICENSE file if one does not exist }
-    { --exclude=* : Paths to exclude when processing files }';
- */
 trait HasPackageConfiguration
 {
     use InteractsWithReplacers;
@@ -74,6 +59,11 @@ trait HasPackageConfiguration
             ->addReplacer(YearReplacer::class); // This will replace the year with the current year
     }
 
+    /**
+     * Add multiple arguments to the command
+     *
+     * @param  array  $arguments  The list of arguments to add
+     */
     protected function addCommandArguments(array $arguments): void
     {
         foreach ($arguments as $argument) {
@@ -101,6 +91,11 @@ trait HasPackageConfiguration
         ));
     }
 
+    /**
+     * Get the list of paths to exclude when processing files, combining default and user-provided exclusions.
+     *
+     * @param  array  $options  The list of options to add
+     */
     protected function addCommandOptions(array $options): void
     {
         foreach ($options as $option) {
@@ -186,6 +181,14 @@ trait HasPackageConfiguration
     private function getEmail(): string
     {
         return Str::lower($this->argument('email'));
+    }
+
+    /**
+     * Get the path where the package should be initialized.
+     */
+    private function getPath(): string
+    {
+        return $this->option('path') ?? getcwd();
     }
 
     /**

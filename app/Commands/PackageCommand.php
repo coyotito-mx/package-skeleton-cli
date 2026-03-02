@@ -324,12 +324,4 @@ class PackageCommand extends Command implements PromptsForMissingInput
 
         info('LICENSE file created successfully!');
     }
-
-    /**
-     * Get the path where the package should be initialized.
-     */
-    private function getPath(): string
-    {
-        return $this->option('path') ?? getcwd();
-    }
 }
