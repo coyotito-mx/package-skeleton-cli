@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace App\Commands;
 
 use App\Commands\Concerns\InteractsWithBinaryRemoval;
-use App\Contracts\ComposerContract;
+use App\Commands\Concerns\InteractsWithTestingFramework;
 use App\Downloaders\Exceptions\DownloaderException;
 use App\Downloaders\Exceptions\DownloadException;
 use App\Downloaders\PackageSkeletonDownloader;
-use App\Facades\Composer;
 use App\Replacers\AuthorReplacer;
 use App\Replacers\Concerns\InteractsWithReplacers;
 use App\Replacers\DescriptionReplacer;
@@ -22,9 +21,7 @@ use App\Replacers\PackageReplacer;
 use App\Replacers\VendorReplacer;
 use App\Replacers\VersionReplacer;
 use App\Replacers\YearReplacer;
-use Exception;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
-use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
@@ -50,6 +47,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
 {
     use InteractsWithBinaryRemoval;
     use InteractsWithReplacers;
+    use InteractsWithTestingFramework;
 
     /**
      * The name and signature of the console command.
@@ -78,8 +76,6 @@ class PackageCommand extends Command implements PromptsForMissingInput
      */
     protected $description = 'Initialize a new package structure';
 
-    protected PackageSkeletonDownloader $downloader;
-
     /**
      * Paths to exclude when processing files for placeholder replacement.
      *
@@ -92,26 +88,8 @@ class PackageCommand extends Command implements PromptsForMissingInput
         'node_modules',
     ];
 
-    /**
-     * Available testing frameworks and their corresponding composer dependencies.
-     *
-     * @var array<string, array{name: string, dependencies: string[]}>
-     */
-    protected array $testingFrameworks = [
-        'phpunit' => [
-            'name' => 'PHPUnit',
-            'dependencies' => ['phpunit/phpunit'],
-        ],
-        'pest' => [
-            'name' => 'Pest',
-            'dependencies' => ['pestphp/pest'],
-        ],
-    ];
-
-    public function __construct(Application $app)
+    public function __construct(protected PackageSkeletonDownloader $downloader)
     {
-        $this->downloader = $app->make(PackageSkeletonDownloader::class);
-
         parent::__construct();
     }
 
@@ -420,38 +398,13 @@ class PackageCommand extends Command implements PromptsForMissingInput
             return;
         }
 
-        $dependencies = $this->getTestingFrameworkDependencies();
+        $dependency = $this->getTestingFrameworkDependency(
+            select('Which testing framework do you want to use?', $this->availableTestingFrameworks, default: self::PEST_DEPENDENCY)
+        );
 
         alert('Installing composer dependencies...');
 
-        tap(
-            Composer::getFacadeRoot(),
-            fn (ComposerContract $composer) => $composer->cwd = $this->getPath()
-        )->require($dependencies, true);
-    }
-
-    /**
-     * Get the list of Composer dependencies for the selected testing framework.
-     *
-     * @return string[]
-     *
-     * @throws Exception If invalid testing framework selected.
-     */
-    private function getTestingFrameworkDependencies(): array
-    {
-        $selected = $this->selectTestingFramework();
-
-        return $this->testingFrameworks[$selected]['dependencies'] ?? throw new Exception('Invalid testing framework selected.');
-    }
-
-    /**
-     * Prompt the user to select a testing framework.
-     */
-    private function selectTestingFramework(): string
-    {
-        $choices = collect($this->testingFrameworks)->mapWithKeys(fn ($framework, $key) => [$key => $framework['name']]);
-
-        return select('Which testing framework do you want to use?', $choices->toArray(), default: 'pest');
+        $dependency->install();
     }
 
     /**
