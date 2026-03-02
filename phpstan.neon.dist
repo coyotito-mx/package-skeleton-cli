@@ -11,4 +11,4 @@ parameters:
 
     excludePaths:
         - ./vendor
-        - ./fixtures
+        - ./tests/fixtures
