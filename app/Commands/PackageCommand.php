@@ -75,7 +75,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
      *
      * @var string
      */
-    protected $description = 'Initialize a new package structure';
+    protected $description = 'Initialize package structure';
 
     /**
      * Paths to exclude when processing files for placeholder replacement.
