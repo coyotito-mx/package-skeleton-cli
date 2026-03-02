@@ -12,6 +12,7 @@ use App\Downloaders\PackageSkeletonDownloader;
 use App\Facades\Composer;
 use App\Replacers\AuthorReplacer;
 use App\Replacers\Builder;
+use App\Replacers\Concerns\InteractsWithReplacers;
 use App\Replacers\DescriptionReplacer;
 use App\Replacers\EmailReplacer;
 use App\Replacers\Exceptions\InvalidFormatException;
@@ -41,7 +42,6 @@ use function Laravel\Prompts\info;
 use function Laravel\Prompts\intro;
 use function Laravel\Prompts\outro;
 use function Laravel\Prompts\select;
-use function Laravel\Prompts\spin;
 use function Laravel\Prompts\table;
 use function Laravel\Prompts\text;
 use function Laravel\Prompts\textarea;
@@ -50,6 +50,7 @@ use function Laravel\Prompts\warning;
 class PackageCommand extends Command implements PromptsForMissingInput
 {
     use InteractsWithBinaryRemoval;
+    use InteractsWithReplacers;
 
     /**
      * The name and signature of the console command.
@@ -79,13 +80,6 @@ class PackageCommand extends Command implements PromptsForMissingInput
     protected $description = 'Initialize a new package structure';
 
     protected PackageSkeletonDownloader $downloader;
-
-    /**
-     * The list of replacers to be used for replacing placeholders in files.
-     *
-     * @var array<class-string<Builder>, null|string|\Closure(): ?string>
-     */
-    protected array $replacers = [];
 
     /**
      * Paths to exclude when processing files for placeholder replacement.
@@ -122,9 +116,6 @@ class PackageCommand extends Command implements PromptsForMissingInput
         parent::__construct();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     #[\Override]
     protected function configure(): void
     {
@@ -177,7 +168,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
 
             $this->ensureLicenseFileExists();
 
-            $this->replacePlaceholders();
+            $this->replacePlaceholdersInFiles($this->getFilesToProcess());
 
             /** @phpstan-ignore-next-line */
             $this->installDependencies(shouldSkip: $this->option('no-install') ?? false);
@@ -408,74 +399,6 @@ class PackageCommand extends Command implements PromptsForMissingInput
     }
 
     /**
-     * Replace placeholders in the files to be processed.
-     */
-    private function replacePlaceholders(): void
-    {
-        $files = $this->getFilesToProcess();
-
-        foreach ($files as $file) {
-            $filename = basename($file);
-
-            spin(fn () => $this->pipeFileThroughReplacers($file), "Processing file: $filename");
-        }
-
-        info('All files processed successfully!');
-    }
-
-    /**
-     * Pipe the given file through all the replacers to replace the placeholders with the actual values.
-     *
-     * @param  string  $file  The path of the file to be processed.
-     */
-    private function pipeFileThroughReplacers(string $file): void
-    {
-        $content = File::get($file);
-        $filename = basename($file);
-        $directory = dirname($file);
-        $newFilename = $filename;
-
-        foreach ($this->replacers as $replacer => $callback) {
-            ['value' => $value, 'skip' => $skip] = $this->resolveReplacerValue($callback);
-
-            if ($skip) {
-                continue;
-            }
-
-            $replacerInstance = $replacer::make($value);
-            $content = $replacerInstance->replace($content);
-            $newFilename = $replacerInstance->replace($newFilename);
-        }
-
-        File::put($file, $content);
-
-        if ($newFilename !== $filename) {
-            File::move($file, $directory.DIRECTORY_SEPARATOR.$newFilename);
-        }
-    }
-
-    /**
-     * Resolve the value from a replacer callback or string.
-     *
-     * @return array{value: mixed, skip: bool}
-     */
-    private function resolveReplacerValue(mixed $callback): array
-    {
-        if (is_callable($callback)) {
-            $value = $callback();
-
-            // Skip if callback returns null
-            if (is_null($value)) {
-                return ['value' => null, 'skip' => true];
-            }
-
-            return ['value' => $value, 'skip' => false];
-        }
-
-        return ['value' => $callback, 'skip' => false];
-    }
-
-    /**
      * Get the list of files to be processed, excluding the ones in the excluded paths.
      *
      * @return string[]
@@ -484,7 +407,6 @@ class PackageCommand extends Command implements PromptsForMissingInput
     {
         return \App\Helpers\allFiles($this->getPath())
             ->filter(fn (SplFileInfo $file) => ! $this->shouldExcludeFile($file))
-            ->map(fn (SplFileInfo $file): string => $file->getRealPath())
             ->values()
             ->all();
     }
