@@ -37,6 +37,9 @@
         },
         "files": [
             "app/helpers.php"
+        ],
+        "exclude-from-classmap": [
+            "tests/fixtures"
         ]
     },
     "autoload-dev": {

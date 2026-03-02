@@ -57,7 +57,7 @@ function temp_path(string $suffix = ''): string
 
 function fixture_path(string $path): string
 {
-    return join_paths(base_path('fixtures'), $path);
+    return join_paths(base_path('tests'), 'fixtures', $path);
 }
 
 function createZipWithFile(string $zipPath, string|array $entries): void
