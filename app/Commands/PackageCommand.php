@@ -11,7 +11,6 @@ use App\Downloaders\Exceptions\DownloadException;
 use App\Downloaders\PackageSkeletonDownloader;
 use App\Facades\Composer;
 use App\Replacers\AuthorReplacer;
-use App\Replacers\Builder;
 use App\Replacers\Concerns\InteractsWithReplacers;
 use App\Replacers\DescriptionReplacer;
 use App\Replacers\EmailReplacer;
@@ -129,19 +128,6 @@ class PackageCommand extends Command implements PromptsForMissingInput
             ->addReplacer(LicenseNameReplacer::class, fn () => 'MIT')
             ->addReplacer(VersionReplacer::class, fn () => '0.0.1')
             ->addReplacer(YearReplacer::class); // This will replace the year with the current year
-    }
-
-    /**
-     * Add a replacer to the list of replacers.
-     *
-     * @param  class-string<Builder>  $replacer  The replacer class to be added.
-     * @param  string|callable|null  $value  A string, a callback, or null that returns the value to be used for replacement when this replacer is applied.
-     */
-    protected function addReplacer(string $replacer, null|string|callable $value = null): self
-    {
-        $this->replacers[$replacer] = $value;
-
-        return $this;
     }
 
     /**
