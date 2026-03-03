@@ -18,8 +18,6 @@
     ],
     "require": {
         "php": "^8.4",
-        "ext-pcntl": "*",
-        "composer/spdx-licenses": "^1.5",
         "illuminate/log": "^12.17",
         "laravel-zero/framework": "^v12.0.2"
     },
