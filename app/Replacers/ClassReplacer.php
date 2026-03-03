@@ -16,6 +16,7 @@ class ClassReplacer extends Builder
 {
     protected static string $placeholder = 'class';
 
+    #[\Override]
     protected function configure(): Replacer
     {
         $replacer = $this->replacer;
