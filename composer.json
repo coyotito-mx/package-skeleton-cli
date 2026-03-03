@@ -46,6 +46,12 @@
         }
     },
     "scripts": {
+        "app:build": "@php skeleton app:build skeleton.phar",
+        "cli:build": "phpacker build",
+        "build": [
+            "@app:build --no-interaction",
+            "@cli:build"
+        ],
         "test": [
             "@php vendor/bin/pest"
         ],

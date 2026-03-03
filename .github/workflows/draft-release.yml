@@ -52,10 +52,10 @@ jobs:
           composer install --no-dev --no-progress --no-interaction --optimize-autoloader &&
           composer global require --no-progress --no-interaction phpacker/phpacker
 
-      - name: Build CLI
+      - name: Build App
         shell: bash
         run: |
-          php skeleton app:build skeleton.phar \
+          composer app:build -- \
             --no-interaction \
             --build-version="v${{ steps.draft_release.outputs.resolved_version }}"
 
@@ -66,11 +66,11 @@ jobs:
           path: ~/.phpacker/binaries
           key: php-binaries
 
-      - name: Build Binaries
+      - name: Build CLI
         shell: bash
         run: |
           # Build macOS binary
-          phpacker build
+          composer cli:build
 
           # Move binary to builds root folder and rename it
           mv builds/mac/mac-arm builds/skeleton-mac
