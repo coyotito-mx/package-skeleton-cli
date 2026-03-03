@@ -240,6 +240,7 @@ trait HasPackageConfiguration
             'namespace' => fn (): ?string => text('Enter the package namespace', 'Vendor\\Package', hint: 'Optional, leave empty to auto-generate') ?: null,
             'author' => fn (): string => $info['author'] ?? text('Enter the author name', 'John Doe', required: true),
             'email' => fn (): string => $info['email'] ?? text('Enter the author\'s email', 'john@doe.com', required: true),
+            'description' => fn (): ?string => text('Enter the package description', 'A short description of the package') ?: null,
         ];
     }
 }
