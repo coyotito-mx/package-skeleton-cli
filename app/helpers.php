@@ -14,10 +14,6 @@ namespace App\Helpers {
      */
     function rmdir_recursive(string $dir): void
     {
-        if (! file_exists($dir) || ! is_dir($dir)) {
-            return;
-        }
-
         $handler = @opendir($dir);
 
         if ($handler === false) {
