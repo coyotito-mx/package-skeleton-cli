@@ -32,9 +32,11 @@ abstract class ComposerDependency
     /**
      * Requires the dependency
      */
-    public function install(): bool
+    public function install(?string $cwd = null): bool
     {
         $packages = Arr::wrap($this->package);
+
+        when($cwd, fn () => $this->composer->cwd = $cwd);
 
         return $this->composer->require($packages, $this->dev, $this->withAllDependencies);
     }

@@ -309,7 +309,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
 
         alert('Installing composer dependencies...');
 
-        $dependency->install();
+        $dependency->install(cwd: $this->getPath());
     }
 
     private function ensureLicenseFileExists(): void
