@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Commands\Concerns;
 
 use App\Replacers\AuthorReplacer;
+use App\Replacers\ClassReplacer;
 use App\Replacers\Concerns\InteractsWithReplacers;
 use App\Replacers\DescriptionReplacer;
 use App\Replacers\EmailReplacer;
@@ -38,6 +39,7 @@ trait HasPackageConfiguration
         ]);
 
         $this->addCommandOptions([
+            ['class', null, InputOption::VALUE_REQUIRED, 'The class name to use in replacements (defaults to the package name)'],
             ['bootstrap', null, InputOption::VALUE_REQUIRED, 'Initialize a new package (options: laravel, vanilla)'],
             ['force', null, InputOption::VALUE_NONE, 'Force bootstrapping even if the target directory is not empty (use with --bootstrap)'],
             ['proceed', null, InputOption::VALUE_NONE, 'Accept the configuration and proceed without confirmation'],
@@ -56,7 +58,8 @@ trait HasPackageConfiguration
             ->addReplacer(EmailReplacer::class, fn () => $this->getEmail())
             ->addReplacer(LicenseNameReplacer::class, fn () => 'MIT')
             ->addReplacer(VersionReplacer::class, fn () => '0.0.1')
-            ->addReplacer(YearReplacer::class); // This will replace the year with the current year
+            ->addReplacer(YearReplacer::class) // This will replace the year with the current year
+            ->addReplacer(ClassReplacer::class, fn () => $this->getClass());
     }
 
     /**
@@ -179,6 +182,11 @@ trait HasPackageConfiguration
     private function getEmail(): string
     {
         return Str::lower($this->argument('email'));
+    }
+
+    private function getClass(): string
+    {
+        return Str::studly($this->option('class') ?? $this->getPackage());
     }
 
     /**
