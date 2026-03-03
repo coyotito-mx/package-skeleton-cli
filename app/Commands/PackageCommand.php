@@ -81,10 +81,8 @@ class PackageCommand extends Command implements PromptsForMissingInput
                 $this->bootstrapPackage($skeleton, $this->option('force'));
             }
 
-            $files = $this->getFilesToProcess();
-
             $this->displayConfiguration();
-            $this->displayFilesToProcess($files);
+            $this->displayFilesToProcess($this->getFilesToProcess());
             $this->displayExcludedPaths();
 
             if (! $this->option('proceed') && ! confirm('Do you want to proceed with this configuration?')) {
@@ -95,7 +93,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
 
             $this->ensureLicenseFileExists();
 
-            $this->replacePlaceholdersInFiles($files);
+            $this->replacePlaceholdersInFiles($this->getFilesToProcess());
 
             /** @phpstan-ignore-next-line */
             $this->installDependencies(shouldSkip: $this->option('no-install') ?? false);
