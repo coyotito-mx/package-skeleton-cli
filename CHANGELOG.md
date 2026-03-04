@@ -1,5 +1,13 @@
 # Release Notes
 
+## v2.0.0 - 2026-03-04
+
+### What's changed
+
+### 🚀 Features
+
+- [FEAT]: Re-work the CLI by [@asciito](https://github.com/asciito) in #106
+
 ## v1.0.1 - 2025-11-02
 
 ### What's changed
