@@ -1,0 +1,16 @@
+{
+    "name": "{{namespace|lower,reverse}}",
+    "description": "{{description|ucfirst}}",
+    "license": "{{license|acronym}}",
+    "authors": [
+        {
+            "name": "{{author}}",
+            "email": "{{email}}"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "illuminate/support": "^10.0|^11.0"
+    },
+    "version": "{{version|prefix}}"
+}

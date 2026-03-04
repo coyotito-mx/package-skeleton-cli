@@ -1,41 +1,46 @@
-
 # Package Skeleton CLI
 
-![example workflow](https://github.com/coyotito-mx/package-skeleton-cli/actions/workflows/tests.yml/badge.svg)
-![Release version](https://img.shields.io/github/v/release/coyotito-mx/package-skeleton-cli?label=Release%20Version&color=2cbe4e&labelColor=444d56)
+![Example Workflow](https://github.com/coyotito-mx/package-skeleton-cli/actions/workflows/tests.yml/badge.svg)
+![Release Version](https://img.shields.io/github/v/release/coyotito-mx/package-skeleton-cli?label=Release%20Version&color=2cbe4e&labelColor=444d56)
+![macOS ARM only](https://shields.io/badge/MacOS--9cf?logo=Apple&style=social)
 
-The **Package Skeleton CLI** is a command-line interface that allows you to initialize a PHP package skeleton by replacing all the placeholders in the files with the values you provide.
-
+The **Package Skeleton CLI** is a command-line interface that allows you to initialize a PHP package skeleton by replacing placeholders in files with the values you provide.
 
 ## Installation
 
 > ⚠️
-> The CLI **only** works on **macOS** 🤷‍♂️
+> The CLI currently works **only** on **macOS** with ARM architecture.
 
 ### Downloading the CLI
 
 Using **cURL**:
-```bash
-curl -L "https://github.com/coyotito-mx/package-skeleton-cli/releases/download/v0.0.3/skeleton" -o skeleton
 
-chmod +x skeleton
+```bash
+curl -L "https://github.com/coyotito-mx/package-skeleton-cli/releases/latest/download/skeleton.tar.gz" -o skeleton.tar.gz
+
+tar -xzf skeleton.tar.gz && chmod +x skeleton
 ```
 
 Using **wget**:
-```bash
-wget "https://github.com/coyotito-mx/package-skeleton-cli/releases/download/v0.0.3/skeleton" -O skeleton
 
-chmod +x skeleton
+```bash
+wget "https://github.com/coyotito-mx/package-skeleton-cli/releases/latest/download/skeleton.tar.gz" -O skeleton.tar.gz
+
+tar -xzf skeleton.tar.gz && chmod +x skeleton
 ```
 
-Then you can move the binary to the desired location and use it.
+Then you can move the binary to your `PATH`:
+
+```bash
+mv skeleton /usr/local/bin/
+```
 
 ## Usage
 
-> ⚠️
-> To use the CLI, you must have a package skeleton with the placeholders you want to replace, or you could call the command with the option `--bootstrap=` and one of the valid templates to bootstrap (`vaniall`, `laravel`).
+> ✅
+> The CLI initializes packages in the **current working directory** or a specified `--path`. You can initialize from existing files or bootstrap from a template using `--bootstrap`.
 
-The [placeholders](#placeholders-and-modifiers) must be written in the following format: `{{placeholder}}`. You can use modifiers with the placeholders to format the values before replacing them. The modifiers must be written in the following format:
+The [placeholders](#placeholders-and-modifiers) must follow the format: `{{placeholder}}`. You can apply modifiers to format values before replacement:
 
 ```bash
 {{placeholder|modifier[,modifier]}}
@@ -43,94 +48,283 @@ The [placeholders](#placeholders-and-modifiers) must be written in the following
 
 ### Running the CLI
 
-This command will bootstrap a `Laravel Project` using the `laravel` [template](https://github.com/coyotito-mx/laravel-package-skeleton) from one of our template skeletons.
+Initialize a package with vendor, package name, and author details:
 
 ```bash
 skeleton init \
-  asciito \
   acme \
-  "This is a sample package" \
-  --author="John Doe" \
-  --email="john@doe.com" \+
-  --license=MIT \
-  --namespace="Asciito\\Acme" \
-  --package-version=v1.0.0 \
-  --minimum-stability=stable \
-  --type=library \
-  --path="$HOME"
-  --bootstrap=laravel
+  blog \
+  "Acme\\Blog" \
+  "John Doe" \
+  "john@doe.com" \
+  "A blogging package for Laravel" \
+  --path="$HOME/projects/my-package"
 ```
 
-### Placeholders and modifiers
+Or use prompts:
 
-The available placeholders (replacers):
+```bash
+skeleton init
+# Prompts: vendor, package, namespace (optional), author, email (fetched from git config, if available), description
+```
 
-- `vendor`
-- `package`
-- `namespace`
-- `description`
-- `author`
-- `email` (Author's email)
-- `package-version`
-- `minimum-stability`
-- `license` (package license: MIT)
-- `type` (package type: library, project, metapackage, composer-plugin, etc.)
-- **More placeholders will be added in the future.**
+> Note: The testing framework prompt appears only when dependencies are installed (i.e., without `--no-install`).
 
-**Global modifiers**:
+To skip confirmation:
 
-- `upper` (converts the value to uppercase)
-- `lower` (converts the value to lowercase)
-- `ucfirst` (converts the first character to uppercase)
-- `title` (converts the value to title case)
-- `studly` (converts the value to studly case)
-- `camel` (converts the value to camel case)
-- `slug` (converts the value to slug case)
-- `snake` (converts the value to snake case)
-- `kebab` (converts the value to kebab case)
-- `plural` (converts the value to plural)
-- `reverse` (reverses the value)
+```bash
+skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
+  --proceed
+```
+
+To skip Composer dependency installation:
+
+```bash
+skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
+  --no-install
+```
+
+To skip creating a LICENSE file when it does not exist:
+
+```bash
+skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
+  --skip-license
+```
+
+To exclude specific files/directories from processing:
+
+```bash
+skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
+  --exclude="composer.json" \
+  --exclude="package.json"
+```
+
+To bootstrap from a skeleton template (`vanilla` or `laravel`):
+
+```bash
+skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
+  --bootstrap=vanilla
+```
+
+To force bootstrapping into a non-empty directory:
+
+```bash
+skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
+  --bootstrap=laravel \
+  --force
+```
+
+### Placeholders and Modifiers
+
+#### Available Placeholders
+
+- `vendor` - Package vendor (e.g., `acme`)
+- `package` - Package name (e.g., `blog`)
+- `namespace` - Package namespace (auto-generated from vendor\package, or custom)
+- `description` - Package description
+- `author` - Package author name
+- `email` - Author's email address
+- `license` - License name (defaults to `MIT`)
+- `version` - Package version (defaults to `0.0.1`)
+- `year` - Current year
+- `class` - Class name (defaults to package name in PascalCase). Used primarily in filenames
+
+> **Namespace Format Requirements**
+>
+> The `namespace` argument must follow this pattern: `Vendor\Package`
+>
+> - Must have exactly two parts separated by a backslash
+> - Each part must start with an **uppercase letter**
+> - Each part can contain alphanumeric characters (A-Z, a-z, 0-9)
+> - Invalid example: `acme\blog`, `Acme_Blog`, `Acme/Blog` ❌
+> - Valid example: `Acme\Blog`, `MyVendor\MyPackage` ✅
+>
+> If not provided, the namespace will be auto-generated as `Vendor\Package` based on the vendor and package arguments.
+
+#### Global Modifiers
+
+- `upper` - Converts to UPPERCASE
+- `lower` - Converts to lowercase
+- `title` - Converts to Title Case
+- `snake` - Converts to snake_case
+- `kebab` - Converts to kebab-case
+- `camel` - Converts to camelCase
+- `pascal` - Converts to PascalCase (StudlyCase)
+- `slug` - Converts to slug-format
+- `ucfirst` - Converts first character to uppercase
+- `acronym` - Generates acronym (e.g., "John Doe" → "JD")
 
 > ⚠️
-> Beware, the order is important, calling a modifier like `<placeholder>|upper,slug` might not be what you want.
-> 
-> For example, the value `John Doe` could be:
+> **Modifier Order Matters!** The order of chained modifiers affects the output.
+>
 > ```text
-> {{author|upper,slug}} → john-doe
-> ```
-> Instead. you must use then in the following order:
-> ```text
-> {{author|slug,upper}} → JOHN-DOE
+> John Doe → JOHN-DOE
+>
+> {{author|upper,slug}} → john-doe     (incorrect)
+> {{author|slug,upper}} → JOHN-DOE     (correct)
 > ```
 
+#### Replacer-Specific Modifiers
 
-Modifiers by `Replacer`:
+##### `namespace` Replacer
 
-- `Namespace`
-  - `escape` (escapes the `namespace` separator `\` to `\\`)
-  - `reverse` (reverses the `namespace` separator)
+- `escape` - Escapes `\` to `\\` (e.g., `Acme\Blog` → `Acme\\Blog`)
+- `reverse` - Reverses `\` to `/` (e.g., `Acme\Blog` → `Acme/Blog`)
 
-### CLI available arguments and options
+> **Note**: Modifiers are applied to each part of the namespace separately (vendor and package).
 
-```shell
-skeleton init [options] [--] <vendor> <package> <description>
+##### `version` Replacer
 
-Options:
-      --namespace=NAMESPACE                  The namespace of the package
-      --author[=AUTHOR]                      The author of the package
-      --email=EMAIL                          The email of the author
-      --minimum-stability=MINIMUM-STABILITY  The minimum stability allowed for the package [default: "dev"]
-  -b, --bootstrap=BOOTSTRAP                  Bootstrap a package using a template (vanilla, laravel)
-      --type[=TYPE]                          The package type [default: "library"]
-      --package-version=PACKAGE-VERSION      The package version [default: "0.0.1"]
-      --replace-license                      Force replace the `LICENSE.md` file
-      --skip-license-generation              Skip license generation
-      --dir[=DIR]                            The excluded directories (multiple values allowed)
-      --file[=FILE]                          The excluded files (multiple values allowed)
-      --path[=PATH]                          The path where the package will be initialized
-      --confirm                              Skip the confirmation prompt
-  -d, --do-not-install-dependencies          Do not install the dependencies after initialization
-  -s, --no-self-delete                       Do not delete the CLI after initialization finished
+- `major` - Extracts major version (e.g., `2` from `2.5.3`)
+- `minor` - Extracts minor version (e.g., `5` from `2.5.3`)
+- `patch` - Extracts patch version (e.g., `3` from `2.5.3`)
+- `pre` - Extracts pre-release (e.g., `alpha` from `1.0.0-alpha`)
+- `meta` - Extracts build metadata (e.g., `abc123` from `1.0.0+abc123`)
+- `prefix` - Adds `v` prefix if not present (e.g., `1.0.0` → `v1.0.0`)
+
+##### `email` Replacer
+
+- `upper` - Converts email to uppercase while preserving `@` and `.`
+
+##### `class` Replacer
+
+- Used only in **filename** contexts
+- Converts to kebab-case in filenames (e.g., `{{class}}` → `my-class.php`)
+- Default value is transformed from package name (e.g., `blog` → `Blog` → `blog` in filename)
+- Supports all global modifiers when used in content
+
+### CLI Arguments and Options
+
+```bash
+SYNOPSIS
+  skeleton init [options] [--] <vendor> <package> <namespace> <author> <email> <description>
+
+Arguments
+  vendor                       The name of the package vendor (prompted if not provided)
+  package                      The name of the package (prompted if not provided)
+  namespace                    The package namespace (auto-generated as Vendor\Package if not provided)
+  author                       The package author (fetched from `git config user.name` or prompted)
+  email                        The package author email (fetched from `git config user.email` or prompted)
+  description                  The package description (prompted if not provided)
+
+Options
+      --bootstrap[=BOOTSTRAP]  Initialize a new package from skeleton template (options: laravel, vanilla)
+      --class[=CLASS]          The class name to use in replacements (defaults to package name)
+      --force                  Force bootstrapping even if target directory is not empty (use with --bootstrap)
+      --proceed                Accept the configuration and proceed without confirmation
+      --no-install             Skip installing composer dependencies
+      --skip-license           Skip creating a LICENSE file if one does not exist
+      --path[=PATH]            The path to initialize the package in (defaults to current working directory)
+      --exclude[=EXCLUDE]      Paths to exclude when processing files (multiple values allowed)
+  -h, --help                   Display help for the command
+      --silent                 Do not output any messages
+  -q, --quiet                  Only errors are displayed. All other output is suppressed
+  -V, --version                Display this application version
+      --ansi|--no-ansi         Force (or disable --no-ansi) ANSI output
+  -n, --no-interaction         Do not ask any interactive question
+      --env[=ENV]              The environment the command should run under
+  -v|vv|vvv, --verbose         Increase the verbosity of messages: 1 for normal output, 2 for more verbose output, and 3 for debug output
+```
+
+### Excluded Paths (Default)
+
+By default, the following paths are **excluded** from placeholder replacement:
+
+- `.git`
+- `.DS_Store`
+- `vendor`
+- `node_modules`
+
+Add custom exclusions with `--exclude`:
+
+```bash
+skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
+  --exclude="dist" \
+  --exclude="build" \
+  --exclude=".env"
+```
+
+### Author Information
+
+The CLI automatically fetches author information from git configuration:
+
+```bash
+git config user.name "John Doe"
+git config user.email "john@doe.com"
+```
+
+If git config is not available, you'll be prompted interactively.
+
+### Testing Framework Selection
+
+When dependencies are enabled (without `--no-install`), you'll be prompted to choose your testing framework:
+
+- **Pest** (default) - Modern, elegant testing for PHP
+- **PHPUnit** - Industry-standard PHP testing framework
+
+The selected framework's dev dependencies will be automatically installed.
+
+If `--no-install` is used, this prompt is skipped and no testing framework dependencies are installed.
+
+### CLI Removal Prompt
+
+At the end of a successful `init` run, the CLI always asks:
+
+```text
+Do you want to remove this CLI now?
+```
+
+If you answer `yes`, the CLI removes the invoked executable file. If it cannot resolve or delete that executable, it shows a warning and continues.
+
+## Examples
+
+### Example 1: Initialize with all prompted values
+
+```bash
+$ skeleton init --path="$HOME/projects"
+Enter the package vendor name: acme
+Enter the package name: blog
+Enter the package namespace (Optional, press Enter to auto-generate): Acme\Blog
+Enter the package description: A blogging package
+(Author and email fetched from git config, if available)
+
+...
+
+Do you want to proceed with this configuration?: Yes
+
+...
+
+Which testing framework do you want to use? [pest/phpunit]: pest
+
+...
+
+Package [Acme\Blog] initialized successfully!
+
+Do you want to remove this CLI now?: No
+```
+
+### Example 2: Initialize with all arguments provided
+
+```bash
+skeleton init acme blog "Acme\\Blog" "Jane Doe" "jane@example.com" "A blogging package" \
+  --proceed \
+  --path="$HOME/projects"
+```
+
+### Example 3: Initialize without dependencies
+
+```bash
+skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "A blogging package" \
+  --no-install \
+  --proceed
+```
+
+### Example 4: Initialize with a custom class name
+
+```bash
+skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "A blogging package" \
+  --class="BlogManager" \
+  --proceed
 ```
 
 ## Contributing
@@ -139,8 +333,32 @@ If you would like to contribute to the Skeleton CLI, please follow these steps:
 
 1. Fork the repository.
 2. Create a new branch for your feature or bugfix.
-3. Make your changes.
-4. Submit a pull request.
+3. Make your changes and add tests.
+4. Ensure all tests pass: `composer test`
+5. Run code standards: `composer lint:with-style`
+6. Submit a pull request.
+
+## Testing
+
+Run tests with:
+
+```bash
+composer test         # Run all tests
+composer test:ci      # Run tests in CI mode
+```
+
+Check code standards with:
+
+```bash
+composer lint         # Run PHPStan (level 5)
+composer style        # Check code formatting with Pint
+```
+
+Fix code formatting:
+
+```bash
+composer fix           # Auto-fix code formatting
+```
 
 ## License
 

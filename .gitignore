@@ -9,3 +9,4 @@
 /.secrets
 /event.json
 /coverage
+/tests/temp

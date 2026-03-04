@@ -1,62 +1,75 @@
 <?php
 
 namespace App\Helpers {
+    use Illuminate\Support\Collection;
+    use SplFileInfo;
+    use Symfony\Component\Finder\Finder;
 
-    use InvalidArgumentException;
+    use function Illuminate\Filesystem\join_paths;
 
     /**
-     * Create a directory
+     * Recursively delete a directory and its contents
      *
-     * Works the same as `\mkdir` but if the directory already exists, will not display an error
+     * @param  string  $dir  The directory to delete
      */
-    function mkdir(string $path, int $permissions = 0777, bool $recursive = false, $context = null): bool
+    function rmdir_recursive(string $dir): void
     {
-        if (is_file($path)) {
-            throw new InvalidArgumentException('The path should be a directory, not a file');
+        $handler = @opendir($dir);
+
+        if ($handler === false) {
+            return;
         }
 
-        if (file_exists($path)) {
-            return false;
+        while (($file = readdir($handler)) !== false) {
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
+
+            $path = $dir.DIRECTORY_SEPARATOR.$file;
+
+            if (is_dir($path)) {
+                rmdir_recursive($path);
+            } else {
+                unlink($path);
+            }
         }
 
-        return \mkdir($path, $permissions, $recursive, $context);
+        closedir($handler);
+
+        rmdir($dir);
     }
 
     /**
-     * @throw InvalidArgumentException if the given path is a file.
+     * Get all the files in a directory recursively
+     *
+     * @param  string  $directory  The directory to search
+     * @param  bool  $ignoreDotFiles  Whether to ignore dotfiles (files starting with a dot)
+     * @return Collection<SplFileInfo>
      */
-    function rmdir_recursive(string $path, bool $preserveRoot = false): void
+    function allFiles(string $directory, bool $ignoreDotFiles = false): Collection
     {
-        $root = $path;
+        $files = Finder::create()
+            ->in($directory)
+            ->ignoreDotFiles($ignoreDotFiles)
+            ->files();
 
-        $walk = function ($path) use (&$walk, $root, $preserveRoot) {
-            if (! file_exists($path)) {
-                return;
-            }
+        return collect(iterator_to_array($files));
+    }
 
-            if (is_file($path)) {
-                throw new InvalidArgumentException("The given path is a file: $path");
-            }
-
-            foreach (scandir($path) as $file) {
-                if (in_array($file, ['.', '..'])) {
-                    continue;
-                }
-
-                $file = $path.DIRECTORY_SEPARATOR.$file;
-
-                if (is_dir($file)) {
-                    $walk($file);
-                } else {
-                    unlink($file);
-                }
-            }
-
-            if (! $preserveRoot || $path !== $root) {
-                rmdir($path);
-            }
-        };
-
-        $walk($path);
+    /**
+     * Get all the files and folders in a directory (non-recursively)
+     *
+     * @param  string  $directory  The directory to search
+     * @param  bool  $ignoreDotFiles  Whether to ignore dotfiles (files starting with a dot)
+     * @return Collection<SplFileInfo>
+     */
+    function entries(string $directory, bool $ignoreDotFiles = false): Collection
+    {
+        return collect([
+            ...(glob(join_paths($directory, '*')) ?: []),
+            ...($ignoreDotFiles ? [] : (glob(join_paths($directory, '.*')) ?: [])),
+        ])
+            ->reject(fn (string $path) => in_array(basename($path), ['.', '..'], true))
+            ->map(fn (string $path) => new SplFileInfo($path));
     }
 }

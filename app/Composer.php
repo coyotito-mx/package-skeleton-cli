@@ -4,68 +4,90 @@ declare(strict_types=1);
 
 namespace App;
 
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Process;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 
-/**
- * @mixin \Illuminate\Support\Composer
- */
-class Composer extends \Illuminate\Support\Composer
+use function Illuminate\Filesystem\join_paths;
+
+class Composer implements Contracts\ComposerContract
 {
-    /**
-     * Install the dependencies from the current Composer lock file.
-     *
-     * @param  bool  $dev  if dev dependencies should be installed
-     * @param  bool  $noProgress  if output should hide progress
-     * @param  bool  $optimize  if autoloader should be optimized
-     * @param  string|null  $composerBinary
-     *
-     * @throw \RuntimeException if the composer file is not found
-     */
-    public function installDependencies(bool $dev = true, bool $noProgress = false, bool $optimize = false, \Closure|OutputInterface|null $output = null, $composerBinary = null): bool
+    public function __construct(public ?string $cwd = null, private readonly ?Application $app = null)
     {
-        $this->findComposerFile();
+        $this->cwd ??= getcwd();
+    }
 
-        $command = collect($this->findComposer($composerBinary))
-            ->merge([
-                'install',
-                '--ansi',
-                '--no-interaction',
-            ])
-            ->when(! $dev, fn ($command) => $command->push('--no-dev'))
-            ->when($noProgress, fn ($command) => $command->push('--no-progress'))
-            ->when($optimize, fn ($command) => $command->push('--optimize-autoloader'))
-            ->all();
+    public function require(string|array $package, bool $dev = false, bool $withAllDependencies = false): bool
+    {
+        $packages = Arr::wrap($package);
 
-        return $this->getProcess($command, ['COMPOSER_MEMORY_LIMIT' => '-1'])
-            ->run(
-                $output instanceof OutputInterface
-                    ? fn ($type, $line) => $output->write('    '.$line)
-                    : $output
-            ) === 0;
+        $flags = [];
+
+        if ($dev) {
+            $flags[] = '--dev';
+        }
+
+        if ($withAllDependencies) {
+            $flags[] = '--with-all-dependencies';
+        }
+
+        return $this->run(['composer', 'require', ...$packages, ...$flags]);
     }
 
     /**
-     * Add a dependency to the `composer.json` file.
+     * Runs the provided command in the current working directory.
+     *
+     * @param  array<int, string>  $command
      */
-    public function addDependencies(string|array $packages, bool $dev = false): void
+    private function run(array $command): bool
     {
-        $packages = Arr::wrap($packages);
+        $process = Process::path($this->cwd);
 
-        $this->modify(
-            function (array $json) use ($packages, $dev): array {
-                $section = $dev ? 'require-dev' : 'require';
+        if ($process->tty) {
+            $process->tty(true);
+        }
 
-                foreach ($packages as $package => $version) {
-                    if (is_int($package)) {
-                        [$package, $version] = [$version, '*'];
-                    }
+        try {
+            $output = $this->app?->make(OutputInterface::class);
+        } catch (Throwable) {
+            $output = null;
+        }
 
-                    $json[$section][$package] = $version;
+        if ($output) {
+            $output->write("\n");
+
+            $result = $process->run(
+                $command,
+                function ($_, $line) use ($output): void {
+                    $output->write($line);
                 }
+            );
+        } else {
+            $result = $process->run($command);
+        }
 
-                return $json;
-            }
-        );
+        return $result->successful();
+    }
+
+    public function allowPlugin(string $plugin, bool $allow = true): void
+    {
+        $composerJsonPath = join_paths($this->cwd, 'composer.json');
+
+        if (! File::exists($composerJsonPath)) {
+            throw new \RuntimeException("Composer.json not found at path: $composerJsonPath");
+        }
+
+        $composerJson = json_decode(File::get($composerJsonPath), true);
+
+        if (! isset($composerJson['config']['allow-plugins'])) {
+            $composerJson['config']['allow-plugins'] = [];
+        }
+
+        $composerJson['config']['allow-plugins'][$plugin] = $allow;
+
+        File::put($composerJsonPath, json_encode($composerJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }
 }
