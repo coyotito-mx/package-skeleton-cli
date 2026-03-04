@@ -34,7 +34,7 @@ trait InteractsWithTestingFramework
     protected function resolveTestingFramework(string $framework): ComposerDependency
     {
         if (blank($this->availableTestingFrameworks[$framework] ?? null)) {
-            throw new InvalidArgumentException('Invalid testing framework selected [' . $framework . ']');
+            throw new InvalidArgumentException("Invalid testing framework selected [$framework]");
         }
 
         $framework = $this->availableTestingFrameworks[$framework];
