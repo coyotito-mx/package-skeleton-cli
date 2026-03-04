@@ -11,15 +11,13 @@ trait HasPackageDescription
 {
     protected function bootPackageDescription(): void
     {
-        $this->addCommandArgument('description', InputArgument::OPTIONAL, 'The package description');
+        $this->addCommandArgument('description', InputArgument::REQUIRED, 'The package description');
 
         $this->addReplacer(DescriptionReplacer::class, fn (): string => $this->getPackageDescription() ?? 'A short description of the package');
     }
 
     /**
-     * Get the package description, or null if not provided.
-     *
-     * @phpstan-ignore-next-line
+     * Get the package description.
      */
     private function getPackageDescription(): ?string
     {
