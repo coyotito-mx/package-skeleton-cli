@@ -1,7 +1,5 @@
 <?php
 
-use App\Dependencies\PestDependency;
-use App\Dependencies\PHPUnitDependency;
 use App\Facades\Composer;
 use Illuminate\Process\FakeProcessResult;
 use Illuminate\Process\PendingProcess;
