@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
+use function Laravel\Prompts\table;
 use function Laravel\Prompts\text;
 
 /**
@@ -135,6 +136,47 @@ trait HasPackageConfiguration
     private function getPath(): string
     {
         return $this->option('path') ?? getcwd();
+    }
+
+    /**
+     * Display the package configuration table to the user.
+     */
+    protected function displayPackageConfiguration(): void
+    {
+        $header = ['Vendor', 'Package', 'Namespace'];
+        $rows = [[
+            $this->getVendor(),
+            $this->getPackage(),
+            $this->getNamespace(),
+        ]];
+
+        if ($description = $this->getPackageDescription()) {
+            $header[] = 'Description';
+            $rows[0][] = $description;
+        }
+
+        $header = [...$header, 'Author', 'Email'];
+        $rows[0] = [...$rows[0], $this->getAuthor(), $this->getEmail()];
+
+        table($header, $rows);
+    }
+
+    /**
+     * Display a table of paths
+     *
+     * @param  string  $heading  The heading for the paths table
+     * @param  array  $paths  The list of paths to display
+     */
+    protected function displayPaths(string $heading, array $paths): void
+    {
+        if (blank($paths)) {
+            return;
+        }
+
+        table(
+            [$heading],
+            [[implode(PHP_EOL, $paths)]]
+        );
     }
 
     /**

@@ -28,7 +28,6 @@ use function Laravel\Prompts\info;
 use function Laravel\Prompts\intro;
 use function Laravel\Prompts\outro;
 use function Laravel\Prompts\select;
-use function Laravel\Prompts\table;
 use function Laravel\Prompts\warning;
 
 class PackageCommand extends Command implements PromptsForMissingInput
@@ -81,9 +80,10 @@ class PackageCommand extends Command implements PromptsForMissingInput
                 $this->bootstrapPackage($skeleton, $this->option('force'));
             }
 
-            $this->displayConfiguration();
-            $this->displayFilesToProcess($this->getFilesToProcess());
-            $this->displayExcludedPaths();
+            $this->displayPackageConfiguration();
+
+            $this->displayPaths('Files to process', $this->getFilesToProcess());
+            $this->displayPaths('Excluded Paths', $this->getExcludedPaths());
 
             if (! $this->option('proceed') && ! confirm('Do you want to proceed with this configuration?')) {
                 error('Package initialization cancelled.');
@@ -93,7 +93,9 @@ class PackageCommand extends Command implements PromptsForMissingInput
 
             $this->ensureLicenseFileExists();
 
-            $this->replacePlaceholdersInFiles($this->getFilesToProcess());
+            $this->replacePlaceholdersInFiles(
+                $this->getFilesToProcess()
+            );
 
             /** @phpstan-ignore-next-line */
             $this->installDependencies(shouldSkip: $this->option('no-install') ?? false);
@@ -206,57 +208,6 @@ class PackageCommand extends Command implements PromptsForMissingInput
         }
 
         return $this->excludedPaths;
-    }
-
-    /**
-     * Display the package configuration table to the user.
-     */
-    private function displayConfiguration(): void
-    {
-        $header = ['Vendor', 'Package', 'Namespace'];
-        $rows = [[
-            $this->getVendor(),
-            $this->getPackage(),
-            $this->getNamespace(),
-        ]];
-
-        if ($description = $this->getPackageDescription()) {
-            $header[] = 'Description';
-            $rows[0][] = $description;
-        }
-
-        $header = [...$header, 'Author', 'Email'];
-        $rows[0] = [...$rows[0], $this->getAuthor(), $this->getEmail()];
-
-        table($header, $rows);
-    }
-
-    /**
-     * Display the list of files that will be processed for placeholder replacement.
-     *
-     * @param  SplFileInfo[]  $files  The list of files to be processed.
-     */
-    private function displayFilesToProcess(array $files): void
-    {
-        $listOfFiles = implode(PHP_EOL, $files);
-
-        table(['Files to process'], [[$listOfFiles]]);
-    }
-
-    /**
-     * Display the list of excluded paths that will not be processed.
-     */
-    private function displayExcludedPaths(): void
-    {
-        $excludedPaths = $this->getExcludedPaths();
-
-        if (empty($excludedPaths)) {
-            return;
-        }
-
-        $excludedPaths = implode(PHP_EOL, $excludedPaths);
-
-        table(['Excluded Paths'], [[$excludedPaths]]);
     }
 
     /**
