@@ -1,0 +1,10 @@
+{
+    "name": "acme/package",
+    "description": "A package description",
+    "license": "MIT",
+    "require": {
+        "php": "^8.0",
+        "illuminate/support": "^10.0|^11.0"
+    },
+    "version": "v0.0.1"
+}

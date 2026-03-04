@@ -6,7 +6,7 @@ use Monolog\Processor\PsrLogMessageProcessor;
 
 use function Illuminate\Filesystem\join_paths;
 
-$logFile = join_paths(APP_DATA, config('app.name'));
+$logFile = join_paths(APP_DATA, config('app.name').'.log');
 
 return [
 
@@ -56,7 +56,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', env('LOG_STACK', 'single')),
+            'channels' => explode(',', (string) env('LOG_STACK', 'single')),
             'ignore_exceptions' => false,
         ],
 

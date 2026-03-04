@@ -1,0 +1,12 @@
+{
+    "$schema": "https://www.schemastore.org/package.json",
+    "private": true,
+    "dependencies": {
+        "{{package|slug}}-foo": "^1.0.0",
+        "{{package|slug}}-bar": "^1.0.1"
+    },
+    "devDependencies": {
+        "{{package|slug}}-baz": "^1.0.2",
+        "{{package|slug}}-foobar": "^1.0.3"
+    }
+}

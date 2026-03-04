@@ -54,6 +54,9 @@ jobs:
           # Extract file
           tar -xf skeleton.tar.gz
 
+          # Cleanup temporary archive
+          rm -f skeleton.tar.gz
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
