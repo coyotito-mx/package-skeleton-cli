@@ -6,9 +6,12 @@ namespace App;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
+
+use function Illuminate\Filesystem\join_paths;
 
 class Composer implements Contracts\ComposerContract
 {
@@ -67,5 +70,24 @@ class Composer implements Contracts\ComposerContract
         }
 
         return $result->successful();
+    }
+
+    public function allowPlugin(string $plugin, bool $allow = true): void
+    {
+        $composerJsonPath = join_paths($this->cwd, 'composer.json');
+
+        if (! File::exists($composerJsonPath)) {
+            throw new \RuntimeException("Composer.json not found at path: $composerJsonPath");
+        }
+
+        $composerJson = json_decode(File::get($composerJsonPath), true);
+
+        if (! isset($composerJson['config']['allow-plugins'])) {
+            $composerJson['config']['allow-plugins'] = [];
+        }
+
+        $composerJson['config']['allow-plugins'][$plugin] = $allow;
+
+        File::put($composerJsonPath, json_encode($composerJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }
 }

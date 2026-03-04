@@ -24,6 +24,8 @@ abstract class ComposerDependency
      */
     protected bool $withAllDependencies = false;
 
+    protected array $plugins = [];
+
     public function __construct(protected ComposerContract $composer)
     {
         //
@@ -32,11 +34,19 @@ abstract class ComposerDependency
     /**
      * Requires the dependency
      */
-    public function install(?string $cwd = null): bool
+    public function install(): bool
     {
         $packages = Arr::wrap($this->package);
 
-        when($cwd, fn () => $this->composer->cwd = $cwd);
+        foreach ($this->plugins as $plugin => $allow) {
+            if (is_int($plugin)) {
+                $plugin = $allow;
+
+                $allow = true;
+            }
+
+            $this->composer->allowPlugin($plugin, (bool) $allow);
+        }
 
         return $this->composer->require($packages, $this->dev, $this->withAllDependencies);
     }

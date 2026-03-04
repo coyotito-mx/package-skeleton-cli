@@ -11,4 +11,8 @@ class PestDependency extends ComposerDependency
     protected bool $dev = true;
 
     protected bool $withAllDependencies = true;
+
+    protected array $plugins = [
+        'pestphp/pest-plugin',
+    ];
 }
