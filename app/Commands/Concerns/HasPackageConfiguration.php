@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Commands\Concerns;
 
+use App\Replacers\ClassReplacer;
 use App\Replacers\Concerns\InteractsWithReplacers;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputArgument;
@@ -32,6 +33,8 @@ trait HasPackageConfiguration
     protected function configure(): void
     {
         $this->bootstrapPackageConfiguration();
+
+        $this->addReplacer(ClassReplacer::class, fn (): string => $this->getClass());
 
         $this->addCommandOptions([
             ['class', null, InputOption::VALUE_REQUIRED, 'The class name to use in replacements (defaults to the package name)'],
