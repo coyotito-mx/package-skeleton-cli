@@ -19,6 +19,16 @@ class Composer extends Facade
         return $instance;
     }
 
+    public static function setPath(string $path): ComposerContract
+    {
+        /** @var ComposerContract $instance */
+        $instance = static::getFacadeRoot();
+
+        $instance->cwd = $path;
+
+        return $instance;
+    }
+
     protected static function getFacadeAccessor()
     {
         return ComposerContract::class;

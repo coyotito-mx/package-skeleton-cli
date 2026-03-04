@@ -1,5 +1,7 @@
 <?php
 
+use App\Dependencies\PestDependency;
+use App\Dependencies\PHPUnitDependency;
 use App\Facades\Composer;
 use Illuminate\Process\FakeProcessResult;
 use Illuminate\Process\PendingProcess;
@@ -104,7 +106,7 @@ it('init package', function (): void {
             [['Acme', 'Package', 'Acme\\Package', 'A package description', 'John Doe', 'john@doe.com']]
         )
         ->expectsConfirmation('Do you want to proceed with this configuration?', 'yes')
-        ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
+        ->expectsChoice('Which testing framework do you want to use?', 'Pest', ['PHPUnit' => 'PHPUnit', 'Pest' => 'Pest'])
         ->expectsPromptsAlert('Installing composer dependencies...')
         ->expectsPromptsOutro('Package [Acme\\Package] initialized successfully!')
         ->expectsConfirmation('Do you want to remove this CLI now?', 'no')
@@ -130,7 +132,7 @@ it('init package using namespace', function (): void {
         ->expectsQuestion('Enter the package namespace', 'Asciito\\Package')
         ->expectsConfirmation('Do you want to proceed with this configuration?', 'yes')
         ->expectsConfirmation('No LICENSE file found. Do you want to create one with the MIT license?', 'yes')
-        ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
+        ->expectsChoice('Which testing framework do you want to use?', 'Pest', ['PHPUnit' => 'PHPUnit', 'Pest' => 'Pest'])
         ->expectsPromptsIntro('Initializing package...')
         ->expectsPromptsOutro('Package [Asciito\\Package] initialized successfully!')
         ->expectsConfirmation('Do you want to remove this CLI now?', 'no')
@@ -154,7 +156,7 @@ it('proceed without confirmation', function (): void {
     ])
         ->expectsPromptsIntro('Initializing package...')
         ->expectsConfirmation('No LICENSE file found. Do you want to create one with the MIT license?', 'yes')
-        ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
+        ->expectsChoice('Which testing framework do you want to use?', 'Pest', ['PHPUnit' => 'PHPUnit', 'Pest' => 'Pest'])
         ->expectsPromptsAlert('Installing composer dependencies...')
         ->expectsPromptsOutro('Package [Acme\\Package] initialized successfully!')
         ->expectsConfirmation('Do you want to remove this CLI now?', 'no')
@@ -178,7 +180,7 @@ it('skip license creation', function (): void {
         '--path' => $testDirectory,
     ])
         ->expectsPromptsIntro('Initializing package...')
-        ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
+        ->expectsChoice('Which testing framework do you want to use?', 'Pest', ['PHPUnit' => 'PHPUnit', 'Pest' => 'Pest'])
         ->expectsPromptsAlert('Installing composer dependencies...')
         ->expectsPromptsOutro('Package [Acme\\Package] initialized successfully!')
         ->expectsConfirmation('Do you want to remove this CLI now?', 'no')
@@ -201,7 +203,7 @@ it('install package composer dependencies', function (): void {
         '--skip-license' => true,
         '--path' => setupTestDirectory(),
     ])
-        ->expectsChoice('Which testing framework do you want to use?', 'pest', ['phpunit' => 'PHPUnit', 'pest' => 'Pest'])
+        ->expectsChoice('Which testing framework do you want to use?', 'Pest', ['PHPUnit' => 'PHPUnit', 'Pest' => 'Pest'])
         ->expectsPromptsAlert('Installing composer dependencies...')
         ->expectsPromptsOutro('Package [Acme\\Package] initialized successfully!')
         ->expectsConfirmation('Do you want to remove this CLI now?', 'no')

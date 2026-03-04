@@ -301,13 +301,18 @@ class PackageCommand extends Command implements PromptsForMissingInput
             return;
         }
 
-        $dependency = $this->getTestingFrameworkDependency(
-            select('Which testing framework do you want to use?', $this->availableTestingFrameworks, default: self::PEST_DEPENDENCY)
+        $availableTestingFrameworks = array_combine(
+            $keys = array_keys($this->availableTestingFrameworks),
+            $keys
+        );
+
+        $dependency = $this->resolveTestingFramework(
+            select('Which testing framework do you want to use?', $availableTestingFrameworks) ?? self::PEST_DEPENDENCY
         );
 
         alert('Installing composer dependencies...');
 
-        $dependency->install(cwd: $this->getPath());
+        $dependency->install();
     }
 
     private function ensureLicenseFileExists(): void

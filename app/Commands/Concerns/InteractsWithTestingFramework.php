@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace App\Commands\Concerns;
 
 use App\Dependencies\ComposerDependency;
-use Illuminate\Contracts\Container\BindingResolutionException;
+use App\Dependencies\PestDependency;
+use App\Dependencies\PHPUnitDependency;
+use App\Facades\Composer;
 use InvalidArgumentException;
 
 trait InteractsWithTestingFramework
 {
-    const string PEST_DEPENDENCY = 'pest';
+    const PEST_DEPENDENCY = 'Pest';
 
-    const string PHPUNIT_DEPENDENCY = 'phpunit';
+    const PHPUNIT_DEPENDENCY = 'PHPUnit';
 
     /**
      * Available testing frameworks
@@ -20,24 +22,28 @@ trait InteractsWithTestingFramework
      * @var string[]
      */
     protected array $availableTestingFrameworks = [
-        self::PEST_DEPENDENCY => 'Pest',
-        self::PHPUNIT_DEPENDENCY => 'PHPUnit',
+        self::PEST_DEPENDENCY => PestDependency::class,
+        self::PHPUNIT_DEPENDENCY => PHPUnitDependency::class,
     ];
 
     /**
-     * Get the testing framework dependency instance based on the provided framework name.
+     * Resolve the selected testing framework dependency.
      *
-     * @throws InvalidArgumentException If invalid testing framework selected.
+     * @throws InvalidArgumentException If invalid testing framework provided.
      */
-    protected function getTestingFrameworkDependency(string $framework): ComposerDependency
+    protected function resolveTestingFramework(string $framework): ComposerDependency
     {
-        try {
-            /** @var ComposerDependency $dependency */
-            $dependency = app()->make($framework);
-
-            return $dependency;
-        } catch (BindingResolutionException) {
-            throw new InvalidArgumentException("Invalid testing framework selected: {$framework}");
+        if (blank($this->availableTestingFrameworks[$framework] ?? null)) {
+            throw new InvalidArgumentException('Invalid testing framework selected [' . $framework . ']');
         }
+
+        $framework = $this->availableTestingFrameworks[$framework];
+
+        /** @var ComposerDependency $dependency */
+        $dependency = new $framework(
+            Composer::setPath($this->getPath())
+        );
+
+        return $dependency;
     }
 }
