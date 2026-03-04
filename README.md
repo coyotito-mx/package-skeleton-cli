@@ -127,6 +127,19 @@ skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
 - `license` - License name (defaults to `MIT`)
 - `version` - Package version (defaults to `0.0.1`)
 - `year` - Current year
+- `class` - Class name (defaults to package name in PascalCase). Used primarily in filenames
+
+> **Namespace Format Requirements**
+>
+> The `namespace` argument must follow this pattern: `Vendor\Package`
+>
+> - Must have exactly two parts separated by a backslash
+> - Each part must start with an **uppercase letter**
+> - Each part can contain alphanumeric characters (A-Z, a-z, 0-9)
+> - Invalid example: `acme\blog`, `Acme_Blog`, `Acme/Blog` ❌
+> - Valid example: `Acme\Blog`, `MyVendor\MyPackage` ✅
+>
+> If not provided, the namespace will be auto-generated as `Vendor\Package` based on the vendor and package arguments.
 
 #### Global Modifiers
 
@@ -145,7 +158,7 @@ skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
 > **Modifier Order Matters!** The order of chained modifiers affects the output.
 >
 > ```text
-> John Doe -> JOHN-DOE
+> John Doe → JOHN-DOE
 >
 > {{author|upper,slug}} → john-doe     (incorrect)
 > {{author|slug,upper}} → JOHN-DOE     (correct)
@@ -173,6 +186,13 @@ skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "Description" \
 
 - `upper` - Converts email to uppercase while preserving `@` and `.`
 
+##### `class` Replacer
+
+- Used only in **filename** contexts
+- Converts to kebab-case in filenames (e.g., `{{class}}` → `my-class.php`)
+- Default value is transformed from package name (e.g., `blog` → `Blog` → `blog` in filename)
+- Supports all global modifiers when used in content
+
 ### CLI Arguments and Options
 
 ```bash
@@ -180,29 +200,30 @@ SYNOPSIS
   skeleton init [options] [--] <vendor> <package> <namespace> <author> <email> <description>
 
 Arguments
-  vendor                   The name of the package vendor (prompted if not provided)
-  package                  The name of the package (prompted if not provided)
-  namespace                The package namespace (auto-generated as Vendor\Package if not provided)
-  author                   The package author (fetched from `git config user.name` or prompted)
-  email                    The package author email (fetched from `git config user.email` or prompted)
-  description              The package description (prompted if not provided)
+  vendor                       The name of the package vendor (prompted if not provided)
+  package                      The name of the package (prompted if not provided)
+  namespace                    The package namespace (auto-generated as Vendor\Package if not provided)
+  author                       The package author (fetched from `git config user.name` or prompted)
+  email                        The package author email (fetched from `git config user.email` or prompted)
+  description                  The package description (prompted if not provided)
 
 Options
-  --bootstrap[=BOOTSTRAP]  Initialize a new package from skeleton template (options: laravel, vanilla)
-  --force                  Force bootstrapping even if target directory is not empty (use with --bootstrap)
-      --proceed            Accept the configuration and proceed without confirmation
-      --no-install         Skip installing composer dependencies
-      --skip-license       Skip creating a LICENSE file if one does not exist
-      --path[=PATH]        The path to initialize the package in (defaults to current working directory)
-      --exclude[=EXCLUDE]  Paths to exclude when processing files (multiple values allowed)
-  -h, --help               Display help for the command
-      --silent             Do not output any messages
-  -q, --quiet              Only errors are displayed. All other output is suppressed
-  -V, --version            Display this application version
-      --ansi|--no-ansi     Force (or disable --no-ansi) ANSI output
-  -n, --no-interaction     Do not ask any interactive question
-      --env[=ENV]          The environment the command should run under
-  -v|vv|vvv, --verbose     Increase the verbosity of messages: 1 for normal output, 2 for more verbose output, and 3 for debug output
+      --bootstrap[=BOOTSTRAP]  Initialize a new package from skeleton template (options: laravel, vanilla)
+      --class[=CLASS]          The class name to use in replacements (defaults to package name)
+      --force                  Force bootstrapping even if target directory is not empty (use with --bootstrap)
+      --proceed                Accept the configuration and proceed without confirmation
+      --no-install             Skip installing composer dependencies
+      --skip-license           Skip creating a LICENSE file if one does not exist
+      --path[=PATH]            The path to initialize the package in (defaults to current working directory)
+      --exclude[=EXCLUDE]      Paths to exclude when processing files (multiple values allowed)
+  -h, --help                   Display help for the command
+      --silent                 Do not output any messages
+  -q, --quiet                  Only errors are displayed. All other output is suppressed
+  -V, --version                Display this application version
+      --ansi|--no-ansi         Force (or disable --no-ansi) ANSI output
+  -n, --no-interaction         Do not ask any interactive question
+      --env[=ENV]              The environment the command should run under
+  -v|vv|vvv, --verbose         Increase the verbosity of messages: 1 for normal output, 2 for more verbose output, and 3 for debug output
 ```
 
 ### Excluded Paths (Default)
@@ -295,6 +316,14 @@ skeleton init acme blog "Acme\\Blog" "Jane Doe" "jane@example.com" "A blogging p
 ```bash
 skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "A blogging package" \
   --no-install \
+  --proceed
+```
+
+### Example 4: Initialize with a custom class name
+
+```bash
+skeleton init acme blog "Acme\\Blog" "John Doe" "john@doe.com" "A blogging package" \
+  --class="BlogManager" \
   --proceed
 ```
 
