@@ -307,7 +307,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
         );
 
         $dependency = $this->resolveTestingFramework(
-            select('Which testing framework do you want to use?', $availableTestingFrameworks) ?? self::PEST_DEPENDENCY
+            select('Which testing framework do you want to use?', $availableTestingFrameworks, required: true)
         );
 
         alert('Installing composer dependencies...');
