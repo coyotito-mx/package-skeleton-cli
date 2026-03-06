@@ -1,6 +1,6 @@
 <?php
 
-use App\Replacer;
+use App\Replacers\Replacer;
 
 it('replace placeholder', function (): void {
     $replacer = Replacer::make('name', 'john doe');

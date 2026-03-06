@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Replacers;
 
-use App\Replacer;
+use App\Replacers\Replacer;
 use App\Replacers\Exceptions\InvalidVersionException;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
