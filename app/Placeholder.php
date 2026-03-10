@@ -117,7 +117,7 @@ abstract class Placeholder
      */
     protected function preProcess(string $replacement): string
     {
-        return Str::headline($replacement);
+        return $replacement;
     }
 
     /**
