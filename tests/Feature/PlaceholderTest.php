@@ -62,6 +62,26 @@ it('can register modifier', function (): void {
     expect($placeholder)->process('John Doe')->toBe('test');
 });
 
+it('can setup default modifiers', function () {
+    $placeholder = new class (['upper']) extends Placeholder
+    {
+        #[\Override]
+        protected static function getDefaultModifiers(): array
+        {
+            return [
+                UpperModifier::class,
+            ];
+        }
+
+        public static function getName(): string
+        {
+            return 'foo';
+        }
+    };
+
+    expect($placeholder)->process('john doe')->toBe('JOHN DOE');
+});
+
 it('apply one modifier', function (): void {
     $placeholder = createPlaceholder('foo', ['acronym']);
 
@@ -140,7 +160,25 @@ it('apply modifier', function (string $modifier, string $replacement, $expected)
 ]);
 
 it('fail to apply non-register modifier', function (): void {
-    $placeholder = createPlaceholder('foo', ['lower', 'unknown']);
+    $placeholder = createplaceholder('foo', ['lower']);
 
-    $placeholder->process('John Doe');
+    $placeholder->process('john doe');
 })->throws(ModifierNotRegistered::class);
+
+test('modifiers order matters', function (string $expected, array $modifiers) {
+    $placeholder = createplaceholder('foo', $modifiers);
+
+    $placeholder->registerModifier([
+        SlugModifier::class,
+        UCFirstModifier::class,
+        UpperModifier::class,
+    ]);
+
+    expect($placeholder)->process('John Doe')->toBe($expected);
+})->with([
+    'slug and ucfirst' => ['John-doe', ['slug', 'ucfirst']],
+    'ucfirst and slug' => ['john-doe', ['ucfirst', 'slug']],
+    'upper and slug' => ['john-doe', ['upper', 'slug']],
+    'slug and upper' => ['JOHN-DOE', ['slug', 'upper']],
+]);
+
