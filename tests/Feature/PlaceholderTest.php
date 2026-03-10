@@ -3,9 +3,19 @@
 declare(strict_types=1);
 
 use App\Placeholder;
+use App\Placeholders\Modifiers\AcronymModifier;
+use App\Placeholders\Modifiers\CamelModifier;
 use App\Placeholders\Modifiers\Concerns\HasName;
 use App\Placeholders\Modifiers\Contracts\ModifierContract;
 use App\Placeholders\Modifiers\Exceptions\ModifierNotRegistered;
+use App\Placeholders\Modifiers\KebabModifier;
+use App\Placeholders\Modifiers\LowerModifier;
+use App\Placeholders\Modifiers\PascalModifier;
+use App\Placeholders\Modifiers\SlugModifier;
+use App\Placeholders\Modifiers\SnakeModifier;
+use App\Placeholders\Modifiers\StudlyModifier;
+use App\Placeholders\Modifiers\UCFirstModifier;
+use App\Placeholders\Modifiers\UpperModifier;
 
 function createPlaceholder(string $placeholder, array $modifiers = []): Placeholder
 {
@@ -35,21 +45,6 @@ it('process replacement', function (): void {
     expect($placeholder)->process('Foo')->toBe('Foo');
 });
 
-it('apply one modifier', function (): void {
-    $placeholder = createPlaceholder('foo', ['acronym']);
-
-    expect($placeholder)
-        ->process('Hewlett Packard')->toBe('HP')
-        ->process('hewlett packard')->toBe('HP')
-        ->process('HewLeTT pacKarD')->toBe('HP');
-});
-
-it('apply multiple modifiers', function (): void {
-    $placeholder = createPlaceholder('foo', ['acronym', 'lower']);
-
-    expect($placeholder)->process('Hewlett Packard')->toBe('hp');
-});
-
 it('can register modifier', function (): void {
     class TestModifier implements ModifierContract
     {
@@ -67,53 +62,78 @@ it('can register modifier', function (): void {
     expect($placeholder)->process('John Doe')->toBe('test');
 });
 
-it('apply modifier', function (string $modifier, $replacement, $expected): void {
-    $placeholder = createPlaceholder('foo', [$modifier]);
+it('apply one modifier', function (): void {
+    $placeholder = createPlaceholder('foo', ['acronym']);
+
+    $placeholder->registerModifier(AcronymModifier::class);
+
+    expect($placeholder)
+        ->process('Hewlett Packard')->toBe('HP')
+        ->process('hewlett packard')->toBe('HP')
+        ->process('HewLeTT pacKarD')->toBe('HP');
+});
+
+it('apply multiple modifiers', function (): void {
+    $placeholder = createPlaceholder('foo', ['acronym', 'lower']);
+
+    $placeholder->registerModifier([
+        AcronymModifier::class,
+        LowerModifier::class,
+    ]);
+
+    expect($placeholder)->process('Hewlett Packard')->toBe('hp');
+});
+
+it('apply modifier', function (string $modifier, string $replacement, $expected): void {
+    /** @var class-string<\App\Placeholders\Modifiers\Contracts\ModifierContract $modifer */
+    $placeholder = createPlaceholder('foo', [$modifier::getName()]);
+
+    $placeholder->registerModifier($modifier);
 
     expect($placeholder)->process($replacement)->toBe($expected);
 })->with([
     'camelCase' => [
-        'camel',
+        CamelModifier::class,
         'john doe',
         'johnDoe',
     ],
     'kebab-case' => [
-        'kebab',
+        KebabModifier::class,
         'John Doe',
         'john-doe',
     ],
     'lowercase' => [
-        'lower',
+        LowerModifier::class,
         'John Doe',
         'john doe',
     ],
     'PascalCase' => [
-        'pascal',
+        PascalModifier::class,
         'John Doe',
         'JohnDoe',
     ],
     'slug-case' => [
-        'slug',
+        SlugModifier::class,
         'John Doe',
         'john-doe',
     ],
     'snake_case' => [
-        'snake',
+        SnakeModifier::class,
         'John Doe',
         'john_doe',
     ],
     'StudlyCase' => [
-        'studly',
+        StudlyModifier::class,
         'John doe',
         'JohnDoe',
     ],
     'Ucfirstcase' => [
-        'ucfirst',
+        UCFirstModifier::class,
         'john Doe',
         'John doe',
     ],
     'UPPERCASE' => [
-        'upper',
+        UpperModifier::class,
         'john doe',
         'JOHN DOE',
     ],

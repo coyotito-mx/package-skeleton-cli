@@ -60,19 +60,10 @@ abstract class Placeholder
      *
      * @return class-string<ModifierContract>[]
      */
-    final protected static function getDefaultModifiers(): array
+    protected static function getDefaultModifiers(): array
     {
         return [
-            AcronymModifier::class,
-            CamelModifier::class,
-            KebabModifier::class,
-            LowerModifier::class,
-            PascalModifier::class,
-            SlugModifier::class,
-            SnakeModifier::class,
-            StudlyModifier::class,
-            UCFirstModifier::class,
-            UpperModifier::class,
+            //
         ];
     }
 
