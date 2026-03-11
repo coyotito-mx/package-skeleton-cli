@@ -2,27 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App;
+namespace App\Placeholders;
 
-use App\Placeholders\Modifiers\AcronymModifier;
-use App\Placeholders\Modifiers\CamelModifier;
 use App\Placeholders\Modifiers\Contracts\ModifierContract;
 use App\Placeholders\Modifiers\Exceptions\ModifierNotRegistered;
-use App\Placeholders\Modifiers\KebabModifier;
-use App\Placeholders\Modifiers\LowerModifier;
-use App\Placeholders\Modifiers\PascalModifier;
-use App\Placeholders\Modifiers\SlugModifier;
-use App\Placeholders\Modifiers\SnakeModifier;
-use App\Placeholders\Modifiers\StudlyModifier;
-use App\Placeholders\Modifiers\UCFirstModifier;
-use App\Placeholders\Modifiers\UpperModifier;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 
 /**
  * Base class for placeholders
  */
-abstract class Placeholder
+abstract class BasePlaceholder
 {
     /**
      * The modifier's registry
@@ -30,6 +19,8 @@ abstract class Placeholder
      * @var array<string, class-string<ModifierContract>>
      */
     protected array $modifiersRegistry = [];
+
+    protected ?\Closure $modifierResolver = null;
 
     /**
      * Contructor class
@@ -105,11 +96,7 @@ abstract class Placeholder
      */
     protected function resolveModifier(string $name, ?string $arg = null): ModifierContract
     {
-        if (! isset($this->modifiersRegistry[$name])) {
-            throw new ModifierNotRegistered("The provided modifier [$name] is not registered in the placeholder ".class_basename($this).'::class');
-        }
-
-        return new $this->modifiersRegistry[$name]($arg);
+        return $this->getModifierResolver()->call($this, name: $name, arg: $arg);
     }
 
     /**
@@ -135,6 +122,32 @@ abstract class Placeholder
         }
 
         return $replacement;
+    }
+
+    /**
+     * Get the modifier class resolver
+     * 
+     * @return \Closure(string $name, ?string $arg): ModifierContract The modifier resolver
+     */
+    protected function getModifierResolver(): \Closure
+    {
+        return $this->modifierResolver ?? function (string $name, ?string $arg): ModifierContract {
+            if (! isset($this->modifiersRegistry[$name])) {
+                throw new ModifierNotRegistered("The provided modifier [$name] is not registered in the placeholder ".class_basename($this).'::class');
+            }
+
+            return new $this->modifiersRegistry[$name]($arg);
+        };
+    }
+
+    /**
+     * Set the closure to handle the modifier resolution using the current object context
+     * 
+     * @param \Closure(string $name, ?string $arg): ModifierContract $resolver
+     */
+    public function setModifierResolverUsing(?\Closure $resolver = null): void
+    {
+        $this->modifierResolver = $resolver;
     }
 
     abstract public static function getName(): string;

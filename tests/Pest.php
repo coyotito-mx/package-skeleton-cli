@@ -11,6 +11,17 @@
 |
 */
 
+use App\Placeholders\Modifiers\CamelModifier;
+use App\Placeholders\Modifiers\KebabModifier;
+use App\Placeholders\Modifiers\LowerModifier;
+use App\Placeholders\Modifiers\PascalModifier;
+use App\Placeholders\Modifiers\SlugModifier;
+use App\Placeholders\Modifiers\SnakeModifier;
+use App\Placeholders\Modifiers\StudlyModifier;
+use App\Placeholders\Modifiers\UCFirstModifier;
+use App\Placeholders\Modifiers\UpperModifier;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Testing\PendingCommand;
 
 use function Illuminate\Filesystem\join_paths;
@@ -38,6 +49,59 @@ uses(Tests\TestCase::class)->in('Feature');
 | global functions to help you to reduce the number of lines of code in your test files.
 |
 */
+
+function getModifierDataset(string|array $modifier): Collection
+{
+    $modifiers = Arr::wrap($modifier);
+
+    return collect([
+        'camel' => [
+            CamelModifier::class,
+            'john doe',
+            'johnDoe',
+        ],
+        'kebab' => [
+            KebabModifier::class,
+            'John Doe',
+            'john-doe',
+        ],
+        'lower' => [
+            LowerModifier::class,
+            'John Doe',
+            'john doe',
+        ],
+        'pascal' => [
+            PascalModifier::class,
+            'John Doe',
+            'JohnDoe',
+        ],
+        'slug' => [
+            SlugModifier::class,
+            'John Doe',
+            'john-doe',
+        ],
+        'snake' => [
+            SnakeModifier::class,
+            'John Doe',
+            'john_doe',
+        ],
+        'studly' => [
+            StudlyModifier::class,
+            'John doe',
+            'JohnDoe',
+        ],
+        'ucfirst' => [
+            UCFirstModifier::class,
+            'john Doe',
+            'John doe',
+        ],
+        'upper' => [
+            UpperModifier::class,
+            'john doe',
+            'JOHN DOE',
+        ],
+    ])->only($modifiers);
+}
 
 function ensureFolderExists(string $folder): void
 {

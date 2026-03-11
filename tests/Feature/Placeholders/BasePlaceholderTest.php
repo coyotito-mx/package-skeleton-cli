@@ -2,28 +2,23 @@
 
 declare(strict_types=1);
 
-use App\Placeholder;
+use App\Placeholders\BasePlaceholder;
 use App\Placeholders\Modifiers\AcronymModifier;
-use App\Placeholders\Modifiers\CamelModifier;
 use App\Placeholders\Modifiers\Concerns\HasName;
 use App\Placeholders\Modifiers\Contracts\ModifierContract;
 use App\Placeholders\Modifiers\Exceptions\ModifierNotRegistered;
-use App\Placeholders\Modifiers\KebabModifier;
 use App\Placeholders\Modifiers\LowerModifier;
-use App\Placeholders\Modifiers\PascalModifier;
 use App\Placeholders\Modifiers\SlugModifier;
-use App\Placeholders\Modifiers\SnakeModifier;
-use App\Placeholders\Modifiers\StudlyModifier;
 use App\Placeholders\Modifiers\UCFirstModifier;
 use App\Placeholders\Modifiers\UpperModifier;
 
-function createPlaceholder(string $placeholder, array $modifiers = []): Placeholder
+function createPlaceholder(string $placeholder, array $modifiers = []): BasePlaceholder
 {
-    return (static function (string $placeholderName, $modifiers): Placeholder {
+    return (static function (string $placeholderName, $modifiers): BasePlaceholder {
         $classIdentifier = uniqid('TestingPlaceholder');
 
         $classDefinition = <<<PHP
-        class $classIdentifier extends \App\Placeholder
+        class $classIdentifier extends \App\Placeholders\BasePlaceholder
         {
             public static function getName(): string
             {
@@ -63,7 +58,7 @@ it('can register modifier', function (): void {
 });
 
 it('can setup default modifiers', function () {
-    $placeholder = new class (['upper']) extends Placeholder
+    $placeholder = new class (['upper']) extends BasePlaceholder
     {
         #[\Override]
         protected static function getDefaultModifiers(): array
@@ -111,53 +106,17 @@ it('apply modifier', function (string $modifier, string $replacement, $expected)
     $placeholder->registerModifier($modifier);
 
     expect($placeholder)->process($replacement)->toBe($expected);
-})->with([
-    'camelCase' => [
-        CamelModifier::class,
-        'john doe',
-        'johnDoe',
-    ],
-    'kebab-case' => [
-        KebabModifier::class,
-        'John Doe',
-        'john-doe',
-    ],
-    'lowercase' => [
-        LowerModifier::class,
-        'John Doe',
-        'john doe',
-    ],
-    'PascalCase' => [
-        PascalModifier::class,
-        'John Doe',
-        'JohnDoe',
-    ],
-    'slug-case' => [
-        SlugModifier::class,
-        'John Doe',
-        'john-doe',
-    ],
-    'snake_case' => [
-        SnakeModifier::class,
-        'John Doe',
-        'john_doe',
-    ],
-    'StudlyCase' => [
-        StudlyModifier::class,
-        'John doe',
-        'JohnDoe',
-    ],
-    'Ucfirstcase' => [
-        UCFirstModifier::class,
-        'john Doe',
-        'John doe',
-    ],
-    'UPPERCASE' => [
-        UpperModifier::class,
-        'john doe',
-        'JOHN DOE',
-    ],
-]);
+})->with(fn () => getModifierDataset([
+    'camel',
+    'kebab',
+    'lower',
+    'pascal',
+    'slug',
+    'snake',
+    'studly',
+    'ucfirst',
+    'upper',
+]));
 
 it('fail to apply non-register modifier', function (): void {
     $placeholder = createplaceholder('foo', ['lower']);
