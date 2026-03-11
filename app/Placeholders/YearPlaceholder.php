@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Placeholders;
 
-use App\Placeholders\BasePlaceholder;
 use App\Placeholders\Exceptions\InvalidYearException;
-use Illuminate\Support\Facades\Date;
 
 /**
  * Replacer for `author` placeholders
@@ -15,11 +13,13 @@ use Illuminate\Support\Facades\Date;
  */
 class YearPlaceholder extends BasePlaceholder
 {
+    #[\Override]
     protected function preProcess(string $replacement): string
     {
         return tap($replacement, fn (string $preProcessed) => InvalidYearException::validate($preProcessed));
     }
 
+    #[\Override]
     public function process(?string $replacement = null): string
     {
         if (blank($replacement)) {

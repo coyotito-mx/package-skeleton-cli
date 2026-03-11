@@ -2,18 +2,17 @@
 
 declare(strict_types=1);
 
-use App\Placeholders\Modifiers\Exceptions\ModifierNotRegistered;
-use App\Placeholders\Namespace\NamespacePlaceholder;
 use App\Placeholders\Exceptions\InvalidNamespaceException;
+use App\Placeholders\Namespace\NamespacePlaceholder;
 
-it('process value', function () {
-    $placeholder = new NamespacePlaceholder();
+it('process value', function (): void {
+    $placeholder = new NamespacePlaceholder;
 
     expect($placeholder)->process('Acme\\Package')->toBe('Acme\\Package');
 });
 
-it('fail to process non-valid namespace', function () {
-    $placeholder = new NamespacePlaceholder();
+it('fail to process non-valid namespace', function (): void {
+    $placeholder = new NamespacePlaceholder;
 
     expect($placeholder)->process('Acme/Package');
 })->throws(InvalidNamespaceException::class);
@@ -36,25 +35,25 @@ it('process value slug modifier', function (): void {
     expect($placeholder)->process('AcmeVendor\\Package')->toBe('acme-vendor\\package');
 });
 
-it('process value escaping namespace', function () {
+it('process value escaping namespace', function (): void {
     $placeholder = new NamespacePlaceholder(['escape']);
 
     expect($placeholder)->process('AcmeVendor\\Package')->toBe('AcmeVendor\\\\Package');
 });
 
-it('fail to escape already escaped namespace', function () {
+it('fail to escape already escaped namespace', function (): void {
     $placeholder = new NamespacePlaceholder(['escape', 'escape']);
 
     expect($placeholder)->process('AcmeVendor\\Package')->toBe('AcmeVendor\\\\Package');
 });
 
-it('process value reversing namespace separator', function () {
+it('process value reversing namespace separator', function (): void {
     $placeholder = new NamespacePlaceholder(['reverse']);
 
     expect($placeholder)->process('AcmeVendor\\Package')->toBe('AcmeVendor/Package');
 });
 
-it('cannot escape reversed namespace separator', function () {
+it('cannot escape reversed namespace separator', function (): void {
     $placeholder = new NamespacePlaceholder(['reverse', 'escape']);
 
     expect($placeholder)->process('AcmeVendor\\Package')->toBe('AcmeVendor/Package');

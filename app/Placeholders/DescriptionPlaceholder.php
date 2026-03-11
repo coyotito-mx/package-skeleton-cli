@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Placeholders;
 
-use App\Placeholders\BasePlaceholder;
 use App\Placeholders\Modifiers\LowerModifier;
 use App\Placeholders\Modifiers\UCFirstModifier;
 use App\Placeholders\Modifiers\UpperModifier;
-use Illuminate\Support\Str;
 
 /**
  * Replacer for `email` placeholders
@@ -17,6 +15,7 @@ use Illuminate\Support\Str;
  */
 class DescriptionPlaceholder extends BasePlaceholder
 {
+    #[\Override]
     protected static function getDefaultModifiers(): array
     {
         return [

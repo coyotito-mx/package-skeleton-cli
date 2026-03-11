@@ -14,7 +14,7 @@ use App\Placeholders\Exceptions\InvalidNamespaceException;
  */
 class NamespacePlaceholder extends BasePlaceholder
 {
-
+    #[\Override]
     protected static function getDefaultModifiers(): array
     {
         return [
@@ -26,6 +26,7 @@ class NamespacePlaceholder extends BasePlaceholder
         ];
     }
 
+    #[\Override]
     protected function preProcess(string $replacement): string
     {
         return tap($replacement, fn (string $preProcessed) => InvalidNamespaceException::validate($preProcessed));

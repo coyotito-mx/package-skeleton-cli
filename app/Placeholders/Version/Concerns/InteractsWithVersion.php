@@ -9,7 +9,8 @@ use Illuminate\Support\Str;
 
 trait InteractsWithVersion
 {
-    protected function matchVersionSegment(string $semver, string $segment): string {
+    protected function matchVersionSegment(string $semver, string $segment): string
+    {
         $matches = Str::of($semver)->matchAllWithGroups($this->getSemVerPattern());
 
         return (string) ($matches[0] ?? collect())->get($segment, $semver);

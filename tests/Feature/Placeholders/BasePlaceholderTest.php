@@ -57,8 +57,8 @@ it('can register modifier', function (): void {
     expect($placeholder)->process('John Doe')->toBe('test');
 });
 
-it('can setup default modifiers', function () {
-    $placeholder = new class (['upper']) extends BasePlaceholder
+it('can setup default modifiers', function (): void {
+    $placeholder = new class(['upper']) extends BasePlaceholder
     {
         #[\Override]
         protected static function getDefaultModifiers(): array
@@ -124,7 +124,7 @@ it('fail to apply non-register modifier', function (): void {
     $placeholder->process('john doe');
 })->throws(ModifierNotRegistered::class);
 
-test('modifiers order matters', function (string $expected, array $modifiers) {
+test('modifiers order matters', function (string $expected, array $modifiers): void {
     $placeholder = createplaceholder('foo', $modifiers);
 
     $placeholder->registerModifier([
@@ -140,4 +140,3 @@ test('modifiers order matters', function (string $expected, array $modifiers) {
     'upper and slug' => ['john-doe', ['upper', 'slug']],
     'slug and upper' => ['JOHN-DOE', ['slug', 'upper']],
 ]);
-

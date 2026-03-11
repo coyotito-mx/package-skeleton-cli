@@ -11,6 +11,7 @@ class LowerModifier extends Modifier
 {
     use InteractsWithNamespace;
 
+    #[\Override]
     public function apply(string $value): string
     {
         return $this->unwrapNamespace(fn (string $segment): string => parent::apply($segment))($value);

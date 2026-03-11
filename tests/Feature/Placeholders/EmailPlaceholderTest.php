@@ -3,17 +3,17 @@
 declare(strict_types=1);
 
 use App\Placeholders\EmailPlaceholder;
-use App\Placeholders\Modifiers\Exceptions\ModifierNotRegistered;
 use App\Placeholders\Exceptions\InvalidEmailException;
+use App\Placeholders\Modifiers\Exceptions\ModifierNotRegistered;
 
-it('process value', function () {
-    $placeholder = new EmailPlaceholder();
+it('process value', function (): void {
+    $placeholder = new EmailPlaceholder;
 
     expect($placeholder)->process('john@doe.com')->toBe('john@doe.com');
 });
 
-it('fail to process non-valid e-mail', function () {
-    $placeholder = new EmailPlaceholder();
+it('fail to process non-valid e-mail', function (): void {
+    $placeholder = new EmailPlaceholder;
 
     expect($placeholder)->process('john@doe');
 })->throws(InvalidEmailException::class);

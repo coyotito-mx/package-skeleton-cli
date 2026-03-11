@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Placeholders;
 
-use App\Placeholders\BasePlaceholder;
 use App\Placeholders\Exceptions\InvalidPackageTypeException;
 use Illuminate\Support\Str;
 
@@ -17,9 +16,10 @@ class PackageTypePlaceholder extends BasePlaceholder
 {
     /**
      * {@inheritdoc}
-     * 
+     *
      * @throws InvalidPackageTypeException if the provided type is not valid
      */
+    #[\Override]
     public function preProcess(string $replacement): string
     {
         return tap(Str::slug($replacement), fn (string $preProcessed) => InvalidPackageTypeException::validate($preProcessed));

@@ -22,7 +22,8 @@ class VersionPlaceholder extends BasePlaceholder
 
         parent::__construct($modifiers);
     }
-    
+
+    #[\Override]
     protected static function getDefaultModifiers(): array
     {
         return [
@@ -34,9 +35,10 @@ class VersionPlaceholder extends BasePlaceholder
 
     /**
      * {@inheritdoc}
-     * 
+     *
      * @throws InvalidVersionException if the version provided is not valid
      */
+    #[\Override]
     public function preProcess(string $replacement): string
     {
         InvalidVersionException::validate($replacement);

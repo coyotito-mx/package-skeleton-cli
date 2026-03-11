@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Placeholders;
 
-use App\Placeholders\BasePlaceholder;
 use App\Placeholders\Modifiers\FilenameModifier;
 use Illuminate\Support\Str;
 
@@ -15,6 +14,7 @@ use Illuminate\Support\Str;
  */
 class ClassPlaceholder extends BasePlaceholder
 {
+    #[\Override]
     protected static function getDefaultModifiers(): array
     {
         return [
@@ -24,9 +24,10 @@ class ClassPlaceholder extends BasePlaceholder
 
     /**
      * {@inheritdoc}
-     * 
+     *
      * @throws \InvalidArgumentException if the provided value is not a valid e-amil
      */
+    #[\Override]
     public function preProcess(string $replacement): string
     {
         return Str::of($replacement)->kebab()->studly()->toString();

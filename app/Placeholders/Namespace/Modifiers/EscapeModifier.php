@@ -11,7 +11,8 @@ use Illuminate\Support\Str;
 class EscapeModifier extends Modifier
 {
     use InteractsWithNamespace;
-    
+
+    #[\Override]
     public function apply(string $value): string
     {
         return $this->handleNamespaceSeparator(

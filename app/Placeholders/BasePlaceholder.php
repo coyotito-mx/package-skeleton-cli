@@ -126,7 +126,7 @@ abstract class BasePlaceholder
 
     /**
      * Get the modifier class resolver
-     * 
+     *
      * @return \Closure(string $name, ?string $arg): ModifierContract The modifier resolver
      */
     protected function getModifierResolver(): \Closure
@@ -142,8 +142,8 @@ abstract class BasePlaceholder
 
     /**
      * Set the closure to handle the modifier resolution using the current object context
-     * 
-     * @param \Closure(string $name, ?string $arg): ModifierContract $resolver
+     *
+     * @param  \Closure(string $name, ?string $arg): ModifierContract  $resolver
      */
     public function setModifierResolverUsing(?\Closure $resolver = null): void
     {

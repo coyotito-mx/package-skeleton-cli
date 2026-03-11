@@ -11,7 +11,8 @@ use Illuminate\Support\Str;
 class ReverseModifier extends Modifier
 {
     use InteractsWithNamespace;
-    
+
+    #[\Override]
     public function apply(string $value): string
     {
         return $this->handleNamespaceSeparator(

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Placeholders;
 
-use App\Placeholders\BasePlaceholder;
 use App\Placeholders\Modifiers\CamelModifier;
 use App\Placeholders\Modifiers\KebabModifier;
 use App\Placeholders\Modifiers\LowerModifier;
@@ -23,6 +22,7 @@ use Illuminate\Support\Str;
  */
 class AuthorPlaceholder extends BasePlaceholder
 {
+    #[\Override]
     protected static function getDefaultModifiers(): array
     {
         return [
@@ -38,6 +38,7 @@ class AuthorPlaceholder extends BasePlaceholder
         ];
     }
 
+    #[\Override]
     public function preProcess(string $replacement): string
     {
         return Str::headline($replacement);
