@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Commands\Concerns\Configurations;
 
-use App\Replacers\Exceptions\InvalidNamespaceException;
+use App\Placeholders\Exceptions\InvalidNamespaceException;
 use App\Replacers\NamespaceReplacer;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\Input;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Replacers\Exceptions;
+namespace App\Placeholders\Exceptions;
 
 final class InvalidPackageTypeException extends InvalidFormatException
 {

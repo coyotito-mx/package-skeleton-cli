@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Replacers\Exceptions;
+namespace App\Placeholders\Exceptions;
 
 use Carbon\Exceptions\InvalidFormatException as CarbonInvalidFormatException;
 use Illuminate\Support\Carbon;
