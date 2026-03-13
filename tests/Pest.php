@@ -155,14 +155,21 @@ function createZipWithFile(string $zipPath, string|array $entries): void
  * 
  * @return class-string<BasePlaceholder>
  */
-function createPlaceholderClass(string $placeholder): string
+function createPlaceholderClass(string $placeholder, array $modifiers = []): string
 {
-    return (static function (string $placeholderName): string {
+    return (static function (string $placeholderName, array $modifiers = []): string {
         $classIdentifier = uniqid('TestingPlaceholder');
+
+        $modifiers = implode(',', array_map(fn (string $modifier): string => "$modifier::class", $modifiers));
 
         $classDefinition = <<<PHP
         class $classIdentifier extends \App\Placeholders\BasePlaceholder
         {
+            protected static function getDefaultModifiers(): array
+            {
+                return [$modifiers];
+            }
+
             public static function getName(): string
             {
                 return "$placeholderName";
@@ -173,7 +180,7 @@ function createPlaceholderClass(string $placeholder): string
         eval($classDefinition);
 
         return $classIdentifier;
-    })($placeholder);
+    })($placeholder, $modifiers);
 }
 
 function createPlaceholder(string $placeholder, array $modifiers = []): BasePlaceholder
