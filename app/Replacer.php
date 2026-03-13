@@ -8,6 +8,11 @@ use App\Placeholders\Exceptions\PlaceholderNotFound;
 use App\Placeholders\PlaceholderBuilder;
 use Illuminate\Support\Str;
 
+/**
+ * PlaceholderB Builder class
+ * 
+ * @template TPlaceholderClass of class-string<\App\Placeholders\BasePlaceholder>
+ */
 final class Replacer
 {
     protected PlaceholderBuilder $builder;
@@ -19,6 +24,12 @@ final class Replacer
         $this->builder = PlaceholderBuilder::make();
     }
 
+    /**
+     * Register a placeholder with a value to be replaced
+     * 
+     * @param TPlaceholderClass $placeholder
+     * @param string $value The value to be replaced
+     */
     public function registerPlaceholderWithValue(string $placeholder, string $value): self
     {
         $this->builder->register($placeholder);
@@ -28,11 +39,17 @@ final class Replacer
         return $this;
     }
 
+    /**
+     * Get the placeholder pattern
+     */
     public function getPlaceholderPattern(): string
     {
         return '/(?<!{){{(?<expression>(?:[a-z0-9]+(?:-[a-z0-9]+)*)(?:\|(?:[^|,}\s]+(?:,[^|,}\s]+)*))?)}}(?!})/';
     }
 
+    /**
+     * Replace the placeholders in the give $content
+     */
     public function replace(string $content): string
     {
         return Str::replaceMatches(
