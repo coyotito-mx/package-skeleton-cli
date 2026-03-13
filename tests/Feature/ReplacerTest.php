@@ -1,0 +1,66 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Placeholders\Modifiers\LowerModifier;
+use App\Placeholders\Modifiers\UpperModifier;
+use App\Replacer;
+
+it('replace placeholder', function () {
+    $placeholderClass = createPlaceholderClass('foo');
+
+    $replacer = new Replacer()->registerPlaceholderWithValue($placeholderClass, 'Bar');
+
+    expect($replacer)->replace('Hello, {{foo}}')->toBe('Hello, Bar');
+});
+
+
+it('replacer placeholders', function () {
+    $fooPlaceholderClass = createPlaceholderClass('foo');
+    $barPlaceholderClass = createPlaceholderClass('bar');
+
+    $replacer = new Replacer()
+        ->registerPlaceholderWithValue($fooPlaceholderClass, 'Buzz')
+        ->registerPlaceholderWithValue($barPlaceholderClass, 'FooBar');
+
+    expect($replacer)->replace('Hello, {{foo}}-{{bar}}')->toBe('Hello, Buzz-FooBar');
+});
+
+it('replace placeholder with modifiers', function () {
+    $placeholderClass = createPlaceholderClass('foo', [
+        UpperModifier::class,
+        LowerModifier::class,
+    ]);
+
+    $replacer = new Replacer()->registerPlaceholderWithValue($placeholderClass, 'Bar');
+
+    expect($replacer)
+        ->replace('{{foo|upper}}')
+        ->toBe('BAR')
+        ->replace('{{foo|lower}}')
+        ->toBe('bar');
+});
+
+
+test('will not replace non-registered placeholder', function () {
+    $replacer = new Replacer();
+
+    expect($replacer)->replace('Hello, {{foo}}')->toBe('Hello, {{foo}}');
+});
+
+
+test('will not replace malformed placeholder', function () {
+    $placeholderClass = createPlaceholderClass('foo');
+
+    $replacer = new Replacer()->registerPlaceholderWithValue($placeholderClass, 'Bar');
+
+    expect($replacer)
+        ->replace('Hello, {{foo }}')->toBe('Hello, {{foo }}')
+        ->replace('Hello, {{ foo}}')->tobe('Hello, {{ foo}}')
+        ->replace('Hello, {{ foo }}')->tobe('Hello, {{ foo }}')
+        ->replace('Hello, {{foo')->tobe('Hello, {{foo')
+        ->replace('Hello, foo}}')->tobe('Hello, foo}}')
+        ->replace('Hello, {foo}')->tobe('Hello, {foo}');
+});
+
+
