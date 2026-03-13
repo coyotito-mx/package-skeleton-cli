@@ -12,28 +12,6 @@ use App\Placeholders\Modifiers\SlugModifier;
 use App\Placeholders\Modifiers\UCFirstModifier;
 use App\Placeholders\Modifiers\UpperModifier;
 
-function createPlaceholder(string $placeholder, array $modifiers = []): BasePlaceholder
-{
-    return (static function (string $placeholderName, $modifiers): BasePlaceholder {
-        $classIdentifier = uniqid('TestingPlaceholder');
-
-        $classDefinition = <<<PHP
-        class $classIdentifier extends \App\Placeholders\BasePlaceholder
-        {
-            public static function getName(): string
-            {
-                return "$placeholderName";
-            }
-        }
-        PHP;
-
-        eval($classDefinition);
-
-        /** @phpstan-ignore-next-line */
-        return new $classIdentifier($modifiers);
-    })($placeholder, $modifiers);
-}
-
 it('process replacement', function (): void {
     $placeholder = createPlaceholder('foo');
 

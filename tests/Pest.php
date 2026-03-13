@@ -11,6 +11,7 @@
 |
 */
 
+use App\Placeholders\BasePlaceholder;
 use App\Placeholders\Modifiers\CamelModifier;
 use App\Placeholders\Modifiers\KebabModifier;
 use App\Placeholders\Modifiers\LowerModifier;
@@ -147,6 +148,39 @@ function createZipWithFile(string $zipPath, string|array $entries): void
     }
 
     $zip->close();
+}
+
+/**
+ * Create a Testing Placeholder class
+ * 
+ * @return class-string<BasePlaceholder>
+ */
+function createPlaceholderClass(string $placeholder): string
+{
+    return (static function (string $placeholderName): string {
+        $classIdentifier = uniqid('TestingPlaceholder');
+
+        $classDefinition = <<<PHP
+        class $classIdentifier extends \App\Placeholders\BasePlaceholder
+        {
+            public static function getName(): string
+            {
+                return "$placeholderName";
+            }
+        }
+        PHP;
+
+        eval($classDefinition);
+
+        return $classIdentifier;
+    })($placeholder);
+}
+
+function createPlaceholder(string $placeholder, array $modifiers = []): BasePlaceholder
+{
+    $placeholderClass = createPlaceholderClass($placeholder);
+
+    return new $placeholderClass($modifiers);
 }
 
 if (! function_exists('artisan')) {
