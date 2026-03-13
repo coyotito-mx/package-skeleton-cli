@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Placeholders;
 
+use App\Placeholders\Modifiers\AcronymModifier;
 use App\Placeholders\Modifiers\CamelModifier;
 use App\Placeholders\Modifiers\KebabModifier;
 use App\Placeholders\Modifiers\LowerModifier;
@@ -25,6 +26,7 @@ class LicensePlaceholder extends BasePlaceholder
     protected static function getDefaultModifiers(): array
     {
         return [
+            AcronymModifier::class,
             CamelModifier::class,
             KebabModifier::class,
             LowerModifier::class,
