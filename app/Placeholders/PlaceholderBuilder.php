@@ -2,66 +2,76 @@
 
 declare(strict_types=1);
 
-namespace App;
+namespace App\Placeholders;
 
 use App\Placeholders\Exceptions\PlaceholderNotFound;
-use Illuminate\Support\Arr;
+use App\Placeholders\BasePlaceholder;
 
 /**
- * Placeholder Builder
+ * BasePlaceholder Builder
+ * 
+ * @template TPlaceholderClass of class-string<BasePlaceholder>
  */
 class PlaceholderBuilder
 {
-    /**+
-     * The placeholder name
+    /**
+     * A placeholder registry of the available placeholders
+     * 
+     * @var TPlaceholderClass[]
      */
-    protected string $placeholder;
+    protected array $placeholdersRegistry = [];
 
     /**
-     * The modifiers
+     * Constructor class
+     * 
+     * @param TPlaceholderClass[] The placeholders used to build a placeholder
      */
-    protected array $modifiers;
-
-    /**
-     * Registry of placeholders
-     */
-    protected static array $registry = [];
-
-    /**
-     * Class constructor
-     */
-    protected function __construct(string $expression)
+    protected function __construct()
     {
-        ['placeholder' => $placeholder, 'modifiers' => $modifiers] = $this->parseExpression($expression);
-
-        $this->placeholder = $placeholder;
-        $this->modifiers = $modifiers;
+        //
     }
 
     /**
-     * Create a builder
+     * Make a builder
      */
-    final public static function make(string $expression): self
+    public static function make(): self
     {
-        return new self($expression);
+        return new static;
     }
 
     /**
-     * Register placeholder
-     *
-     * @param  class-string<Placeholder>|class-string<Placeholder>[]  $placeholder  The class string of a Placeholder
+     * Make a builder and register placeholders
+     * 
+     * @param TPlaceholder|TPlaceholderClass[] $placeholder
      */
-    public static function register(string|array $placeholder): void
+    public static function using(string|array $placeholder): self
     {
-        $placeholders = Arr::wrap($placeholder);
+        return with(static::make(), fn (self $builder): self => $builder->register($placeholder));
+    }
 
-        foreach ($placeholders as $placeholder) {
-            static::$registry[$placeholder::$name] = $placeholder;
+
+    /**
+     * Register placeholders
+     * 
+     * @param TPlaceholder|TPlaceholderClass[] $placeholder
+     */
+    public function register(string|array $placeholder): self
+    {
+        if (is_string($placeholder)) {
+            return $this->register([$placeholder]);
         }
+
+        foreach ($placeholder as $ph) {
+            $this->placeholdersRegistry[$ph::getName()] = $ph;
+        }
+
+        return $this;
     }
 
     /**
-     * Parse the given expresion to extract the placeholder name and modifiers (or not)
+     * Parse the given expresion to extract the placeholder name and modifiers
+     * 
+     * @return array{placeholder: string, modifiers: array} The parsed result
      */
     protected function parseExpression(string $expression): array
     {
@@ -85,22 +95,21 @@ class PlaceholderBuilder
     /**
      * Resolve the placeholder from the given name
      *
-     * @return class-string<Placeholder>
+     * @return BasePlaceholder The resolved placeholder
      *
      * @throws PlaceholderNotFound
      */
-    private function resolvePlaceholder(string $name): string
+    private function resolvePlaceholder(string $placeholder, array $modifiers = []): BasePlaceholder
     {
-        return static::$registry[$name] ?? throw new PlaceholderNotFound("The placeholder [$name] is not registered");
+        $placeholderClass = $this->placeholdersRegistry[$placeholder] ?? throw new PlaceholderNotFound("The placeholder [$placeholder] is not registered");
+
+        return new $placeholderClass($modifiers);
     }
 
-    /**
-     * Build a the placeholder
-     */
-    public function build(): Placeholder
+    public function build(string $expression): BasePlaceholder
     {
-        $resolved = $this->resolvePlaceholder($this->placeholder);
+        ['placeholder' => $placeholder, 'modifiers' => $modifiers] = $this->parseExpression($expression);
 
-        return new $resolved($this->modifiers);
+        return $this->resolvePlaceholder($placeholder, $modifiers);
     }
 }
