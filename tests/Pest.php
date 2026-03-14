@@ -12,6 +12,7 @@
 */
 
 use App\Placeholders\BasePlaceholder;
+use App\Placeholders\Modifiers\AcronymModifier;
 use App\Placeholders\Modifiers\CamelModifier;
 use App\Placeholders\Modifiers\KebabModifier;
 use App\Placeholders\Modifiers\LowerModifier;
@@ -101,6 +102,11 @@ function getModifierDataset(string|array $modifier): Collection
             'john doe',
             'JOHN DOE',
         ],
+        'acronym' => [
+            AcronymModifier::class,
+            'Hewlett Packard',
+            'HP',
+        ]
     ])->only($modifiers);
 }
 

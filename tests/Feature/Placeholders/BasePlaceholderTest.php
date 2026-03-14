@@ -94,6 +94,7 @@ it('apply modifier', function (string $modifier, string $replacement, $expected)
     'studly',
     'ucfirst',
     'upper',
+    'acronym'
 ]));
 
 it('fail to apply non-register modifier', function (): void {
