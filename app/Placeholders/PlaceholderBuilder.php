@@ -8,22 +8,18 @@ use App\Placeholders\Exceptions\PlaceholderNotFound;
 
 /**
  * BasePlaceholder Builder
- *
- * @template TPlaceholderClass of class-string<BasePlaceholder>
  */
 class PlaceholderBuilder
 {
     /**
      * A placeholder registry of the available placeholders
      *
-     * @var TPlaceholderClass[]
+     * @var class-string<BasePlaceholder>[]
      */
     protected array $placeholdersRegistry = [];
 
     /**
      * Constructor class
-     *
-     * @param TPlaceholderClass[] The placeholders used to build a placeholder
      */
     protected function __construct()
     {
@@ -35,23 +31,23 @@ class PlaceholderBuilder
      */
     public static function make(): self
     {
-        return new static;
+        return new self;
     }
 
     /**
      * Make a builder and register placeholders
      *
-     * @param  TPlaceholder|TPlaceholderClass[]  $placeholder
+     * @param  class-string<BasePlaceholder>|class-string<BasePlaceholder>[]  $placeholder
      */
     public static function using(string|array $placeholder): self
     {
-        return with(static::make(), fn (self $builder): self => $builder->register($placeholder));
+        return with(self::make(), fn (self $builder): self => $builder->register($placeholder));
     }
 
     /**
      * Register placeholders
      *
-     * @param  TPlaceholder|TPlaceholderClass[]  $placeholder
+     * @param  class-string<BasePlaceholder>|class-string<BasePlaceholder>[]  $placeholder
      */
     public function register(string|array $placeholder): self
     {

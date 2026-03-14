@@ -10,8 +10,6 @@ use Illuminate\Support\Str;
 
 /**
  * PlaceholderB Builder class
- *
- * @template TPlaceholderClass of class-string<\App\Placeholders\BasePlaceholder>
  */
 final class Replacer
 {
@@ -27,7 +25,7 @@ final class Replacer
     /**
      * Register a placeholder with a value to be replaced
      *
-     * @param  TPlaceholderClass  $placeholder
+     * @param  class-string<\App\Placeholders\BasePlaceholder>  $placeholder
      * @param  string  $value  The value to be replaced
      */
     public function registerPlaceholderWithValue(string $placeholder, string $value): self

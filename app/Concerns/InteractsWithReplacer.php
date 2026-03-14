@@ -12,7 +12,7 @@ trait InteractsWithReplacer
     /**
      * The list of placeholder to look
      *
-     * @var array<class-string<\App\Replacers\Builder>, null|string|\Closure(): ?string>
+     * @var array<class-string<\App\Placeholders\BasePlaceholder>, null|string|\Closure(): ?string>
      */
     protected array $placeholders = [];
 
@@ -54,7 +54,6 @@ trait InteractsWithReplacer
 
         $replacer = new Replacer;
 
-        // TODO: Change the implementation
         foreach ($this->placeholders as $placeholder => $callback) {
             ['value' => $value, 'skip' => $skip] = $this->resolvePlaceholderValue($callback);
 
