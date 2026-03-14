@@ -17,7 +17,7 @@ function assertPropertyIsEqual(PlaceholderBuilder $builder, string $property, mi
     (fn () => PHPUnit\Assert::assertEquals($this->$property, $value, "The property \${$property} and the value provided are not equal"))->call($builder);
 }
 
-it('can register placeholder', function () {
+it('can register placeholder', function (): void {
     $pleceholderClass = createPlaceholderClass('foo');
 
     $builder = PlaceholderBuilder::make()->register($pleceholderClass);
@@ -27,7 +27,7 @@ it('can register placeholder', function () {
     ]);
 });
 
-it('can parse placeholder expression', function () {
+it('can parse placeholder expression', function (): void {
     $builder = PlaceholderBuilder::make();
 
     expect(callNonAccessibleMethod($builder, 'parseExpression', 'foo|bar,buzz'))->toBe([
@@ -36,7 +36,7 @@ it('can parse placeholder expression', function () {
     ]);
 });
 
-it('can resolve placeholder', function () {
+it('can resolve placeholder', function (): void {
     $pleceholderClass = createPlaceholderClass('foo');
 
     $builder = PlaceholderBuilder::using($pleceholderClass);
@@ -46,7 +46,7 @@ it('can resolve placeholder', function () {
     )->toBeInstanceOf(BasePlaceholder::class);
 });
 
-it('can build placeholder', function () {
+it('can build placeholder', function (): void {
     $pleceholderClass = createPlaceholderClass('foo');
 
     $builder = PlaceholderBuilder::make()->register($pleceholderClass);
@@ -56,6 +56,6 @@ it('can build placeholder', function () {
     ]);
 });
 
-it('fail to build non-registered placeholder', function () {
+it('fail to build non-registered placeholder', function (): void {
     PlaceholderBuilder::make()->build('foo');
 })->throws(PlaceholderNotFound::class);

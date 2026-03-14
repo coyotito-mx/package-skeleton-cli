@@ -5,25 +5,24 @@ declare(strict_types=1);
 namespace App\Placeholders;
 
 use App\Placeholders\Exceptions\PlaceholderNotFound;
-use App\Placeholders\BasePlaceholder;
 
 /**
  * BasePlaceholder Builder
- * 
+ *
  * @template TPlaceholderClass of class-string<BasePlaceholder>
  */
 class PlaceholderBuilder
 {
     /**
      * A placeholder registry of the available placeholders
-     * 
+     *
      * @var TPlaceholderClass[]
      */
     protected array $placeholdersRegistry = [];
 
     /**
      * Constructor class
-     * 
+     *
      * @param TPlaceholderClass[] The placeholders used to build a placeholder
      */
     protected function __construct()
@@ -41,19 +40,18 @@ class PlaceholderBuilder
 
     /**
      * Make a builder and register placeholders
-     * 
-     * @param TPlaceholder|TPlaceholderClass[] $placeholder
+     *
+     * @param  TPlaceholder|TPlaceholderClass[]  $placeholder
      */
     public static function using(string|array $placeholder): self
     {
         return with(static::make(), fn (self $builder): self => $builder->register($placeholder));
     }
 
-
     /**
      * Register placeholders
-     * 
-     * @param TPlaceholder|TPlaceholderClass[] $placeholder
+     *
+     * @param  TPlaceholder|TPlaceholderClass[]  $placeholder
      */
     public function register(string|array $placeholder): self
     {
@@ -70,7 +68,7 @@ class PlaceholderBuilder
 
     /**
      * Parse the given expresion to extract the placeholder name and modifiers
-     * 
+     *
      * @return array{placeholder: string, modifiers: array} The parsed result
      */
     protected function parseExpression(string $expression): array

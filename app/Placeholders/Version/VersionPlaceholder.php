@@ -30,7 +30,7 @@ class VersionPlaceholder extends BasePlaceholder
             Modifiers\MajorModifier::class,
             Modifiers\MinorModifier::class,
             Modifiers\PatchModifier::class,
-            Modifiers\PrefixModifier::class
+            Modifiers\PrefixModifier::class,
         ];
     }
 

@@ -106,7 +106,7 @@ function getModifierDataset(string|array $modifier): Collection
             AcronymModifier::class,
             'Hewlett Packard',
             'HP',
-        ]
+        ],
     ])->only($modifiers);
 }
 
@@ -158,7 +158,7 @@ function createZipWithFile(string $zipPath, string|array $entries): void
 
 /**
  * Create a Testing Placeholder class
- * 
+ *
  * @return class-string<BasePlaceholder>
  */
 function createPlaceholderClass(string $placeholder, array $modifiers = []): string

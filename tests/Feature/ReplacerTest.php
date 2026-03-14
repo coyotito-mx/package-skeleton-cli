@@ -6,7 +6,7 @@ use App\Placeholders\Modifiers\LowerModifier;
 use App\Placeholders\Modifiers\UpperModifier;
 use App\Replacer;
 
-it('replace placeholder', function () {
+it('replace placeholder', function (): void {
     $placeholderClass = createPlaceholderClass('foo');
 
     $replacer = new Replacer()->registerPlaceholderWithValue($placeholderClass, 'Bar');
@@ -14,8 +14,7 @@ it('replace placeholder', function () {
     expect($replacer)->replace('Hello, {{foo}}')->toBe('Hello, Bar');
 });
 
-
-it('replacer placeholders', function () {
+it('replacer placeholders', function (): void {
     $fooPlaceholderClass = createPlaceholderClass('foo');
     $barPlaceholderClass = createPlaceholderClass('bar');
 
@@ -26,7 +25,7 @@ it('replacer placeholders', function () {
     expect($replacer)->replace('Hello, {{foo}}-{{bar}}')->toBe('Hello, Buzz-FooBar');
 });
 
-it('replace placeholder with modifiers', function () {
+it('replace placeholder with modifiers', function (): void {
     $placeholderClass = createPlaceholderClass('foo', [
         UpperModifier::class,
         LowerModifier::class,
@@ -41,15 +40,13 @@ it('replace placeholder with modifiers', function () {
         ->toBe('bar');
 });
 
-
-test('will not replace non-registered placeholder', function () {
-    $replacer = new Replacer();
+test('will not replace non-registered placeholder', function (): void {
+    $replacer = new Replacer;
 
     expect($replacer)->replace('Hello, {{foo}}')->toBe('Hello, {{foo}}');
 });
 
-
-test('will not replace malformed placeholder', function () {
+test('will not replace malformed placeholder', function (): void {
     $placeholderClass = createPlaceholderClass('foo');
 
     $replacer = new Replacer()->registerPlaceholderWithValue($placeholderClass, 'Bar');
@@ -62,5 +59,3 @@ test('will not replace malformed placeholder', function () {
         ->replace('Hello, foo}}')->tobe('Hello, foo}}')
         ->replace('Hello, {foo}')->tobe('Hello, {foo}');
 });
-
-

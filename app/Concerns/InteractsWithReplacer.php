@@ -52,8 +52,7 @@ trait InteractsWithReplacer
         $directory = dirname($file->getRealPath());
         $newFilename = $file->getFilename();
 
-
-        $replacer = new Replacer();
+        $replacer = new Replacer;
 
         // TODO: Change the implementation
         foreach ($this->placeholders as $placeholder => $callback) {
