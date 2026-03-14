@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Commands\Concerns\Configurations;
 
-use App\Replacers\PackageReplacer;
-use App\Replacers\VendorReplacer;
+use App\Placeholders\PackagePlaceholder;
+use App\Placeholders\VendorPlaceholder;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputArgument;
 
@@ -19,8 +19,8 @@ trait HasVendorPackage
         ]);
 
         $this
-            ->addReplacer(VendorReplacer::class, fn () => $this->getVendor())
-            ->addReplacer(PackageReplacer::class, fn () => $this->getPackage());
+            ->addPlaceholder(VendorPlaceholder::class, fn () => $this->getVendor())
+            ->addPlaceholder(PackagePlaceholder::class, fn () => $this->getPackage());
     }
 
     /**

@@ -11,6 +11,19 @@
 |
 */
 
+use App\Placeholders\BasePlaceholder;
+use App\Placeholders\Modifiers\AcronymModifier;
+use App\Placeholders\Modifiers\CamelModifier;
+use App\Placeholders\Modifiers\KebabModifier;
+use App\Placeholders\Modifiers\LowerModifier;
+use App\Placeholders\Modifiers\PascalModifier;
+use App\Placeholders\Modifiers\SlugModifier;
+use App\Placeholders\Modifiers\SnakeModifier;
+use App\Placeholders\Modifiers\StudlyModifier;
+use App\Placeholders\Modifiers\UCFirstModifier;
+use App\Placeholders\Modifiers\UpperModifier;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Testing\PendingCommand;
 
 use function Illuminate\Filesystem\join_paths;
@@ -38,6 +51,64 @@ uses(Tests\TestCase::class)->in('Feature');
 | global functions to help you to reduce the number of lines of code in your test files.
 |
 */
+
+function getModifierDataset(string|array $modifier): Collection
+{
+    $modifiers = Arr::wrap($modifier);
+
+    return collect([
+        'camel' => [
+            CamelModifier::class,
+            'john doe',
+            'johnDoe',
+        ],
+        'kebab' => [
+            KebabModifier::class,
+            'John Doe',
+            'john-doe',
+        ],
+        'lower' => [
+            LowerModifier::class,
+            'John Doe',
+            'john doe',
+        ],
+        'pascal' => [
+            PascalModifier::class,
+            'John Doe',
+            'JohnDoe',
+        ],
+        'slug' => [
+            SlugModifier::class,
+            'John Doe',
+            'john-doe',
+        ],
+        'snake' => [
+            SnakeModifier::class,
+            'John Doe',
+            'john_doe',
+        ],
+        'studly' => [
+            StudlyModifier::class,
+            'John doe',
+            'JohnDoe',
+        ],
+        'ucfirst' => [
+            UCFirstModifier::class,
+            'john Doe',
+            'John doe',
+        ],
+        'upper' => [
+            UpperModifier::class,
+            'john doe',
+            'JOHN DOE',
+        ],
+        'acronym' => [
+            AcronymModifier::class,
+            'Hewlett Packard',
+            'HP',
+        ],
+    ])->only($modifiers);
+}
 
 function ensureFolderExists(string $folder): void
 {
@@ -83,6 +154,46 @@ function createZipWithFile(string $zipPath, string|array $entries): void
     }
 
     $zip->close();
+}
+
+/**
+ * Create a Testing Placeholder class
+ *
+ * @return class-string<BasePlaceholder>
+ */
+function createPlaceholderClass(string $placeholder, array $modifiers = []): string
+{
+    return (static function (string $placeholderName, array $modifiers = []): string {
+        $classIdentifier = uniqid('TestingPlaceholder');
+
+        $modifiers = implode(',', array_map(fn (string $modifier): string => "$modifier::class", $modifiers));
+
+        $classDefinition = <<<PHP
+        class $classIdentifier extends \App\Placeholders\BasePlaceholder
+        {
+            protected static function getDefaultModifiers(): array
+            {
+                return [$modifiers];
+            }
+
+            public static function getName(): string
+            {
+                return "$placeholderName";
+            }
+        }
+        PHP;
+
+        eval($classDefinition);
+
+        return $classIdentifier;
+    })($placeholder, $modifiers);
+}
+
+function createPlaceholder(string $placeholder, array $modifiers = []): BasePlaceholder
+{
+    $placeholderClass = createPlaceholderClass($placeholder);
+
+    return new $placeholderClass($modifiers);
 }
 
 if (! function_exists('artisan')) {
