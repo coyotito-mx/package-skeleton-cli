@@ -93,7 +93,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
 
             $this->ensureLicenseFileExists();
 
-            $this->replacePlaceholdersInFiles(
+            $this->processFiles(
                 $this->getFilesToProcess()
             );
 

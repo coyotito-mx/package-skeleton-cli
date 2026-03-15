@@ -2,12 +2,14 @@
 
 namespace App\Concerns;
 
+use App\PlaceholderReplacer;
 use App\Replacer;
+use App\TagRemoval;
 use Closure;
 use Illuminate\Support\Facades\File;
 use SplFileInfo;
 
-trait InteractsWithReplacer
+trait InteractsWithReplacers
 {
     /**
      * The list of placeholder to look
@@ -30,29 +32,29 @@ trait InteractsWithReplacer
     }
 
     /**
-     * Replace placeholders in the given files
+     * Process the given files
      *
      * @param  SplFileInfo[]  $files  The files to process
      */
-    private function replacePlaceholdersInFiles(array $files): void
+    protected function processFiles(array $files): void
     {
         foreach ($files as $file) {
-            $this->pipeFileThroughPlaceholder($file);
+            $this->pipeFileThroughReplacers($file);
         }
     }
 
     /**
-     * Pipe the given file through all the placeholders and replace them
+     * Pipe the given file through all the replacers
      *
      * @param  SplFileInfo  $file  The file to be processed.
      */
-    private function pipeFileThroughPlaceholder(SplFileInfo $file): void
+    private function pipeFileThroughReplacers(SplFileInfo $file): void
     {
         $content = File::get($file->getRealPath());
         $directory = dirname($file->getRealPath());
         $newFilename = $file->getFilename();
 
-        $replacer = new Replacer;
+        $placeholderReplacer = new PlaceholderReplacer;
 
         foreach ($this->placeholders as $placeholder => $callback) {
             ['value' => $value, 'skip' => $skip] = $this->resolvePlaceholderValue($callback);
@@ -61,16 +63,23 @@ trait InteractsWithReplacer
                 continue;
             }
 
-            $replacer->registerPlaceholderWithValue($placeholder, $value);
+            $placeholderReplacer->registerPlaceholderWithValue($placeholder, $value);
         }
 
-        $content = $replacer->replace($content);
-        $newFilename = $replacer->replace($newFilename);
+        $this->replaceUsing($placeholderReplacer, $content, $newFilename);
+        $this->replaceUsing(new TagRemoval, $content, $newFilename);
 
         File::put($file->getRealPath(), $content);
 
         if ($newFilename !== $file->getFilename()) {
             File::move($file->getRealPath(), $directory.DIRECTORY_SEPARATOR.$newFilename);
+        }
+    }
+
+    private function replaceUsing(Replacer $replacer, string &...$content): void
+    {
+        foreach ($content as &$value) {
+            $value = $replacer->replace($value);
         }
     }
 

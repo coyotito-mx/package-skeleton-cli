@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Commands\Concerns;
 
-use App\Concerns\InteractsWithReplacer;
+use App\Concerns\InteractsWithReplacers;
 use App\Placeholders\ClassPlaceholder;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputArgument;
@@ -27,7 +27,7 @@ trait HasPackageConfiguration
         Configurations\HasVendorPackage,
         Configurations\HasVersion,
         Configurations\HasYear,
-        InteractsWithReplacer;
+        InteractsWithReplacers;
 
     #[\Override]
     protected function configure(): void
