@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App;
 
-use App\Placeholders\Exceptions\PlaceholderNotFound;
-use App\Placeholders\PlaceholderBuilder;
 use Illuminate\Support\Str;
 
 /**
@@ -13,7 +11,6 @@ use Illuminate\Support\Str;
  */
 class TagRemoval extends Replacer
 {
-
     /**
      * Get the placeholder pattern
      */

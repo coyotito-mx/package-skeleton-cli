@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
+use App\PlaceholderReplacer;
 use App\Placeholders\Modifiers\LowerModifier;
 use App\Placeholders\Modifiers\UpperModifier;
-use App\PlaceholderReplacer;
 
 it('replace placeholder', function (): void {
     $placeholderClass = createPlaceholderClass('foo');
