@@ -32,23 +32,23 @@ trait InteractsWithReplacers
     }
 
     /**
-     * Replace placeholders in the given files
+     * Process the given files
      *
      * @param  SplFileInfo[]  $files  The files to process
      */
-    private function replacePlaceholdersInFiles(array $files): void
+    protected function processFiles(array $files): void
     {
         foreach ($files as $file) {
-            $this->pipeFileThroughPlaceholder($file);
+            $this->pipeFileThroughReplacers($file);
         }
     }
 
     /**
-     * Pipe the given file through all the placeholders and replace them
+     * Pipe the given file through all the replacers
      *
      * @param  SplFileInfo  $file  The file to be processed.
      */
-    private function pipeFileThroughPlaceholder(SplFileInfo $file): void
+    private function pipeFileThroughReplacers(SplFileInfo $file): void
     {
         $content = File::get($file->getRealPath());
         $directory = dirname($file->getRealPath());
@@ -66,8 +66,8 @@ trait InteractsWithReplacers
             $placeholderReplacer->registerPlaceholderWithValue($placeholder, $value);
         }
 
-        $this->replace($placeholderReplacer, $content, $newFilename);
-        $this->replace(new TagRemoval, $content, $newFilename);
+        $this->replaceUsing($placeholderReplacer, $content, $newFilename);
+        $this->replaceUsing(new TagRemoval, $content, $newFilename);
 
         File::put($file->getRealPath(), $content);
 
@@ -76,7 +76,7 @@ trait InteractsWithReplacers
         }
     }
 
-    private function replace(Replacer $replacer, string &...$content): void
+    private function replaceUsing(Replacer $replacer, string &...$content): void
     {
         foreach ($content as &$value) {
             $value = $replacer->replace($value);
