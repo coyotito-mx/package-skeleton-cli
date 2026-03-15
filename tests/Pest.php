@@ -110,7 +110,7 @@ function getModifierDataset(null|string|array $modifier = null): Collection
             TitleModifier::class,
             'john doe',
             'John Doe',
-        ]
+        ],
     ])->when($modifier !== null, fn (Collection $collection): Collection => $collection->only(Arr::wrap($modifier)));
 }
 
