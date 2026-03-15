@@ -2,7 +2,7 @@
 
 namespace App\Concerns;
 
-use App\Replacer;
+use App\PlaceholderReplacer;
 use Closure;
 use Illuminate\Support\Facades\File;
 use SplFileInfo;
@@ -52,7 +52,7 @@ trait InteractsWithReplacer
         $directory = dirname($file->getRealPath());
         $newFilename = $file->getFilename();
 
-        $replacer = new Replacer;
+        $replacer = new PlaceholderReplacer;
 
         foreach ($this->placeholders as $placeholder => $callback) {
             ['value' => $value, 'skip' => $skip] = $this->resolvePlaceholderValue($callback);
