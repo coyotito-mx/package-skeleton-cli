@@ -1,5 +1,17 @@
 # Release Notes
 
+## v2.1.0 - 2026-03-15
+
+### What's changed
+
+### 🚀 Features
+
+- Add removal tag by [@asciito](https://github.com/asciito) in #110
+
+### 🔧 Chores
+
+- Improve `replacer` structure by [@asciito](https://github.com/asciito) in #109
+
 ## v2.0.0 - 2026-03-04
 
 ### What's changed
