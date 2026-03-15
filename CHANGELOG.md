@@ -1,5 +1,13 @@
 # Release Notes
 
+## v2.1.2 - 2026-03-15
+
+### What's changed
+
+### 🐞 Bugfix
+
+- Add missing title modifier and tests by [@asciito](https://github.com/asciito) in #117
+
 ## v2.1.1 - 2026-03-15
 
 ### What's changed
