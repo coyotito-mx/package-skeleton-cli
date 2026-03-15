@@ -20,6 +20,7 @@ use App\Placeholders\Modifiers\PascalModifier;
 use App\Placeholders\Modifiers\SlugModifier;
 use App\Placeholders\Modifiers\SnakeModifier;
 use App\Placeholders\Modifiers\StudlyModifier;
+use App\Placeholders\Modifiers\TitleModifier;
 use App\Placeholders\Modifiers\UCFirstModifier;
 use App\Placeholders\Modifiers\UpperModifier;
 use Illuminate\Support\Arr;
@@ -52,10 +53,8 @@ uses(Tests\TestCase::class)->in('Feature');
 |
 */
 
-function getModifierDataset(string|array $modifier): Collection
+function getModifierDataset(null|string|array $modifier = null): Collection
 {
-    $modifiers = Arr::wrap($modifier);
-
     return collect([
         'camel' => [
             CamelModifier::class,
@@ -107,7 +106,12 @@ function getModifierDataset(string|array $modifier): Collection
             'Hewlett Packard',
             'HP',
         ],
-    ])->only($modifiers);
+        'title' => [
+            TitleModifier::class,
+            'john doe',
+            'John Doe',
+        ],
+    ])->when($modifier !== null, fn (Collection $collection): Collection => $collection->only(Arr::wrap($modifier)));
 }
 
 function ensureFolderExists(string $folder): void

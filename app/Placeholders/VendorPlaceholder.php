@@ -11,6 +11,7 @@ use App\Placeholders\Modifiers\PascalModifier;
 use App\Placeholders\Modifiers\SlugModifier;
 use App\Placeholders\Modifiers\SnakeModifier;
 use App\Placeholders\Modifiers\StudlyModifier;
+use App\Placeholders\Modifiers\TitleModifier;
 use App\Placeholders\Modifiers\UCFirstModifier;
 use App\Placeholders\Modifiers\UpperModifier;
 use Illuminate\Support\Str;
@@ -35,6 +36,7 @@ class VendorPlaceholder extends BasePlaceholder
             StudlyModifier::class,
             UCFirstModifier::class,
             UpperModifier::class,
+            TitleModifier::class,
         ];
     }
 
