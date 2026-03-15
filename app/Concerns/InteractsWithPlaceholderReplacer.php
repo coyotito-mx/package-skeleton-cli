@@ -7,7 +7,7 @@ use Closure;
 use Illuminate\Support\Facades\File;
 use SplFileInfo;
 
-trait InteractsWithReplacer
+trait InteractsWithPlaceholderReplacer
 {
     /**
      * The list of placeholder to look
