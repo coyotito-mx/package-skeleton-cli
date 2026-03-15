@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Commands\Concerns\Configurations;
 
-use App\Replacers\Exceptions\InvalidNamespaceException;
-use App\Replacers\NamespaceReplacer;
+use App\Placeholders\Exceptions\InvalidNamespaceException;
+use App\Placeholders\Namespace\NamespacePlaceholder;
 use Illuminate\Support\Str;
-use Symfony\Component\Console\Input\Input;
 use Symfony\Component\Console\Input\InputArgument;
 
 trait HasNamespace
@@ -16,7 +15,7 @@ trait HasNamespace
     {
         $this->addCommandArgument(name: 'namespace', mode: InputArgument::REQUIRED, description: 'The root namespace of the package');
 
-        $this->addReplacer(NamespaceReplacer::class, fn (): string => $this->getNamespace());
+        $this->addPlaceholder(NamespacePlaceholder::class, fn (): string => $this->getNamespace());
     }
 
     /**

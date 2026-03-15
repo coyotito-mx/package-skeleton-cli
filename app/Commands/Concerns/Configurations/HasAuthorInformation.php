@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Commands\Concerns\Configurations;
 
-use App\Replacers\AuthorReplacer;
-use App\Replacers\EmailReplacer;
+use App\Placeholders\AuthorPlaceholder;
+use App\Placeholders\EmailPlaceholder;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputArgument;
 
@@ -19,8 +19,8 @@ trait HasAuthorInformation
         ]);
 
         $this
-            ->addReplacer(AuthorReplacer::class, fn () => $this->getAuthor())
-            ->addReplacer(EmailReplacer::class, fn () => $this->getEmail());
+            ->addPlaceholder(AuthorPlaceholder::class, fn () => $this->getAuthor())
+            ->addPlaceholder(EmailPlaceholder::class, fn () => $this->getEmail());
     }
 
     /**

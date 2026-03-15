@@ -11,7 +11,7 @@ use App\Concerns\InteractsWithProcess;
 use App\Downloaders\Exceptions\DownloaderException;
 use App\Downloaders\Exceptions\DownloadException;
 use App\Downloaders\PackageSkeletonDownloader;
-use App\Replacers\Exceptions\InvalidFormatException;
+use App\Placeholders\Exceptions\InvalidFormatException;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
@@ -93,7 +93,7 @@ class PackageCommand extends Command implements PromptsForMissingInput
 
             $this->ensureLicenseFileExists();
 
-            $this->replacePlaceholdersInFiles(
+            $this->processFiles(
                 $this->getFilesToProcess()
             );
 
