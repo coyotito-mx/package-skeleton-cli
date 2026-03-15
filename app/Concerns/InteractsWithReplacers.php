@@ -3,11 +3,13 @@
 namespace App\Concerns;
 
 use App\PlaceholderReplacer;
+use App\Replacer;
+use App\TagRemoval;
 use Closure;
 use Illuminate\Support\Facades\File;
 use SplFileInfo;
 
-trait InteractsWithPlaceholderReplacer
+trait InteractsWithReplacers
 {
     /**
      * The list of placeholder to look
@@ -52,7 +54,7 @@ trait InteractsWithPlaceholderReplacer
         $directory = dirname($file->getRealPath());
         $newFilename = $file->getFilename();
 
-        $replacer = new PlaceholderReplacer;
+        $placeholderReplacer = new PlaceholderReplacer;
 
         foreach ($this->placeholders as $placeholder => $callback) {
             ['value' => $value, 'skip' => $skip] = $this->resolvePlaceholderValue($callback);
@@ -61,16 +63,23 @@ trait InteractsWithPlaceholderReplacer
                 continue;
             }
 
-            $replacer->registerPlaceholderWithValue($placeholder, $value);
+            $placeholderReplacer->registerPlaceholderWithValue($placeholder, $value);
         }
 
-        $content = $replacer->replace($content);
-        $newFilename = $replacer->replace($newFilename);
+        $this->replace($placeholderReplacer, $content, $newFilename);
+        $this->replace(new TagRemoval, $content, $newFilename);
 
         File::put($file->getRealPath(), $content);
 
         if ($newFilename !== $file->getFilename()) {
             File::move($file->getRealPath(), $directory.DIRECTORY_SEPARATOR.$newFilename);
+        }
+    }
+
+    private function replace(Replacer $replacer, string &...$content): void
+    {
+        foreach ($content as &$value) {
+            $value = $replacer->replace($value);
         }
     }
 
