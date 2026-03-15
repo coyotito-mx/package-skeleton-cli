@@ -276,6 +276,31 @@ Do you want to remove this CLI now?
 
 If you answer `yes`, the CLI removes the invoked executable file. If it cannot resolve or delete that executable, it shows a warning and continues.
 
+### Remove content
+
+To remove `content` you can use a tag named `<remove></remove>`, and all the content between this tag would be removed, also the spaces after the close tag will be removed.
+
+```MD
+# Lorem ipsum
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sem libero, rutrum ut congue quis, cursus quis lectus.
+
+<remove>Etiam tempor ac lacus in congue.</remove>
+
+Ut lobortis eros a ipsum varius, eget tristique risus laoreet. Vestibulum ultricies augue ligula, vitae imperdiet urna tempus non.
+```
+
+and the result should be something like:
+
+```MD
+# Lorem ipsum
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sem libero, rutrum ut congue quis, cursus quis lectus.
+
+Ut lobortis eros a ipsum varius, eget tristique risus laoreet. Vestibulum ultricies augue ligula, vitae imperdiet urna tempus non.
+```
+
+
 ## Examples
 
 ### Example 1: Initialize with all prompted values
