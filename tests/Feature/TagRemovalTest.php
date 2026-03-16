@@ -3,9 +3,18 @@
 declare(strict_types=1);
 
 use App\TagRemoval;
+use Dom\Text;
 
 it('replace tag', function (): void {
-    expect(new TagRemoval)->replace('Hello <remove>World</remove>')->toBe('');
+    expect(new TagRemoval)->replace(<<<TEXT
+    Hello
+
+    <remove>World</remove>
+    TEXT)->toBe(<<<TEXT
+    Hello
+
+    
+    TEXT);
 });
 
 it('replace tag with a lot of text', function (): void {
