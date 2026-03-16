@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\TagRemoval;
 
 it('replace tag', function (): void {
-    expect(new TagRemoval)->replace('Hello <remove>World</remove>')->toBe('Hello ');
+    expect(new TagRemoval)->replace('Hello <remove>World</remove>')->toBe('');
 });
 
 it('replace tag with a lot of text', function (): void {
@@ -44,10 +44,9 @@ it('replace tag with a lot of text', function (): void {
         lacus in congue.
         
         Ut ut erat felis. Phasellus pharetra mauris at lacus porttitor consequat. Nullam dapibus risus at
-        scelerisque porttitor. Mauris laoreet, ex ut elementum iaculis, sem massa vestibulum urna, quis efficitur purus sem a dui. Aenean
+        Mauris laoreet, ex ut elementum iaculis, sem massa vestibulum urna, quis efficitur purus sem a dui. Aenean
         eget nisl eu enim gravida auctor et eu dolor.
         
-        Donec ac rutrum felis, non accumsan justo. Ut rutrum tortor
         sed felis ultrices ultricies. Proin eu vehicula sapien.
         TOBE);
 });

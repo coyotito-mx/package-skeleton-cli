@@ -16,7 +16,7 @@ class TagRemoval extends Replacer
      */
     protected function getPattern(): string
     {
-        return '/<remove>(?:[\s\S]*?)<\/remove>\s*/';
+        return '/.*<remove>(?:[\s\S]*?)<\/remove>.*\s+/m';
     }
 
     /**
