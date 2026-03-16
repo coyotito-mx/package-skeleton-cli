@@ -3,14 +3,13 @@
 declare(strict_types=1);
 
 use App\TagRemoval;
-use Dom\Text;
 
 it('replace tag', function (): void {
-    expect(new TagRemoval)->replace(<<<TEXT
+    expect(new TagRemoval)->replace(<<<'TEXT'
     Hello
 
     <remove>World</remove>
-    TEXT)->toBe(<<<TEXT
+    TEXT)->toBe(<<<'TEXT'
     Hello
 
     
