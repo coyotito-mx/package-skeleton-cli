@@ -1,5 +1,13 @@
 # Release Notes
 
+## v2.1.3 - 2026-03-16
+
+### What's changed
+
+### 🔧 Chores
+
+- Update `regex` and tests by [@asciito](https://github.com/asciito) in #120
+
 ## v2.1.2 - 2026-03-15
 
 ### What's changed
